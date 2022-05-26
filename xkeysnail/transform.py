@@ -4,7 +4,9 @@ import itertools
 from time import time
 from inspect import signature
 from .key import Action, Combo, Key, Modifier
-from .output import send_combo, send_key_action, send_key, is_pressed
+from .output import Output 
+from evdev import ecodes
+
 
 __author__ = 'zh'
 
@@ -44,6 +46,7 @@ def get_class_name(window):
 
 
 _pressed_modifier_keys = set()
+_output = Output()
 
 
 def update_pressed_modifier_keys(key, action):
@@ -416,13 +419,17 @@ def on_event(event, device_name, quiet):
     update_pressed_keys(key, action)
 
 
+# direct pass-thru for non-key events
+def on_non_key_event(event):
+    _output.send_event(event)
+
 def on_key(key, action, wm_class=None, quiet=False):
     if key in Modifier.get_all_keys():
         update_pressed_modifier_keys(key, action)
-        send_key_action(key, action)
+        _output.send_key_action(key, action)
     elif not action.is_pressed():
-        if is_pressed(key):
-            send_key_action(key, action)
+        if _output.is_pressed(key):
+            _output.send_key_action(key, action)
     else:
         transform_key(key, action, wm_class=wm_class, quiet=quiet)
 
@@ -435,7 +442,7 @@ def transform_key(key, action, wm_class=None, quiet=False):
 
     if _mode_maps is escape_next_key:
         print("Escape key: {}".format(combo))
-        send_key_action(key, action)
+        _output.send_key_action(key, action)
         _mode_maps = None
         return
 
@@ -472,7 +479,7 @@ def transform_key(key, action, wm_class=None, quiet=False):
     # Not found in all keymaps
     if is_top_level:
         # If it's top-level, pass through keys
-        send_key_action(key, action)
+        _output.send_key_action(key, action)
 
     _mode_maps = None
 
@@ -494,9 +501,9 @@ def handle_commands(commands, key, action):
                 return True
 
         if isinstance(command, Key):
-            send_key(command)
+            _output.send_key(command)
         elif isinstance(command, Combo):
-            send_combo(command)
+            _output.send_combo(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False
@@ -505,7 +512,7 @@ def handle_commands(commands, key, action):
             _mode_maps = [command]
             return False
         elif command is pass_through_key:
-            send_key_action(key, action)
+            _output.send_key_action(key, action)
             return True
     # Reset keymap in ordinary flow
     return True

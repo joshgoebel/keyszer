@@ -31,73 +31,80 @@ _uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
                          ecodes.EV_REL: set([0,1,6,8,9]),
                          })
 
-_pressed_modifier_keys = set()
-_pressed_keys = set()
 
-def update_modifier_key_pressed(key, action):
-    if key in Modifier.get_all_keys():
+
+class Output:
+
+    def __init__(self):
+        self._pressed_modifier_keys = set()
+        self._pressed_keys = set()
+        return
+
+
+    def __update_modifier_key_pressed(self, key, action):
+        if key in Modifier.get_all_keys():
+            if action.is_pressed():
+                self._pressed_modifier_keys.add(key)
+            else:
+                self._pressed_modifier_keys.discard(key)
+
+    def __update_pressed_keys(self, key, action):
         if action.is_pressed():
-            _pressed_modifier_keys.add(key)
+            self._pressed_keys.add(key)
         else:
-            _pressed_modifier_keys.discard(key)
+            self._pressed_keys.discard(key)
 
-def update_pressed_keys(key, action):
-    if action.is_pressed():
-        _pressed_keys.add(key)
-    else:
-        _pressed_keys.discard(key)
+    def __send_sync(self ):
+        _uinput.syn()
 
-def is_pressed(key):
-    return key in _pressed_keys
+    def is_pressed(self,key):
+        return key in self._pressed_keys
 
-def send_sync():
-    _uinput.syn()
+    def send_event(self, event):
+        _uinput.write_event(event)
+        self.__send_sync()
 
-
-def send_event(event):
-    _uinput.write_event(event)
-    send_sync()
-
-
-def send_key_action(key, action):
-    update_modifier_key_pressed(key, action)
-    update_pressed_keys(key, action)
-    _uinput.write(ecodes.EV_KEY, key, action)
-    send_sync()
+    def send_key_action(self,key, action):
+        self.__update_modifier_key_pressed(key, action)
+        self.__update_pressed_keys(key, action)
+        _uinput.write(ecodes.EV_KEY, key, action)
+        print("key_action", key, action)
+        self.__send_sync()
 
 
-def send_combo(combo):
+    def send_combo(self,combo):
+        print("send_combo")
 
-    released_modifiers_keys = []
+        released_modifiers_keys = []
 
-    extra_modifier_keys = _pressed_modifier_keys.copy()
-    missing_modifiers = combo.modifiers.copy()
-    for pressed_key in _pressed_modifier_keys:
-        for modifier in combo.modifiers:
-            if pressed_key in modifier.get_keys():
-                extra_modifier_keys.remove(pressed_key)
-                missing_modifiers.remove(modifier)
+        extra_modifier_keys = self._pressed_modifier_keys.copy()
+        missing_modifiers = combo.modifiers.copy()
+        for pressed_key in self._pressed_modifier_keys:
+            for modifier in combo.modifiers:
+                if pressed_key in modifier.get_keys():
+                    extra_modifier_keys.remove(pressed_key)
+                    missing_modifiers.remove(modifier)
 
-    for modifier_key in extra_modifier_keys:
-        send_key_action(modifier_key, Action.RELEASE)
-        released_modifiers_keys.append(modifier_key)
+        for modifier_key in extra_modifier_keys:
+            self.send_key_action(modifier_key, Action.RELEASE)
+            released_modifiers_keys.append(modifier_key)
 
-    pressed_modifier_keys = []
-    for modifier in missing_modifiers:
-        modifier_key = modifier.get_key()
-        send_key_action(modifier_key, Action.PRESS)
-        pressed_modifier_keys.append(modifier_key)
+        pressed_modifier_keys = []
+        for modifier in missing_modifiers:
+            modifier_key = modifier.get_key()
+            self.send_key_action(modifier_key, Action.PRESS)
+            pressed_modifier_keys.append(modifier_key)
 
-    send_key_action(combo.key, Action.PRESS)
+        self.send_key_action(combo.key, Action.PRESS)
 
-    send_key_action(combo.key, Action.RELEASE)
+        self.send_key_action(combo.key, Action.RELEASE)
 
-    for modifier in reversed(pressed_modifier_keys):
-        send_key_action(modifier, Action.RELEASE)
+        for modifier in reversed(pressed_modifier_keys):
+            self.send_key_action(modifier, Action.RELEASE)
 
-    for modifier in reversed(released_modifiers_keys):
-        send_key_action(modifier, Action.PRESS)
+        for modifier in reversed(released_modifiers_keys):
+            self.send_key_action(modifier, Action.PRESS)
 
 
-def send_key(key):
-    send_combo(Combo(None, key))
+    def send_key(self,key):
+        self.send_combo(Combo(None, key))
