@@ -735,6 +735,9 @@ class Action(IntEnum):
     def is_pressed(self):
         return self == Action.PRESS or self == Action.REPEAT
 
+    def is_released(self):
+        return self == Action.RELEASE
+
 
 @unique
 class Modifier(Enum):
@@ -762,49 +765,37 @@ class Modifier(Enum):
         }
 
     def __str__(self):
-        if self.value == self.L_CONTROL.value: return "LC"
-        if self.value == self.R_CONTROL.value: return "RC"
-        if self.value == self.CONTROL.value: return "C"
-        if self.value == self.L_ALT.value: return "LM"
-        if self.value == self.R_ALT.value: return "RM"
-        if self.value == self.ALT.value: return "M"
-        if self.value == self.L_SHIFT.value: return "LShift"
-        if self.value == self.R_SHIFT.value: return "RShift"
-        if self.value == self.SHIFT.value: return "Shift"
-        if self.value == self.L_SUPER.value: return "LSuper"
-        if self.value == self.R_SUPER.value: return "RSuper"
-        if self.value == self.SUPER.value: return "Super"
-        return None
+        to_str = {
+            self.L_CONTROL: "LC",
+            self.R_CONTROL: "RC",
+            self.CONTROL: "C",
+            self.L_ALT: "LM",
+            self.R_ALT: "RM",
+            self.ALT: "M",
+            self.L_SHIFT: "LShift",
+            self.R_SHIFT: "RShift",
+            self.SHIFT: "Shift",
+            self.L_SUPER: "LSuper",
+            self.R_SUPER: "RSuper",
+            self.SUPER: "Super"
+        }
+        return to_str.get(self)
 
     def is_specified(self):
-        return self.value == self.L_CONTROL.value or \
-                self.value == self.R_CONTROL.value or \
-                self.value == self.L_ALT.value or \
-                self.value == self.R_ALT.value or \
-                self.value == self.L_SHIFT.value or \
-                self.value == self.R_SHIFT.value or \
-                self.value == self.L_SUPER.value or \
-                self.value == self.R_SUPER.value
+        prefix = self.name[0:2]
+        return prefix == "L_" or prefix == "R_"
 
     def to_left(self):
-        if self.value == self.CONTROL.value:
-            return self.L_CONTROL
-        elif self.value == self.ALT.value:
-            return self.L_ALT
-        elif self.value == self.SHIFT.value:
-            return self.L_SHIFT
-        elif self.value == self.SUPER.value:
-            return self.L_SUPER
+        try:
+            return Modifier["L_" + self.name]
+        except KeyError:
+            return None
 
     def to_right(self):
-        if self.value == self.CONTROL.value:
-            return self.R_CONTROL
-        elif self.value == self.ALT.value:
-            return self.R_ALT
-        elif self.value == self.SHIFT.value:
-            return self.R_SHIFT
-        elif self.value == self.SUPER.value:
-            return self.R_SUPER
+        try:
+            return Modifier["R_" + self.name]
+        except KeyError:
+            return None
 
     def get_keys(self):
         return self._get_modifier_map()[self]
@@ -818,9 +809,17 @@ class Modifier(Enum):
 
     @staticmethod
     def from_key(key):
-        for modifier in Modifier:
-            if key in modifier.get_keys():
-                return modifier
+        key_to_modifier = {
+            Key.LEFT_CTRL: Modifier.L_CONTROL, 
+            Key.RIGHT_CTRL: Modifier.R_CONTROL,
+            Key.LEFT_ALT: Modifier.L_ALT,
+            Key.RIGHT_ALT: Modifier.R_ALT,
+            Key.LEFT_SHIFT: Modifier.L_SHIFT,
+            Key.RIGHT_SHIFT: Modifier.R_SHIFT,
+            Key.LEFT_META: Modifier.L_SUPER,
+            Key.RIGHT_META: Modifier.R_SUPER
+        }
+        return key_to_modifier.get(key)
 
 
 class Combo:
