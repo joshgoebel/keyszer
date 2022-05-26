@@ -381,6 +381,11 @@ def multipurpose_handler(multipurpose_map, key, action):
 
 
 def on_event(event, device_name, quiet):
+    # we do not attempt to transform non-key events 
+    if event.type != ecodes.EV_KEY:
+        _output.send_event(event)
+        return
+
     key = Key(event.code)
     action = Action(event.value)
     wm_class = None
@@ -418,10 +423,6 @@ def on_event(event, device_name, quiet):
     on_key(key, action, wm_class=wm_class, quiet=quiet)
     update_pressed_keys(key, action)
 
-
-# direct pass-thru for non-key events
-def on_non_key_event(event):
-    _output.send_event(event)
 
 def on_key(key, action, wm_class=None, quiet=False):
     if key in Modifier.get_all_keys():

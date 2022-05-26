@@ -3,7 +3,7 @@
 from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
-from .transform import on_event, on_non_key_event
+from .transform import on_event
 from .key import Key
 
 __author__ = 'zh'
@@ -126,10 +126,7 @@ def loop(device_matches, device_watch, quiet):
                 for waitable in r:
                     if isinstance(waitable, InputDevice):
                         for event in waitable.read():
-                            if event.type == ecodes.EV_KEY:
-                                on_event(event, waitable.name, quiet)
-                            else:
-                                on_non_key_event(event)
+                            on_event(event, waitable.name, quiet)
                     else:
                         new_devices = add_new_device(devices, device_filter, inotify)
                         if new_devices:
