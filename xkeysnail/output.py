@@ -38,6 +38,9 @@ class Output:
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
+        self._sticky = None
+        # outbound keys that we're holding down (sticky)
+        self._held = set()
         return
 
 
@@ -46,6 +49,7 @@ class Output:
             if action.is_pressed():
                 self._pressed_modifier_keys.add(key)
             else:
+                self._lifted(key)
                 self._pressed_modifier_keys.discard(key)
 
     def __update_pressed_keys(self, key, action):
@@ -53,6 +57,22 @@ class Output:
             self._pressed_keys.add(key)
         else:
             self._pressed_keys.discard(key)
+
+    def _lifted(self, key):
+        if self._sticky == None:
+            return
+
+        #print("lifted", key, "currently sticky: ", self._sticky)
+        lst = dict(self._sticky.mappings)
+        for inmods, outmods in lst.items():
+            for inmod in inmods:
+                if key in inmod.get_keys():
+                    self._sticky.discard(inmods)
+                    for outmod in outmods:
+                        for key in outmod.get_keys():
+                            if key in self._held:
+                                self.art_key_action(key, Action.RELEASE)
+                                self._held.discard(key)
 
     def __send_sync(self ):
         _uinput.syn()
@@ -71,6 +91,21 @@ class Output:
         print("key_action", key, action)
         self.__send_sync()
 
+    def art_key_action(self,key, action):
+        _uinput.write(ecodes.EV_KEY, key, action)
+        print("artificial_action", key, action)
+        self.__send_sync()
+
+    def do_sticky(self, sticky):
+        self._sticky = sticky
+        for inmods, outmods in sticky.items():
+            for mod in outmods:
+                key = mod.get_key()
+                if not key in self._held:
+                    self.art_key_action(key, Action.PRESS)
+                    self._held.add(key)
+
+        print("sticky", sticky)
 
     def send_combo(self,combo):
         print("send_combo")
@@ -86,24 +121,25 @@ class Output:
                     missing_modifiers.remove(modifier)
 
         for modifier_key in extra_modifier_keys:
-            self.send_key_action(modifier_key, Action.RELEASE)
+            self.art_key_action(modifier_key, Action.RELEASE)
             released_modifiers_keys.append(modifier_key)
 
         pressed_modifier_keys = []
         for modifier in missing_modifiers:
             modifier_key = modifier.get_key()
-            self.send_key_action(modifier_key, Action.PRESS)
+            if not modifier_key in self._held:
+                self.art_key_action(modifier_key, Action.PRESS)
             pressed_modifier_keys.append(modifier_key)
 
-        self.send_key_action(combo.key, Action.PRESS)
-
-        self.send_key_action(combo.key, Action.RELEASE)
+        self.art_key_action(combo.key, Action.PRESS)
+        self.art_key_action(combo.key, Action.RELEASE)
 
         for modifier in reversed(pressed_modifier_keys):
-            self.send_key_action(modifier, Action.RELEASE)
+            if not modifier in self._held:
+                self.art_key_action(modifier, Action.RELEASE)
 
         for modifier in reversed(released_modifiers_keys):
-            self.send_key_action(modifier, Action.PRESS)
+            self.art_key_action(modifier, Action.PRESS)
 
 
     def send_key(self,key):

@@ -115,6 +115,28 @@ def K(exp):
     key = getattr(Key, key_str)
     return Combo(create_modifiers_from_strings(modifier_strs), key)
 
+class Sticky:
+    def __init__(self, mappings):
+        self.mappings = mappings
+
+    def __str__(self):
+        return str(self.mappings)
+
+    def discard(self, x):
+        self.mappings.pop(x)
+
+    def items(self):
+        return self.mappings.items()
+
+def STICKY(keymap):
+    "Helper function to bind sticky keys"
+    m = {}
+    for keyin, keyout in keymap.items():
+        keysin = keyin.split("-")
+        keysout = keyout.split("-")
+        s = frozenset(create_modifiers_from_strings(keysin))
+        m[s] = create_modifiers_from_strings(keysout)
+    return Sticky(m)    
 
 def create_modifiers_from_strings(modifier_strs):
     modifiers = set()
@@ -473,6 +495,8 @@ def handle_commands(commands, key, action):
             _output.send_key(command)
         elif isinstance(command, Combo):
             _output.send_combo(command)
+        elif isinstance(command, Sticky):
+            _output.do_sticky(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False
