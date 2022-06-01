@@ -2,6 +2,7 @@
 
 import re
 from xkeysnail.transform import *
+from xkeysnail.config_api import *
 
 # define timeout for multipurpose_modmap
 define_timeout(1)
