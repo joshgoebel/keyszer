@@ -5,12 +5,12 @@ from select import select
 from sys import exit
 from .transform import on_event
 from .key import Key
+import asyncio
+import signal
 
-__author__ = 'zh'
 
-
-def get_devices_list():
-    return [InputDevice(device_fn) for device_fn in reversed(list_devices())]
+QWERTY = [Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y]
+A_Z_SPACE = [Key.SPACE, Key.A, Key.Z]
 
 
 def is_keyboard_device(device):
@@ -19,16 +19,13 @@ def is_keyboard_device(device):
     if 1 not in capabilities:
         return False
     supported_keys = capabilities[1]
-    if Key.SPACE not in supported_keys or \
-       Key.A not in supported_keys or \
-       Key.Z not in supported_keys:
-        # Not support common keys. Not keyboard.
-        return False
-    if Key.BTN_MOUSE in supported_keys:
-        # Mouse.
-        return False
-    # Otherwise, its keyboard!
-    return True
+
+    qwerty = all(k in supported_keys for k in QWERTY)
+    az = all(k in supported_keys for k in A_Z_SPACE)
+    if qwerty and az:
+        return True
+    # Otherwise, its not a keyboard!
+    return False
 
 
 def print_device_list(devices):
@@ -41,8 +38,8 @@ def print_device_list(devices):
     print('')
 
 
-def get_devices_from_paths(device_paths):
-    return [InputDevice(device_fn) for device_fn in device_paths]
+def get_devices_list():
+    return [InputDevice(device_fn) for device_fn in reversed(list_devices())]
 
 
 class DeviceFilter(object):
@@ -56,89 +53,83 @@ class DeviceFilter(object):
                 if device.fn == match or device.name == match:
                     return True
             return False
-        # Exclude none keyboard devices
-        if not is_keyboard_device(device):
-            return False
         # Exclude evdev device, we use for output emulation, from input monitoring list
         if device.name == "py-evdev-uinput":
             return False
-        return True
+        # Exclude none keyboard devices
+        return is_keyboard_device(device)
 
 
-def select_device(device_matches=None, interactive=True):
+def select_devices(device_filter=None):
     """Select a device from the list of accessible input devices."""
-    devices = get_devices_from_paths(reversed(list_devices()))
+    devices = get_devices_list()
 
-    if interactive:
-        if not device_matches:
-            print("""No keyboard devices specified via (--devices) option.
-xkeysnail picks up keyboard-ish devices from the list below:
-""")
-        print_device_list(devices)
+    if not device_filter:
+        print ("(--) Autodetecting keyboards (--device not specified)")
 
-    devices = list(filter(DeviceFilter(device_matches), devices))
+    devices = list(filter(device_filter, devices))
 
-    if interactive:
-        if not devices:
-            print('error: no input devices found (do you have rw permission on /dev/input/*?)')
-            exit(1)
-
-        print("Okay, now enable remapping on the following device(s):\n")
-        print_device_list(devices)
+    if not devices:
+        print('error: no input devices found (do you have rw permission on /dev/input/*?)')
+        exit(1)
 
     return devices
 
 
-def in_device_list(fn, devices):
-    for device in devices:
-        if device.fn == fn:
-            return True
-    return False
+def in_device_list(filename, devices):
+    return any([device for device in devices if device.fn == filename])
 
 
-def loop(device_matches, device_watch, quiet):
-    devices = select_device(device_matches, True)
-    try:
-        for device in devices:
-            device.grab()
-    except IOError:
-        print("IOError when grabbing device. Maybe, another xkeysnail instance is running?")
-        exit(1)
+def cleanup():
+    loop = asyncio.get_event_loop()
+    loop.stop()
+    from .output import _uinput
+    _uinput.close()
+
+
+def sig_term():
+    print("signal TERM received", flush = True)
+    cleanup()
+    exit(0)
+
+
+def sig_int():
+    print("signal INT received", flush = True)
+    cleanup()
+    exit(0)
+
+
+def watch_dev_input():
+    from inotify_simple import INotify, flags
+    inotify = INotify()
+    inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB | flags.DELETE)
+    return inotify
+
+def main_loop(device_matches, device_watch, quiet):
+    devices = []
+    inotify = None
+
+    device_filter = DeviceFilter(device_matches)
+    selected_devices = select_devices(device_filter)
+    for device in selected_devices:
+        add_device(devices, device)
 
     if device_watch:
-        from inotify_simple import INotify, flags
-        inotify = INotify()
-        inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB)
-        print("Watching keyboard devices plug in")
-    device_filter = DeviceFilter(device_matches)
-
-    if quiet:
-        print("No key event will be output since quiet option was specified.")
+        inotify = watch_dev_input()
 
     try:
-        while True:
-            try:
-                waitables = devices[:]
-                if device_watch:
-                    waitables.append(inotify.fd)
-                r, w, x = select(waitables, [], [])
+        loop = asyncio.get_event_loop()
 
-                for waitable in r:
-                    if isinstance(waitable, InputDevice):
-                        for event in waitable.read():
-                            on_event(event, waitable.name, quiet)
-                    else:
-                        new_devices = add_new_device(devices, device_filter, inotify)
-                        if new_devices:
-                            print("Okay, now enable remapping on the following new device(s):\n")
-                            print_device_list(new_devices)
-            except OSError:
-                if isinstance(waitable, InputDevice):
-                    remove_device(devices, waitable)
-                    print("Device removed: " + str(device.name))
-            except KeyboardInterrupt:
-                print("Received an interrupt, exiting.")
-                break
+        for device in devices:
+            loop.add_reader(device, receive_input, device, quiet)
+        if device_watch:
+            loop.add_reader(inotify.fd, _inotify_handler, devices, device_filter, inotify)
+        
+        _sup = loop.create_task(supervisor())
+        loop.add_signal_handler(signal.SIGINT, sig_int)
+        loop.add_signal_handler(signal.SIGTERM, sig_term)
+        print("(**) Ready to process input.")
+        loop.run_forever()
     finally:
         for device in devices:
             try:
@@ -149,26 +140,93 @@ def loop(device_matches, device_watch, quiet):
             inotify.close()
 
 
-def add_new_device(devices, device_filter, inotify):
-    new_devices = []
-    for event in inotify.read():
-        new_device = InputDevice("/dev/input/" + event.name)
-        if device_filter(new_device) and not in_device_list(new_device.fn, devices):
-            try:
-                new_device.grab()
-            except IOError:
-                # Ignore errors on new devices
-                print("IOError when grabbing new device: " + str(new_device.name))
-                continue
-            devices.append(new_device)
-            new_devices.append(new_device)
-    return new_devices
+_tasks = []
+_sup = None
 
+
+async def supervisor():
+    while True:
+        await asyncio.sleep(5)
+        for task in _tasks:
+            if task.done():
+                if task.exception():
+                    import traceback
+                    traceback.print_exception(task.exception())
+                _tasks.remove(task)
+
+
+def receive_input(device, quiet):
+    for event in device.read():
+        on_event(event, device.name, quiet)
+
+
+_add_timer = None
+_notify_events = []
+
+def _inotify_handler(devices, device_filter, inotify):
+    global _add_timer
+    global _notify_events
+
+    events = inotify.read(0)
+    _notify_events.extend(events)
+
+    if _add_timer:
+        _add_timer.cancel()
+    
+    def device_change_task():
+        task = loop.create_task(device_change(devices, device_filter, _notify_events))
+        _tasks.append(task)
+
+    loop = asyncio.get_running_loop()
+    # slow the roll a bit to allow for udev to change permissions, etc...
+    _add_timer = loop.call_later(0.5, device_change_task)
+
+async def device_change(devices, device_filter, events):
+    while events:
+        event = events.pop(0)
+        # ignore mouse, mice, etc, non-event devices
+        if not event.name.startswith("event"):
+            continue
+
+        filename = f"/dev/input/{event.name}"
+
+        # unplugging
+        from inotify_simple import flags
+        if (event.mask == flags.DELETE):
+            device, = [d for d in devices if d.fn == filename] or [None]
+            if device:
+                remove_device(devices, device)
+            continue
+
+        # new device, do we care about it?
+        try:
+            new_device = InputDevice(filename)
+            if device_filter(new_device) and not in_device_list(new_device.fn, devices):
+                add_device(devices, device)
+        except FileNotFoundError:
+            # likely we've recieved a ATTR right before a DELETE, so we just ignore it
+            continue
 
 def remove_device(devices, device):
+    print(f"(-K) Ungrabbing: {device.name} (removed)")
+    loop = asyncio.get_running_loop()
+    loop.remove_reader(device)
     devices.remove(device)
     try:
         device.ungrab()
-    except OSError as e:
+    except OSError:
         pass
 
+def add_device(devices, device):
+    print(f"(+K) Grabbing {device.name} ({device.fn})")
+    devices.append(device)
+    try:
+        device.grab()
+    except IOError:
+        print("IOError when grabbing device. Maybe, another instance is running?")
+        cleanup()
+        exit(1)
+    # except IOError:
+    #     # Ignore errors on new devices
+    #     print("IOError when grabbing new device: " + str(new_device.name))
+    #     continue

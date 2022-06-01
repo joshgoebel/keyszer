@@ -3,12 +3,12 @@
 import itertools
 from time import time
 from inspect import signature
+from evdev import ecodes
+import asyncio
+
 from .key import Action, Combo, Key, Modifier
 from .output import Output 
-from evdev import ecodes
 from .xorg import get_active_window_wm_class
-
-__author__ = 'zh'
 
 # ============================================================ #
 
@@ -240,7 +240,6 @@ def define_timeout(seconds=1):
     _timeout = seconds
 
 
-
 def define_modmap(mod_remappings):
     """Defines modmap (keycode translation)
 
@@ -392,10 +391,64 @@ def on_event(event, device_name, quiet):
     update_pressed_keys(key, action)
 
 
+def none_pressed():
+    return not(any(_pressed_keys) or any(_pressed_modifier_keys))
+
+_suspend_timer = None
+
+def resume_keys():
+    global _suspend_timer
+    if not suspended():
+        return
+
+    _suspend_timer.cancel()
+    _suspend_timer = None
+    print("resuming keys:", _pressed_modifier_keys)
+    for mod in _pressed_modifier_keys:
+        _output.send_key_action(mod, Action.PRESS)
+    
+
+def suspended():
+    global _suspend_timer
+    return _suspend_timer != None
+
+def resuspend_keys():
+    global _suspend_timer
+    _suspend_timer.cancel()
+    print("resuspending keys")
+    suspend_keys(True)
+
+def suspend_keys(quiet=False):
+    global _suspend_timer
+    if not quiet:
+        print("suspending keys")
+    loop = asyncio.get_event_loop()
+    _suspend_timer = loop.call_later(1, resume_keys)
+
+def sticky(key):
+    for k in _sticky.keys():
+        if k == key:
+            return True
+    return False
+
 def on_key(key, action, wm_class=None, quiet=False):
+    global _suspend_timer
+
     if key in Modifier.get_all_keys():
+        if none_pressed() and action.is_pressed():
+            suspend_keys()        
+
+        if action.is_released():
+            if sticky(key):
+                outkey = _sticky[key]
+                _output.send_key_action(outkey, Action.RELEASE)    
+                del _sticky[key]
+            else:     
+                resume_keys()
+
         update_pressed_modifier_keys(key, action)
-        _output.send_key_action(key, action)
+        if not suspended():
+            _output.send_key_action(key, action)
     elif not action.is_pressed():
         if _output.is_pressed(key):
             _output.send_key_action(key, action)
@@ -440,24 +493,41 @@ def transform_key(key, action, wm_class=None, quiet=False):
         if combo not in mappings:
             continue
         # Found key in "mappings". Execute commands defined for the key.
-        reset_mode = handle_commands(mappings[combo], key, action)
+        reset_mode = handle_commands(mappings[combo], key, action, combo)
         if reset_mode:
             _mode_maps = None
         return
 
     # Not found in all keymaps
     if is_top_level:
+        # need to output any keys we've suspended
+        resume_keys()
         # If it's top-level, pass through keys
         _output.send_key_action(key, action)
 
     _mode_maps = None
 
+# deals with the single modifier mapped to another modifier case
+def simple_sticky(combo, output_combo):
+    inp = combo.modifiers or {}
+    out = output_combo.modifiers or {}
+    print("simple_sticky", combo, output_combo)
+    if len(inp) != 1 or len(out) != 1:
+        return {}
+    
+    m = {}
+    m[next(iter(inp)).get_key()] = next(iter(out)).get_key()
+    print("AUTO-STICKY:", m)
+    return m
 
-def handle_commands(commands, key, action):
+_sticky = {}
+
+def handle_commands(commands, key, action, combo):
     """
     returns: reset_mode (True/False) if this is True, _mode_maps will be reset
     """
     global _mode_maps
+    global _sticky
 
     if not isinstance(commands, list):
         commands = [commands]
@@ -472,6 +542,11 @@ def handle_commands(commands, key, action):
         if isinstance(command, Key):
             _output.send_key(command)
         elif isinstance(command, Combo):
+            _sticky = simple_sticky(combo, command)
+            for k in _sticky.values():
+                if not _output.is_mod_pressed(k):
+                    _output.send_key_action(k, Action.PRESS)
+            resuspend_keys()
             _output.send_combo(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key

@@ -38,6 +38,7 @@ class Output:
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
+        self._sticky = {}
         return
 
 
@@ -57,8 +58,14 @@ class Output:
     def __send_sync(self ):
         _uinput.syn()
 
+    def is_mod_pressed(self, key):
+        return key in self._pressed_modifier_keys
+
     def is_pressed(self,key):
         return key in self._pressed_keys
+
+    def make_sticky(self, sticky):
+        self._sticky = sticky
 
     def send_event(self, event):
         _uinput.write_event(event)
@@ -95,8 +102,8 @@ class Output:
             self.send_key_action(modifier_key, Action.PRESS)
             pressed_modifier_keys.append(modifier_key)
 
+        # normal key portion of the combo
         self.send_key_action(combo.key, Action.PRESS)
-
         self.send_key_action(combo.key, Action.RELEASE)
 
         for modifier in reversed(pressed_modifier_keys):
