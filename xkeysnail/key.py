@@ -738,6 +738,9 @@ class Action(IntEnum):
     def is_released(self):
         return self == Action.RELEASE
 
+    def __str__(self):
+        return self.name.lower()
+
 
 @unique
 class Modifier(Enum):

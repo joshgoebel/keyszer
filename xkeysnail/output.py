@@ -3,6 +3,7 @@
 from evdev import ecodes
 from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
+from .logger import debug
 
 __author__ = 'zh'
 
@@ -75,13 +76,11 @@ class Output:
         self.__update_modifier_key_pressed(key, action)
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
-        print("key_action", key, action)
+        debug(action, key, ctx="OO")
         self.__send_sync()
 
 
     def send_combo(self,combo):
-        print("send_combo")
-
         released_modifiers_keys = []
 
         extra_modifier_keys = self._pressed_modifier_keys.copy()

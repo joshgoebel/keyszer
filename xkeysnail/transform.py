@@ -425,7 +425,7 @@ def suspend_keys(quiet=False):
     loop = asyncio.get_event_loop()
     _suspend_timer = loop.call_later(1, resume_keys)
 
-def sticky(key):
+def is_sticky(key):
     for k in _sticky.keys():
         if k == key:
             return True
@@ -439,7 +439,7 @@ def on_key(key, action, wm_class=None, quiet=False):
             suspend_keys()        
 
         if action.is_released():
-            if sticky(key):
+            if is_sticky(key):
                 outkey = _sticky[key]
                 _output.send_key_action(outkey, Action.RELEASE)    
                 del _sticky[key]
@@ -543,10 +543,11 @@ def handle_commands(commands, key, action, combo):
             _output.send_key(command)
         elif isinstance(command, Combo):
             _sticky = simple_sticky(combo, command)
+            if (suspended()):
+                resuspend_keys()
             for k in _sticky.values():
                 if not _output.is_mod_pressed(k):
                     _output.send_key_action(k, Action.PRESS)
-            resuspend_keys()
             _output.send_combo(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
