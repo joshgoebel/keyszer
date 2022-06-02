@@ -31,6 +31,12 @@ _spent_modifiers_keys = set()
 _pressed_modifier_keys = OrderedSet()
 _output = Output()
 
+def reset_transform():
+    global _spent_modifiers_keys
+    global _pressed_modifier_keys
+    _spent_modifiers_keys = set()
+    _pressed_modifier_keys = OrderedSet()
+
 
 def update_pressed_modifier_keys(key, action):
     if action.is_pressed():
@@ -259,7 +265,7 @@ def on_key(key, action, wm_class=None, quiet=False):
                 del _sticky[key]
             elif key in _spent_modifiers_keys:
                 print("silent lift of spent modifier", key)
-                # also allow a silent release inside the tranform
+                # allow a silent release inside the tranform
                 _spent_modifiers_keys.remove(key)
             else:     
                 print("resume because of release")

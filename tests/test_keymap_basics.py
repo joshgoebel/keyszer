@@ -8,11 +8,7 @@ sys.modules["xkeysnail.xorg"] = __import__('lib.xorg_mock',
 from xkeysnail.output import setup_uinput
 from xkeysnail.key import Key, Action
 from xkeysnail.config_api import *
-from xkeysnail.transform import suspend_keys, \
-    resume_keys, \
-    boot_config, \
-    on_event, \
-    suspended
+from xkeysnail.transform import boot_config, on_event, reset_transform
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
@@ -28,13 +24,12 @@ _out = None
 
 def setup_function(module):
     global _out
-    global _spent_modifiers_keys
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     _out = UInputStub()
     setup_uinput(_out)
     reset_configuration()
-    _spent_modifiers_keys = {}
+    reset_transform()
 
 @pytest.mark.looptime(False)
 async def test_multiple_keys_at_once():
@@ -57,5 +52,39 @@ async def test_multiple_keys_at_once():
         (PRESS, Key.LEFT_CTRL),
         (PRESS, Key.TAB),
         (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_CTRL),
+    ]
+
+@pytest.mark.looptime(False)
+async def test_multiple_combos_without_releasing_all_nonsticky():
+    # NOTE: if we were sticky then techcanily the C on the output
+    # should probalby be held without release
+    window("Firefox")
+    keymap(re.compile("Firefox"),{
+        K("C-M-j"): K("C-TAB"),
+        K("C-M-k"): K("C-Shift-TAB"),
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.LEFT_ALT)
+    press(Key.J)    
+    release(Key.J)
+    press(Key.K)            
+    release(Key.K)
+    release(Key.LEFT_ALT)
+    release(Key.LEFT_CTRL)
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_SHIFT),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_SHIFT),
         (RELEASE, Key.LEFT_CTRL),
     ]
