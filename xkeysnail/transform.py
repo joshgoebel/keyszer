@@ -4,6 +4,7 @@ import itertools
 from time import time
 from inspect import signature
 from evdev import ecodes
+from ordered_set import OrderedSet
 import asyncio
 
 from .key import Action, Combo, Key, Modifier
@@ -26,7 +27,8 @@ def boot_config():
 # ============================================================ #
 
 
-_pressed_modifier_keys = set()
+_spent_modifiers_keys = set()
+_pressed_modifier_keys = OrderedSet()
 _output = Output()
 
 
@@ -215,6 +217,7 @@ def resume_keys():
     _suspend_timer.cancel()
     _suspend_timer = None
     print("resuming keys:", _pressed_modifier_keys)
+    _spent_modifiers_keys = {}
     for mod in _pressed_modifier_keys:
         _output.send_key_action(mod, Action.PRESS)
     
@@ -254,7 +257,12 @@ def on_key(key, action, wm_class=None, quiet=False):
                 outkey = _sticky[key]
                 _output.send_key_action(outkey, Action.RELEASE)    
                 del _sticky[key]
+            elif key in _spent_modifiers_keys:
+                print("silent lift of spent modifier", key)
+                # also allow a silent release inside the tranform
+                _spent_modifiers_keys.remove(key)
             else:     
+                print("resume because of release")
                 resume_keys()
 
         update_pressed_modifier_keys(key, action)
@@ -270,6 +278,7 @@ def on_key(key, action, wm_class=None, quiet=False):
 def transform_key(key, action, wm_class=None, quiet=False):
     global _mode_maps
     global _toplevel_keymaps
+    global _spent_modifiers_keys
 
     combo = Combo(get_pressed_modifiers(), key)
 
@@ -303,6 +312,8 @@ def transform_key(key, action, wm_class=None, quiet=False):
     for mappings in _mode_maps:
         if combo not in mappings:
             continue
+        _spent_modifiers_keys |= _pressed_modifier_keys
+        print("spent modifiers", _spent_modifiers_keys)
         # Found key in "mappings". Execute commands defined for the key.
         reset_mode = handle_commands(mappings[combo], key, action, combo)
         if reset_mode:
@@ -322,10 +333,10 @@ def transform_key(key, action, wm_class=None, quiet=False):
 def simple_sticky(combo, output_combo):
     inp = combo.modifiers or {}
     out = output_combo.modifiers or {}
-    print("simple_sticky", combo, output_combo)
     if len(inp) != 1 or len(out) != 1:
         return {}
-    
+    print("simple_sticky", combo, output_combo)
+
     m = {}
     m[next(iter(inp)).get_key()] = next(iter(out)).get_key()
     print("AUTO-STICKY:", m)

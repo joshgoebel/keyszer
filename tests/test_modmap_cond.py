@@ -32,7 +32,7 @@ def setup_function(module):
     asyncio.set_event_loop(loop)
     _out = UInputStub()
     setup_uinput(_out)
-    reset_configutation()
+    reset_configuration()
 
 async def test_cond_modmap_wins_over_default_modmap():
     modmap({
@@ -103,4 +103,5 @@ async def test_when_in_emacs():
 
 @pytest.mark.skip
 async def test_sticky_switch_modmaps_midstream():
+    # TODO: correct behavior?
     pass

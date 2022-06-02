@@ -754,18 +754,18 @@ class Modifier(Enum):
     @classmethod
     def _get_modifier_map(cls):
         return {
-            cls.L_CONTROL: {Key.LEFT_CTRL},
-            cls.R_CONTROL: {Key.RIGHT_CTRL},
-            cls.CONTROL: {Key.LEFT_CTRL, Key.RIGHT_CTRL},
-            cls.L_ALT: {Key.LEFT_ALT},
-            cls.R_ALT: {Key.RIGHT_ALT},
-            cls.ALT: {Key.LEFT_ALT, Key.RIGHT_ALT},
-            cls.L_SHIFT: {Key.LEFT_SHIFT},
-            cls.R_SHIFT: {Key.RIGHT_SHIFT},
-            cls.SHIFT: {Key.LEFT_SHIFT, Key.RIGHT_SHIFT},
-            cls.L_SUPER: {Key.LEFT_META},
-            cls.R_SUPER: {Key.RIGHT_META},
-            cls.SUPER: {Key.LEFT_META, Key.RIGHT_META}
+            cls.L_CONTROL: [Key.LEFT_CTRL],
+            cls.R_CONTROL: [Key.RIGHT_CTRL],
+            cls.CONTROL: [Key.LEFT_CTRL, Key.RIGHT_CTRL],
+            cls.L_ALT: [Key.LEFT_ALT],
+            cls.R_ALT: [Key.RIGHT_ALT],
+            cls.ALT: [Key.LEFT_ALT, Key.RIGHT_ALT],
+            cls.L_SHIFT: [Key.LEFT_SHIFT],
+            cls.R_SHIFT: [Key.RIGHT_SHIFT],
+            cls.SHIFT: [Key.LEFT_SHIFT, Key.RIGHT_SHIFT],
+            cls.L_SUPER: [Key.LEFT_META],
+            cls.R_SUPER: [Key.RIGHT_META],
+            cls.SUPER: [Key.LEFT_META, Key.RIGHT_META],
         }
 
     def __str__(self):

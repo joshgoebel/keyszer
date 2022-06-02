@@ -19,7 +19,7 @@ _conditional_multipurpose_map = []
 _toplevel_keymaps = []
 _timeout = 1
 
-def reset_configutation():
+def reset_configuration():
     global _mod_map
     global _conditional_mod_map
     global _multipurpose_map

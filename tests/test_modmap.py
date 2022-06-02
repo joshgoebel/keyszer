@@ -26,7 +26,7 @@ def setup_function(module):
     asyncio.set_event_loop(loop)
     _out = UInputStub()
     setup_uinput(_out)
-    reset_configutation()
+    reset_configuration()
 
 async def test_command_to_control():
     modmap({
