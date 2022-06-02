@@ -5,6 +5,7 @@ from enum import Enum, unique, IntEnum
 __author__ = 'zh'
 
 
+# https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
 class Key(IntEnum):
     RESERVED = 0
     ESC = 1

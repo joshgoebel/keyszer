@@ -7,6 +7,44 @@ from .key import Action, Combo, Key, Modifier
 escape_next_key = {}
 pass_through_key = {}
 
+# keycode translation
+# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
+_mod_map = {}
+_conditional_mod_map = []
+
+# multipurpose keys
+# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
+_multipurpose_map = None
+_conditional_multipurpose_map = []
+_toplevel_keymaps = []
+_timeout = 1
+
+def reset_configutation():
+    global _mod_map
+    global _conditional_mod_map
+    global _multipurpose_map
+    global _conditional_multipurpose_map
+    global _toplevel_keymaps
+    global _timeout
+
+    _mod_map = {}
+    _conditional_mod_map = []
+    _multipurpose_map = None
+    _conditional_multipurpose_map = []
+    _toplevel_keymaps = []
+    _timeout = 1
+
+def get_configuration():
+    return (
+        _mod_map,
+        _conditional_mod_map,
+        _multipurpose_map,
+        _conditional_multipurpose_map,
+        _toplevel_keymaps,
+        _timeout
+    )
+
+
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
@@ -82,18 +120,6 @@ def _create_modifiers_from_strings(modifier_strs):
 # ============================================================ #
 
 
-# keycode translation
-# e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
-_mod_map = {}
-_conditional_mod_map = []
-
-# multipurpose keys
-# e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
-_multipurpose_map = None
-_conditional_multipurpose_map = []
-
-_timeout = 1
-
 
 def define_timeout(seconds=1):
     global _timeout
@@ -168,7 +194,6 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
 
 # ============================================================ #
 
-_toplevel_keymaps = []
 
 def define_keymap(condition, mappings, name="Anonymous keymap"):
     global _toplevel_keymaps
@@ -223,20 +248,12 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
     _toplevel_keymaps.append((condition, mappings, name))
     return mappings
 
+# aliases
+
 timeout = define_timeout
 keymap = define_keymap
 modmap = define_modmap
 conditional_modmap = define_conditional_modmap
 multipurpose_modmap = define_multipurpose_modmap
 conditional_multipurpose_modmap = define_conditional_multipurpose_modmap
-
-def get_configuration():
-    return (
-        _mod_map,
-        _conditional_mod_map,
-        _multipurpose_map,
-        _conditional_multipurpose_map,
-        _toplevel_keymaps,
-        _timeout
-    )
-
+    
