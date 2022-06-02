@@ -829,9 +829,12 @@ class Modifier(Enum):
 class Combo:
 
     def __init__(self, modifiers, key):
+        ordered_mods = None
 
         if isinstance(modifiers, list):
-            raise ValueError("modifiers should be a set instead of a list")
+            # raise ValueError("modifiers should be a set instead of a list")
+            ordered_mods = modifiers
+            modifiers = set(modifiers)
         elif modifiers is None:
             modifiers = set()
         elif isinstance(modifiers, Modifier):
@@ -842,6 +845,7 @@ class Combo:
         if not isinstance(key, Key):
             raise ValueError("key should be a Key")
 
+        self.ordered_mods = ordered_mods or list(modifiers)
         self.modifiers = modifiers
         self.key = key
 
@@ -860,4 +864,5 @@ class Combo:
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
             modifiers = {modifiers}
+        # TODO: preserve order of ordered_mods
         return Combo(self.modifiers | modifiers, self.key)
