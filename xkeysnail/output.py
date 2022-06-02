@@ -28,11 +28,17 @@ mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
               273: 'BTN_RIGHT'}
 _keyboard_codes.update(mouse_btns)
 
-_uinput = UInput(events={ecodes.EV_KEY: _keyboard_codes,
-                         ecodes.EV_REL: set([0,1,6,8,9]),
-                         })
+_uinput = None
 
+def real_uinput():
+    UInput(events={ecodes.EV_KEY: _keyboard_codes,
+        ecodes.EV_REL: set([0,1,6,8,9]),
+        })
 
+# TODO: improve injection?
+def setup_uinput(uinput = None):
+    global _uinput
+    _uinput = uinput or real_uinput()
 
 class Output:
 
@@ -72,7 +78,7 @@ class Output:
         _uinput.write_event(event)
         self.__send_sync()
 
-    def send_key_action(self,key, action):
+    def send_key_action(self, key, action):
         self.__update_modifier_key_pressed(key, action)
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)

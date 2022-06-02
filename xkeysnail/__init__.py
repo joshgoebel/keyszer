@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 
+CONFIG_HEADER = b"""
+# -*- coding: utf-8 -*-
+import re
+from xkeysnail.transform import with_mark, set_mark, with_or_set_mark
+from xkeysnail.config_api import *
+"""
 
-def eval_file(path):
+def eval_config(path):
     with open(path, "rb") as file:
-        exec(compile(file.read(), path, 'exec'), globals())
+        config_code = CONFIG_HEADER + file.read()
+        exec(compile(config_code, path, 'exec'), globals())
 
 
 def uinput_device_exists():
@@ -23,7 +30,7 @@ def has_access_to_uinput():
 def cli_main():
     from .info import __logo__, __version__
     #print(__logo__.strip())
-    print(f"xkeysnail v{__version__}")
+    print(f"keyszer v{__version__}")
     #print("                             v{}".format(__version__))
 
     # Parse args
@@ -54,7 +61,6 @@ def cli_main():
         print_device_list(get_devices_list())
         exit(0)
 
-
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
         print("""The '/dev/uinput' device does not exist.
@@ -70,7 +76,7 @@ Please check your access permissions for /dev/uinput.""")
         sys.exit(1)
 
     # Load configuration file
-    eval_file(args.config)
+    eval_config(args.config)
 
     print(f"(--) CONFIG: {args.config}")
 
