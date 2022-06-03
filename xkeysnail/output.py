@@ -31,7 +31,7 @@ _keyboard_codes.update(mouse_btns)
 _uinput = None
 
 def real_uinput():
-    UInput(events={ecodes.EV_KEY: _keyboard_codes,
+    return UInput(events={ecodes.EV_KEY: _keyboard_codes,
         ecodes.EV_REL: set([0,1,6,8,9]),
         })
 

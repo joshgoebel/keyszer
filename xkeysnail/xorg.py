@@ -1,5 +1,9 @@
 import Xlib.display
 
+# https://github.com/python-xlib/python-xlib/blob/master/Xlib/display.py#L153
+# https://stackoverflow.com/questions/23786289/how-to-correctly-detect-application-name-when-changing-focus-event-occurs-with
+
+# TODO: keep tabs on active window vs constant querying?
 
 def get_active_window_wm_class(display=Xlib.display.Display()):
     """Get active window's WM_CLASS"""

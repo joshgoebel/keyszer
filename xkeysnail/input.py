@@ -4,6 +4,7 @@ from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
 from .transform import on_event, boot_config
+from .output import setup_uinput
 from .key import Key
 import asyncio
 import signal
@@ -110,6 +111,7 @@ def main_loop(device_matches, device_watch, quiet):
     inotify = None
 
     boot_config()
+    setup_uinput()
 
     device_filter = DeviceFilter(device_matches)
     selected_devices = select_devices(device_filter)

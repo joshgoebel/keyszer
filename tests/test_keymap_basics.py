@@ -81,6 +81,7 @@ async def test_multiple_combos_without_releasing_all_nonsticky():
         (PRESS, Key.TAB),
         (RELEASE, Key.TAB),
         (RELEASE, Key.LEFT_CTRL),
+        
         (PRESS, Key.LEFT_CTRL),
         (PRESS, Key.LEFT_SHIFT),
         (PRESS, Key.TAB),

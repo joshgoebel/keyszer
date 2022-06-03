@@ -7,6 +7,8 @@ from evdev import ecodes
 from ordered_set import OrderedSet
 import asyncio
 
+import evdev
+
 from .key import Action, Combo, Key, Modifier
 from .output import Output 
 from .xorg import get_active_window_wm_class
@@ -166,9 +168,20 @@ def multipurpose_handler(multipurpose_map, key, action):
         _last_key = key
 
 
+JUST_KEYS = []
+JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
+
+from .lib.benchit import *
+
+@benchit
 def on_event(event, device_name, quiet):
     # we do not attempt to transform non-key events 
+    #print(evdev.util.categorize(event))
     if event.type != ecodes.EV_KEY:
+        _output.send_event(event)
+        return
+        
+    if len(_pressed_modifier_keys) == 0 and event.code in JUST_KEYS:
         _output.send_event(event)
         return
 
