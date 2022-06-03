@@ -25,17 +25,17 @@ This project has been forked from [xkeysnail](https://github.com/mooz/xkeysnail)
 
 `keyszer` is a keyboard remapping tool for X environment written in Python. It's similar `xmodmap` but allows more flexible remappings.
 
-The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
+#### Features
+
+- High-level and flexible remapping mechanisms:
+    - **per-application keybindings**
+    - **multiple stroke keybindings** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
+    - **multipurpose bindings** a regular key can become a modifier when held 
+- Uses low-level libraries (`evdev` and `uinput`), making remapping work almost everywhere
 
 
-- **Pros**
-    - Has high-level and flexible remapping mechanisms, such as
-        - **per-application keybindings can be defined**
-        - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
-    - Runs at a low-level (`evdev` and `uinput`), making remapping work almost everywhere
+This project was originally forked from [xkeysnail](https://github.com/mooz/xkeysnail) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs). The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
 
-
-This project was originally forked from [xkeysnail](https://github.com/mooz/xkeysnail) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs).
 
 
 ## Installation
@@ -44,6 +44,7 @@ This project was originally forked from [xkeysnail](https://github.com/mooz/xkey
 
 Requires **Python 3**.
 
+<!--
 ### Ubuntu
 
     sudo apt install python3-pip
@@ -76,42 +77,136 @@ Requires **Python 3**.
     # and may fail to do so if gcc is not installed.
     sudo eopkg install gcc
     sudo eopkg install -c system.devel
+-->
 
 ### From source
 
-    git clone --depth 1 https://github.com/mooz/xkeysnail.git
+    git clone https://github.com/joshgoebel/xkeysnail.git
     cd xkeysnail
     sudo pip3 install --upgrade .
 
+## Requirements
+
+We will need read/write access to:
+
+- `/dev/input/event*` - to capture input from actual hardware keyboards
+- `/dev/uinput` - to present ourselves as a pretend keyboard to the kernel
+
+### Running as a user in the `input` group (most secure)
+
+Some distros already have an input group, or you can create one.  You'll just need `udev` rules to make sure that the input devices are all given read/write access to that group.
+
+`/etc/udev/rules.d/90-input.rules`:
+
+```
+SUBSYSTEM=="input", GROUP="input"
+KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="input"
+```
+
+Now create a new user that is a member of that group.  We'll name them `xkeysnail`.
+
+```
+sudo useradd xkeysnail -G input
+```
+
+#### systemd
+
+Then lets have a systemd service to run:
+
+```
+[Unit]
+Description=xkeysnail
+
+[Service]
+Type=simple
+KillMode=process
+ExecStart=xkeysnail --quiet --watch
+Restart=on-failure
+RestartSec=3
+Environment=DISPLAY=:0
+User=xkeysnail
+Group=input
+
+[Install]
+WantedBy=graphical.target
+```
+
+### Running under own user account 
+
+#### udev rules:
+
+`/etc/udev/rules.d/90-input.rules`:
+
+```
+SUBSYSTEM=="input", GROUP="input"
+KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
+```
+
+#### systemd
+
+Would it make sense to use systemd here also?
+
+
+#### With a graphical display manager?
+
+HOW?
+
+
+#### with `.xinitrc`
+
+If you're using a minimal setup you can simply add us to your `.xinitrc`. For example to start us up and then start Awesome WM.
+
+```
+xkeysnail &
+exec awesome
+```
+
+
+### Running as root (most insecure)
+
+_Don't do this, it's bad, and wholly unnecessary._
+
 ## Usage
 
-    sudo xkeysnail config.py
+    xkeysnail
 
-When you encounter the errors like `Xlib.error.DisplayConnectionError: Can't connect to display ":0.0": b'No protocol specified\n'
-`, try
+To specify the location of a config file (otherwise the default  `~/.config/xkeysnail/config.py` will be used):
 
-    xhost +SI:localuser:root
-    sudo xkeysnail config.py
+    xkeysnail -c config.py
 
-If you want to specify keyboard devices, use `--devices` option:
+If you want to limit to only specify keyboard devices, use `--devices`:
 
-    sudo xkeysnail config.py --devices /dev/input/event3 'Topre Corporation HHKB Professional'
+    xkeysnail --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
 If you have hot-plugging keyboards, use `--watch` option.
 
 If you want to suppress output of key events, use `-q` / `--quiet` option especially when running as a daemon.
 
-## How to prepare `config.py`?
 
-(**If you just need Emacs-like keybindings, consider to
-use
-[`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py),
-which contains Emacs-like keybindings)**.
+## Configuration
 
-Configuration file is a Python script that consists of several keymaps defined
-by `define_keymap(condition, mappings, name)`
+By default we will look for the configuration in `~/.config/xkeysnail/config.py` but you can override this location with the `-c` switch.  The configuration file is a Python script that defines modmaps, keymaps, and other configuration details. 
 
-### `define_keymap(condition, mappings, name)`
+The configuration API:
+
+- `timeout`
+- `keymap`
+- `modmap`
+- `conditional_modmap`
+- `multipurpose_modmap`
+- `conditional_multipurpose_modmap`
+
+### `modmap`
+
+
+
+### `conditional_modmap`
+
+### `multipurpose_modmap`
+
+### `conditional_multipurpose_modmap`
+
+### `keymap(condition, mappings, name)`
 
 Defines a keymap consists of `mappings`, which is activated when the `condition`
 is satisfied.
@@ -154,7 +249,7 @@ Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
 
 And `<Key>` is a key whose name is defined
-in [`key.py`](https://github.com/mooz/xkeysnail/blob/master/xkeysnail/key.py).
+in [`key.py`](https://github.com/joshgoebel/xkeysnail/blob/main/xkeysnail/key.py).
 
 Here is a list of key specification examples:
 
@@ -165,7 +260,7 @@ Here is a list of key specification examples:
 
 #### Multiple stroke keys
 
-When you needs multiple stroke keys, define nested keymap. For example, the
+When you needs multiple stroke keys, define a nested keymap. For example, the
 following example remaps `C-x C-c` to `C-q`.
 
 ```python
@@ -193,13 +288,11 @@ Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
 
 ### Example `config.py`
 
-See [`example/config.py`](https://github.com/mooz/xkeysnail/blob/master/example/config.py).
+See [`example/config.py`](https://github.com/joshgoebel/xkeysnail/blob/main/example/config.py).
 
 Here is an excerpt of `example/config.py`.
 
 ```python
-from xkeysnail.transform import *
-
 define_keymap(re.compile("Firefox|Google-chrome"), {
     # Ctrl+Alt+j/k to switch next/previous tab
     K("C-M-j"): K("C-TAB"),
@@ -238,7 +331,7 @@ define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
 
 ### Example of Case Insensitivity Matching
 
-```
+```py
 terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
 terminals = [term.casefold() for term in terminals]
 termStr = "|".join(str(x) for x in terminals)
@@ -269,13 +362,10 @@ define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
 
 ## FAQ
 
-### How do I fix Firefox capturing Alt before xkeysnail?
-
-In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccessKeyFocuses`, and set the Value to `false`.
-
+None yet.
 
 ## License
 
-`keyszer` is distributed under GPL.  See our [LICENSE](https://github.com/joshgoebel/xkeysnail/blob/master/LICENSE).
+`keyszer` is distributed under GPL.  See our [LICENSE](https://github.com/joshgoebel/xkeysnail/blob/main/LICENSE).
 
     
