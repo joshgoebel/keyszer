@@ -1,25 +1,48 @@
-# xkeysnail
 
-`xkeysnail` is yet another keyboard remapping tool for X environment written in Python. It's like
-`xmodmap` but allows more flexible remappings.
+This project has been forked from [xkeysnail](https://github.com/mooz/xkeysnail) but doesn't yet have a new name or have everything fully renamed - **or fully working**.  
 
-![screenshot](http://mooz.github.io/image/xkeysnail_screenshot.png)
+
+![work in progress](https://badgen.net/badge/work%20in%20progress/yes?color=red&scale=2.5)
+
+---
+
+# keyszer (placeholder name)
+
+<!-- [![latest version](https://badgen.net/pypi/v/xkeysnail?label=latest)]() -->
+[![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/xkeysnail/releases) 
+[![](https://badgen.net/badge/python/3.10%20|%20%3F/blue)]()
+[![license](https://badgen.net/badge/license/GPL3/xkeysnail?color=cyan)](https://github.com/joshgoebel/xkeysnail/blob/main/LICENSE)
+
+<!-- ![build and CI status](https://badgen.net/github/checks/joshgoebel/xkeysnail/main?label=build) -->
+<!-- [![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/xkeysnail/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/xkeysnail/?mode=list) -->
+<!-- [![vulnerabilities](https://badgen.net/snyk/joshgoebel/xkeysnail)](https://snyk.io/test/github/joshgoebel/xkeysnail?targetFile=package.json) -->
+
+
+[![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink)](https://discord.gg/nX6qSC8mer)
+[![open issues](https://badgen.net/github/open-issues/joshgoebel/xkeysnail?label=issues)](https://github.com/joshgoebel/xkeysnail/issues)
+[![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/xkeysnail/help%20welcome/open)](https://github.com/joshgoebel/xkeysnail/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
+[![good first issue](https://badgen.net/github/label-issues/joshgoebel/xkeysnail/good%20first%20issue/open)](https://github.com/joshgoebel/xkeysnail/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+
+`keyszer` is a keyboard remapping tool for X environment written in Python. It's similar `xmodmap` but allows more flexible remappings.
+
+The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
+
 
 - **Pros**
     - Has high-level and flexible remapping mechanisms, such as
         - **per-application keybindings can be defined**
         - **multiple stroke keybindings can be defined** such as `Ctrl+x Ctrl+c` to `Ctrl+q`
-        - **not only key remapping but arbitrary commands defined by Python can be bound to a key**
-    - Runs in low-level layer (`evdev` and `uinput`), making **remapping work in almost all the places**
-- **Cons**
-    - Runs in root-mode (requires `sudo`)
+    - Runs at a low-level (`evdev` and `uinput`), making remapping work almost everywhere
 
-The key remapping mechanism of `xkeysnail` is based on `pykeymacs`
-(https://github.com/DreaminginCodeZH/pykeymacs).
+
+This project was originally forked from [xkeysnail](https://github.com/mooz/xkeysnail) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs).
+
 
 ## Installation
 
-Requires root privilege and **Python 3**.
+**These instructions are not correct yet.**
+
+Requires **Python 3**.
 
 ### Ubuntu
 
@@ -253,40 +276,6 @@ In the Firefox location bar, go to `about:config`, search for `ui.key.menuAccess
 
 ## License
 
-`xkeysnail` is distributed under GPL.
+`keyszer` is distributed under GPL.  See our [LICENSE](https://github.com/joshgoebel/xkeysnail/blob/master/LICENSE).
 
-    xkeysnail
-    Copyright (C) 2018 Masafumi Oyamada
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-`xkeysnail` is based on `pykeymacs`
- (https://github.com/DreaminginCodeZH/pykeymacs), which is distributed under
- GPL.
-
-    pykeymacs
-    Copyright (C) 2015 Zhang Hai
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    

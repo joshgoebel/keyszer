@@ -88,7 +88,7 @@ def test_enter_is_enter_and_control():
     ]  
 
 @pytest.mark.skip
-def test_held_enter_is_enter_after_timeout():
+def test_held_enter_is_mod_after_timeout():
     pass
 # need to figure out how to stub out the 
 # internal non-async io timekeeping before we can test these
