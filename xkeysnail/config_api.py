@@ -6,6 +6,7 @@ from .key import Action, Combo, Key, Modifier
 
 escape_next_key = {}
 pass_through_key = {}
+ignore_key = {}
 
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
@@ -16,9 +17,15 @@ _conditional_mod_map = []
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
 _multipurpose_map = None
 _conditional_multipurpose_map = []
-_toplevel_keymaps = []
+
+# multipurpose timeout
 _timeout = 1
 
+# keymaps
+_toplevel_keymaps = []
+
+
+# needed for testing teardowns
 def reset_configuration():
     global _mod_map
     global _conditional_mod_map
@@ -34,6 +41,7 @@ def reset_configuration():
     _toplevel_keymaps = []
     _timeout = 1
 
+# how transform hooks into the configuration
 def get_configuration():
     return (
         _mod_map,

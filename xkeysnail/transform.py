@@ -13,7 +13,7 @@ from .key import Action, Combo, Key, Modifier
 from .logger import debug
 from .output import Output 
 from .xorg import get_active_window_wm_class
-from .config_api import get_configuration,escape_next_key, pass_through_key
+from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
 
 def boot_config():
     global _mod_map
@@ -260,7 +260,7 @@ def is_sticky(key):
     return False
 
 def on_key(key, action, wm_class=None, quiet=False):
-    debug("on_key", key, action)
+    # debug("on_key", key, action)
     global _suspend_timer
 
     if key in Modifier.get_all_keys():
@@ -389,12 +389,18 @@ def handle_commands(commands, key, action, combo):
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False
+        elif command is ignore_key:
+            debug("ignore_key", key)
+            return True
+        elif command is pass_through_key:
+            debug("pass_thru_key", key)
+            _output.send_key_action(key, action)
+            return True
         # Go to next keymap
         elif isinstance(command, dict):
             _mode_maps = [command]
             return False
-        elif command is pass_through_key:
-            _output.send_key_action(key, action)
-            return True
+        else:
+            debug("unknown command")
     # Reset keymap in ordinary flow
     return True
