@@ -1,2 +1,2 @@
-def debug(*args, ctx = "--"):
+def debug(*args, ctx = "DD"):
     print(f"({ctx})", *args)

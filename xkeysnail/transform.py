@@ -10,6 +10,7 @@ import asyncio
 import evdev
 
 from .key import Action, Combo, Key, Modifier
+from .logger import debug
 from .output import Output 
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, pass_through_key
@@ -31,13 +32,22 @@ def boot_config():
 
 _spent_modifiers_keys = set()
 _pressed_modifier_keys = OrderedSet()
+_mode_maps = None
 _output = Output()
+_pressed_keys = set()
 
 def reset_transform():
     global _spent_modifiers_keys
     global _pressed_modifier_keys
+    global _mode_maps
+    global _pressed_keys
+    _mode_maps = None
+    _pressed_keys = set()
     _spent_modifiers_keys = set()
     _pressed_modifier_keys = OrderedSet()
+
+
+# ============================================================ #
 
 
 def update_pressed_modifier_keys(key, action):
@@ -49,12 +59,6 @@ def update_pressed_modifier_keys(key, action):
 
 def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
-
-
-# ============================================================ #
-
-
-_pressed_keys = set()
 
 
 def update_pressed_keys(key, action):
@@ -100,20 +104,6 @@ def with_or_set_mark(combo):
     return _with_or_set_mark
 
 
-
-
-# ============================================================
-# Keymap
-# ============================================================
-
-
-_mode_maps = None
-
-
-
-
-
-
 # ============================================================
 # Key handler
 # ============================================================
@@ -128,7 +118,7 @@ _last_key_time = time()
 
 
 def multipurpose_handler(multipurpose_map, key, action):
-
+    debug("multipurple_handler", key, action)
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
@@ -168,27 +158,9 @@ def multipurpose_handler(multipurpose_map, key, action):
         _last_key = key
 
 
-JUST_KEYS = []
-JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
-
-from .lib.benchit import *
-
-@benchit
-def on_event(event, device_name, quiet):
-    # we do not attempt to transform non-key events 
-    #print(evdev.util.categorize(event))
-    if event.type != ecodes.EV_KEY:
-        _output.send_event(event)
-        return
-        
-    if len(_pressed_modifier_keys) == 0 and event.code in JUST_KEYS:
-        _output.send_event(event)
-        return
-
-    key = Key(event.code)
-    action = Action(event.value)
+# translate keycode (like xmodmap)
+def apply_modmap(key):
     wm_class = None
-    # translate keycode (like xmodmap)
     active_mod_map = _mod_map
     if _conditional_mod_map:
         wm_class = get_active_window_wm_class()
@@ -203,6 +175,29 @@ def on_event(event, device_name, quiet):
     if active_mod_map and key in active_mod_map:
         key = active_mod_map[key]
 
+    return key
+
+JUST_KEYS = []
+JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
+
+#from .lib.benchit import *
+
+# @benchit
+def on_event(event, device_name, quiet):
+    # we do not attempt to transform non-key events 
+    #print(evdev.util.categorize(event))
+    if event.type != ecodes.EV_KEY:
+        _output.send_event(event)
+        return
+        
+    # if len(_pressed_modifier_keys) == 0 and event.code in JUST_KEYS:
+    #     _output.send_event(event)
+    #     return
+
+    action = Action(event.value)
+    key = apply_modmap(Key(event.code))
+
+    wm_class = None
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
         wm_class = get_active_window_wm_class()
@@ -265,6 +260,7 @@ def is_sticky(key):
     return False
 
 def on_key(key, action, wm_class=None, quiet=False):
+    debug("on_key", key, action)
     global _suspend_timer
 
     if key in Modifier.get_all_keys():
@@ -296,7 +292,7 @@ def on_key(key, action, wm_class=None, quiet=False):
 
 def transform_key(key, action, wm_class=None, quiet=False):
     global _mode_maps
-    global _toplevel_keymaps
+    # global _toplevel_keymaps
     global _spent_modifiers_keys
 
     combo = Combo(get_pressed_modifiers(), key)
