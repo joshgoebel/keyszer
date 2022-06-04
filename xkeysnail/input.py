@@ -5,6 +5,7 @@ from select import select
 from sys import exit
 from .transform import on_event, boot_config
 from .output import setup_uinput
+from .logger import *
 from .key import Key
 import asyncio
 import signal
@@ -66,12 +67,12 @@ def select_devices(device_filter=None):
     devices = get_devices_list()
 
     if not device_filter:
-        print ("(--) Autodetecting keyboards (--device not specified)")
+        info("(--) Autodetecting keyboards (--device not specified)")
 
     devices = list(filter(device_filter, devices))
 
     if not devices:
-        print('error: no input devices found (do you have rw permission on /dev/input/*?)')
+        info('error: no input devices found (do you have rw permission on /dev/input/*?)')
         exit(1)
 
     return devices
@@ -132,7 +133,7 @@ def main_loop(device_matches, device_watch, quiet):
         _sup = loop.create_task(supervisor())
         loop.add_signal_handler(signal.SIGINT, sig_int)
         loop.add_signal_handler(signal.SIGTERM, sig_term)
-        print("(**) Ready to process input.")
+        info("Ready to process input.")
         loop.run_forever()
     finally:
         for device in devices:
@@ -212,7 +213,7 @@ async def device_change(devices, device_filter, events):
             continue
 
 def remove_device(devices, device):
-    print(f"(-K) Ungrabbing: {device.name} (removed)")
+    info(f"Ungrabbing: {device.name} (removed)", ctx = "-K")
     loop = asyncio.get_running_loop()
     loop.remove_reader(device)
     devices.remove(device)
@@ -222,12 +223,12 @@ def remove_device(devices, device):
         pass
 
 def add_device(devices, device):
-    print(f"(+K) Grabbing {device.name} ({device.fn})")
+    info(f"Grabbing {device.name} ({device.fn})", ctx = "+K")
     devices.append(device)
     try:
         device.grab()
     except IOError:
-        print("IOError when grabbing device. Maybe, another instance is running?")
+        print("IOError when grabbing keyboard. Maybe, another instance is running?")
         cleanup()
         exit(1)
     # except IOError:

@@ -5,8 +5,6 @@ from evdev.uinput import UInput
 from .key import Action, Combo, Modifier
 from .logger import debug
 
-__author__ = 'zh'
-
 
 # Remove all buttons so udev doesn't think xkeysnail is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN
@@ -45,7 +43,6 @@ class Output:
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
-        self._sticky = {}
         return
 
 
@@ -70,9 +67,6 @@ class Output:
 
     def is_pressed(self,key):
         return key in self._pressed_keys
-
-    def make_sticky(self, sticky):
-        self._sticky = sticky
 
     def send_event(self, event):
         _uinput.write_event(event)

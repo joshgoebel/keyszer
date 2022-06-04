@@ -10,7 +10,7 @@ import asyncio
 import evdev
 
 from .key import Action, Combo, Key, Modifier
-from .logger import debug
+from .logger import *
 from .output import Output 
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
@@ -61,6 +61,10 @@ def get_pressed_modifiers():
     return {Modifier.from_key(key) for key in _pressed_modifier_keys}
 
 
+def none_pressed():
+    return not(any(_pressed_keys) or any(_pressed_modifier_keys))
+
+
 def update_pressed_keys(key, action):
     if action.is_pressed():
         _pressed_keys.add(key)
@@ -102,6 +106,50 @@ def with_or_set_mark(combo):
         return combo.with_modifier(Modifier.SHIFT)
 
     return _with_or_set_mark
+
+
+# ============================================================ #
+# Suspend / Resume input side
+# ============================================================ #
+
+# keep track of how long until we need to resume the input
+# and send held keys to the output (that haven't been used
+# as part of a combo)
+_suspend_timer = None
+
+def resume_keys():
+    global _suspend_timer
+    if not suspended():
+        return
+
+    _suspend_timer.cancel()
+    _suspend_timer = None
+    debug("resuming keys:", _pressed_modifier_keys)
+    _spent_modifiers_keys = {}
+    for mod in _pressed_modifier_keys:
+        # sticky keys (input side) remain silently held
+        # and are only lifted when they are lifted from the input
+        if mod in _sticky:
+            continue
+        _output.send_key_action(mod, Action.PRESS)
+    
+
+def suspended():
+    global _suspend_timer
+    return _suspend_timer != None
+
+def resuspend_keys():
+    global _suspend_timer
+    _suspend_timer.cancel()
+    debug("resuspending keys")
+    suspend_keys(True)
+
+def suspend_keys(quiet=False):
+    global _suspend_timer
+    if not quiet:
+        debug("suspending keys")
+    loop = asyncio.get_event_loop()
+    _suspend_timer = loop.call_later(1, resume_keys)
 
 
 # ============================================================
@@ -185,7 +233,7 @@ JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
 # @benchit
 def on_event(event, device_name, quiet):
     # we do not attempt to transform non-key events 
-    #print(evdev.util.categorize(event))
+    #debug(evdev.util.categorize(event))
     if event.type != ecodes.EV_KEY:
         _output.send_event(event)
         return
@@ -218,41 +266,6 @@ def on_event(event, device_name, quiet):
     update_pressed_keys(key, action)
 
 
-def none_pressed():
-    return not(any(_pressed_keys) or any(_pressed_modifier_keys))
-
-_suspend_timer = None
-
-def resume_keys():
-    global _suspend_timer
-    if not suspended():
-        return
-
-    _suspend_timer.cancel()
-    _suspend_timer = None
-    print("resuming keys:", _pressed_modifier_keys)
-    _spent_modifiers_keys = {}
-    for mod in _pressed_modifier_keys:
-        _output.send_key_action(mod, Action.PRESS)
-    
-
-def suspended():
-    global _suspend_timer
-    return _suspend_timer != None
-
-def resuspend_keys():
-    global _suspend_timer
-    _suspend_timer.cancel()
-    print("resuspending keys")
-    suspend_keys(True)
-
-def suspend_keys(quiet=False):
-    global _suspend_timer
-    if not quiet:
-        print("suspending keys")
-    loop = asyncio.get_event_loop()
-    _suspend_timer = loop.call_later(1, resume_keys)
-
 def is_sticky(key):
     for k in _sticky.keys():
         if k == key:
@@ -261,8 +274,6 @@ def is_sticky(key):
 
 def on_key(key, action, wm_class=None, quiet=False):
     # debug("on_key", key, action)
-    global _suspend_timer
-
     if key in Modifier.get_all_keys():
         if none_pressed() and action.is_pressed():
             suspend_keys()        
@@ -273,11 +284,11 @@ def on_key(key, action, wm_class=None, quiet=False):
                 _output.send_key_action(outkey, Action.RELEASE)    
                 del _sticky[key]
             elif key in _spent_modifiers_keys:
-                print("silent lift of spent modifier", key)
+                debug("silent lift of spent modifier", key)
                 # allow a silent release inside the tranform
                 _spent_modifiers_keys.remove(key)
             else:     
-                print("resume because of release")
+                debug("resume because of mod release")
                 resume_keys()
 
         update_pressed_modifier_keys(key, action)
@@ -298,7 +309,7 @@ def transform_key(key, action, wm_class=None, quiet=False):
     combo = Combo(get_pressed_modifiers(), key)
 
     if _mode_maps is escape_next_key:
-        print("Escape key: {}".format(combo))
+        debug("Escape key: {}".format(combo))
         _output.send_key_action(key, action)
         _mode_maps = None
         return
@@ -318,17 +329,17 @@ def transform_key(key, action, wm_class=None, quiet=False):
                 _mode_maps.append(mappings)
                 keymap_names.append(name)
         if not quiet:
-            print("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
+            debug("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
 
     if not quiet:
-        print(combo)
+        debug("COMBO:", combo)
 
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:
             continue
         _spent_modifiers_keys |= _pressed_modifier_keys
-        print("spent modifiers", _spent_modifiers_keys)
+        debug("spent modifiers", _spent_modifiers_keys)
         # Found key in "mappings". Execute commands defined for the key.
         reset_mode = handle_commands(mappings[combo], key, action, combo)
         if reset_mode:
@@ -350,16 +361,16 @@ def simple_sticky(combo, output_combo):
     out = output_combo.modifiers or {}
     if len(inp) != 1 or len(out) != 1:
         return {}
-    print("simple_sticky", combo, output_combo)
+    debug("simple_sticky (one mod => one mod)", combo, output_combo)
 
     m = {}
     m[next(iter(inp)).get_key()] = next(iter(out)).get_key()
-    print("AUTO-STICKY:", m)
+    debug("AUTO-STICKY:", m)
     return m
 
 _sticky = {}
 
-def handle_commands(commands, key, action, combo):
+def handle_commands(commands, key, action, input_combo):
     """
     returns: reset_mode (True/False) if this is True, _mode_maps will be reset
     """
@@ -379,7 +390,7 @@ def handle_commands(commands, key, action, combo):
         if isinstance(command, Key):
             _output.send_key(command)
         elif isinstance(command, Combo):
-            _sticky = simple_sticky(combo, command)
+            _sticky = simple_sticky(input_combo, command)
             if (suspended()):
                 resuspend_keys()
             for k in _sticky.values():

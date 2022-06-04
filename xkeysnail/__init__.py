@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from .logger import *
+
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-
 import re
@@ -28,8 +30,7 @@ def has_access_to_uinput():
 
 
 def cli_main():
-    from .info import __logo__, __version__
-    #print(__logo__.strip())
+    from .info import __version__
     print(f"keyszer v{__version__}")
     #print("                             v{}".format(__version__))
 
@@ -64,27 +65,27 @@ def cli_main():
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
         print("""The '/dev/uinput' device does not exist.
-Please check your kernel configuration.""")
+Please check kernel configuration.""")
         import sys
         sys.exit(1)
 
     # Make sure that user have root privilege
     if not has_access_to_uinput():
         print("""Failed to open `uinput` in write mode.
-Please check your access permissions for /dev/uinput.""")
+Please check access permissions for /dev/uinput.""")
         import sys
         sys.exit(1)
 
     # Load configuration file
     eval_config(args.config)
 
-    print(f"(--) CONFIG: {args.config}")
+    log(f"CONFIG: {args.config}")
 
     if args.quiet:
-        print("(--) QUIET: key output supressed.")
+        log("QUIET: key output supressed.")
 
     if args.watch:
-        print("(--) WATCH: Watching for new devices to hot-plug.")
+        log("WATCH: Watching for new devices to hot-plug.")
 
     # Enter event loop
     from xkeysnail.input import main_loop
