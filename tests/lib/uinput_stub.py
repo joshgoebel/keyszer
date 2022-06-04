@@ -16,3 +16,6 @@ class UInputStub:
 
     def keys(self):
         return [(x[2], x[1]) for x in self.queue if x[0] == EV_KEY]
+
+    def close(self):
+        pass # NOP

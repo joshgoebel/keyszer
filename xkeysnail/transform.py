@@ -41,11 +41,16 @@ def reset_transform():
     global _pressed_modifier_keys
     global _mode_maps
     global _pressed_keys
+    global _output
     _mode_maps = None
     _pressed_keys = set()
     _spent_modifiers_keys = set()
     _pressed_modifier_keys = OrderedSet()
+    _output = Output()
 
+
+def shutdown():
+    _output.shutdown()
 
 # ============================================================ #
 

@@ -3,12 +3,14 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from xkeysnail.output import setup_uinput
 from xkeysnail.key import Key, Action
+from xkeysnail import input
 from xkeysnail.config_api import *
 from xkeysnail.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    suspended
+    suspended, \
+    reset_transform
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
@@ -26,6 +28,7 @@ def setup_function(module):
     asyncio.set_event_loop(loop)
     _out = UInputStub()
     setup_uinput(_out)
+    reset_transform()
     reset_configuration()
 
 @pytest.mark.looptime
@@ -79,6 +82,26 @@ async def test_unmapped_combo():
         (PRESS, Key.LEFT_CTRL),
         (PRESS, Key.LEFT_SHIFT),
         (PRESS, Key.F),
+        (RELEASE, Key.F),
+        (RELEASE, Key.LEFT_SHIFT),
+        (RELEASE, Key.LEFT_CTRL),
+    ]
+
+async def test_terminate_should_release_keys():
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.LEFT_SHIFT)
+    press(Key.F)
+
+    with pytest.raises(SystemExit):
+        input.sig_term()
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_SHIFT),
+        (PRESS, Key.F),
+        # sig term should ensure the releases happen before we terminate
         (RELEASE, Key.F),
         (RELEASE, Key.LEFT_SHIFT),
         (RELEASE, Key.LEFT_CTRL),

@@ -4,6 +4,7 @@ from evdev import ecodes, InputDevice, list_devices
 from select import select
 from sys import exit
 from .transform import on_event, boot_config
+from . import transform
 from .output import setup_uinput
 from .logger import *
 from .key import Key
@@ -82,22 +83,21 @@ def in_device_list(filename, devices):
     return any([device for device in devices if device.fn == filename])
 
 
-def cleanup():
+def shutdown():
     loop = asyncio.get_event_loop()
     loop.stop()
-    from .output import _uinput
-    _uinput.close()
+    transform.shutdown()
 
 
 def sig_term():
     print("signal TERM received", flush = True)
-    cleanup()
+    shutdown()
     exit(0)
 
 
 def sig_int():
     print("signal INT received", flush = True)
-    cleanup()
+    shutdown()
     exit(0)
 
 
@@ -229,7 +229,7 @@ def add_device(devices, device):
         device.grab()
     except IOError:
         print("IOError when grabbing keyboard. Maybe, another instance is running?")
-        cleanup()
+        shutdown()
         exit(1)
     # except IOError:
     #     # Ignore errors on new devices

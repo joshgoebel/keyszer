@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
-from .info import __version__, __name__
+from .info import __version__ # , __name__
 

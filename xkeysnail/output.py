@@ -114,3 +114,13 @@ class Output:
 
     def send_key(self,key):
         self.send_combo(Combo(None, key))
+
+
+    def shutdown(self):
+        # raise all keys for shutdown so that we have a clean state
+        # on uninput with any watching apps as we're exiting
+        for key in self._pressed_keys.copy():
+            self.send_key_action(key, Action.RELEASE)
+        for key in self._pressed_modifier_keys.copy():
+            self.send_key_action(key, Action.RELEASE)
+        _uinput.close()
