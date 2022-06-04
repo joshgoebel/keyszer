@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+__name__ = "keyszer"
+
 __version__ = "0.4.99"
 
 __description__ = "A smart, flexible keyboard remapping tool for the X environment."
