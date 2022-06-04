@@ -1,6 +1,9 @@
 import itertools
 
 from .key import Action, Combo, Key, Modifier
+from .lib.modmap import Modmap
+from sys import exit
+from .logger import *
 
 # GLOBALS
 
@@ -10,8 +13,7 @@ ignore_key = {}
 
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
-_mod_map = {}
-_conditional_mod_map = []
+_modmaps = []
 
 # multipurpose keys
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
@@ -27,15 +29,13 @@ _toplevel_keymaps = []
 
 # needed for testing teardowns
 def reset_configuration():
-    global _mod_map
-    global _conditional_mod_map
+    global _modmaps
     global _multipurpose_map
     global _conditional_multipurpose_map
     global _toplevel_keymaps
     global _timeout
 
-    _mod_map = {}
-    _conditional_mod_map = []
+    _modmaps = []
     _multipurpose_map = None
     _conditional_multipurpose_map = []
     _toplevel_keymaps = []
@@ -43,9 +43,19 @@ def reset_configuration():
 
 # how transform hooks into the configuration
 def get_configuration():
+    global _modmaps
+
+    # setup modmaps
+    conditional = [mm for mm in _modmaps if mm.conditional]
+    default = [mm for mm in _modmaps if not mm.conditional] or [Modmap("default", {})]
+    if len(default) > 1:
+        error(f"You may only have a single default (non-conditional modmap), you have {len(default)} currently.")
+        exit(0)
+
+    _modmaps = default + conditional
+
     return (
-        _mod_map,
-        _conditional_mod_map,
+        _modmaps,
         _multipurpose_map,
         _conditional_multipurpose_map,
         _toplevel_keymaps,
@@ -132,7 +142,19 @@ def define_timeout(seconds=1):
     _timeout = seconds
 
 
-def define_modmap(mod_remappings):
+def conditional(fn, what): 
+    # TODO: check that fn is a valid conditional
+    what.conditional = fn
+    return what
+
+
+# old API, takes name as an optional param
+def define_modmap(mappings, name = "unnamed"):
+    return modmap(name, mappings)
+
+
+# new API, requires name
+def modmap(name, mappings):
     """Defines modmap (keycode translation)
 
     Example:
@@ -141,11 +163,13 @@ def define_modmap(mod_remappings):
         Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
-    global _mod_map
-    _mod_map = mod_remappings
+    global _modmaps
+    mm = Modmap(name, mappings)
+    _modmaps.append(mm)
+    return mm
 
 
-def define_conditional_modmap(condition, mod_remappings):
+def define_conditional_modmap(condition, mappings):
     """Defines conditional modmap (keycode translation)
 
     Example:
@@ -154,11 +178,38 @@ def define_conditional_modmap(condition, mod_remappings):
         Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
+    condition_fn = None
+    def re_search(re):
+        def fn(ctx):
+            print("running re_search", ctx)
+            return re.search(ctx["wm_class"])
+        return fn
+
+    def wm_class(wm_class_fn):
+        def fn(ctx):
+            return wm_class_fn(ctx["wm_class"])
+        return fn
+    
+    def wm_class_and_device(cond_fn):
+        def fn(ctx):
+            return cond_fn(ctx["wm_class"], ctx["device_name"])
+        return fn
+
+
+    name = "define_conditional_modmap (old API)"
     if hasattr(condition, 'search'):
-        condition = condition.search
-    if not callable(condition):
+        condition_fn = re_search(condition)
+    elif callable(condition):
+        if len(signature(condition).parameters) == 1:
+            condition_fn = wm_class(condition)
+        elif len(signature(condition).parameters) == 2:
+            condition_fn = wm_class_and_device(condition)
+
+    if not callable(condition_fn):
         raise ValueError('condition must be a function or compiled regexp')
-    _conditional_mod_map.append((condition, mod_remappings))
+
+    return conditional(condition_fn, modmap(name, mappings))
+    # _conditional_mod_map.append((condition, mod_remappings))
 
 
 def define_multipurpose_modmap(multipurpose_remappings):
@@ -258,7 +309,6 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 
 timeout = define_timeout
 keymap = define_keymap
-modmap = define_modmap
 conditional_modmap = define_conditional_modmap
 multipurpose_modmap = define_multipurpose_modmap
 conditional_multipurpose_modmap = define_conditional_multipurpose_modmap

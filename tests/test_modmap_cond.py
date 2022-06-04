@@ -35,7 +35,7 @@ def setup_function(module):
     reset_configuration()
 
 async def test_cond_modmap_wins_over_default_modmap():
-    modmap({
+    modmap("default", {
         Key.RIGHT_CTRL: Key.LEFT_META,
     })
     conditional_modmap(re.compile(r'Emacs'), {

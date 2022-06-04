@@ -29,7 +29,7 @@ def setup_function(module):
     reset_configuration()
 
 async def test_command_to_control():
-    modmap({
+    modmap("default", {
         Key.LEFT_META: Key.LEFT_CTRL
     })
 
@@ -58,7 +58,7 @@ async def test_command_to_control():
     ]
 
 async def test_remapped_in_combo_with_unremapped():
-    modmap({
+    modmap("default",{
         Key.LEFT_META: Key.LEFT_CTRL
     })
 
@@ -81,7 +81,7 @@ async def test_remapped_in_combo_with_unremapped():
     ]
 
 async def test_multiple_remapped(): 
-    modmap({
+    modmap("default", {
         Key.LEFT_META: Key.LEFT_CTRL,
         Key.LEFT_SHIFT: Key.RIGHT_ALT
     })

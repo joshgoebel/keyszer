@@ -16,13 +16,12 @@ from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
 
 def boot_config():
-    global _mod_map
-    global _conditional_mod_map
+    global _modmaps
     global _multipurpose_map
     global _conditional_multipurpose_map
     global _toplevel_keymaps
     global _timeout
-    _mod_map, _conditional_mod_map, _multipurpose_map, \
+    _modmaps, _multipurpose_map, \
         _conditional_multipurpose_map, _toplevel_keymaps, _timeout = \
             get_configuration()
 
@@ -212,21 +211,23 @@ def multipurpose_handler(multipurpose_map, key, action):
 
 
 # translate keycode (like xmodmap)
-def apply_modmap(key):
-    wm_class = None
-    active_mod_map = _mod_map
-    if _conditional_mod_map:
-        wm_class = get_active_window_wm_class()
-        for condition, mod_map in _conditional_mod_map:
-            params = [wm_class]
-            if len(signature(condition).parameters) == 2:
-                params = [wm_class, device_name]
-
-            if condition(*params):
-                active_mod_map = mod_map
+def apply_modmap(key, device_name):
+    # first modmap is always the default, unconditional
+    active_modmap = _modmaps[0] 
+    print("active", active_modmap)
+    conditional_modmaps = _modmaps[1:]
+    print("conditionals", conditional_modmaps)
+    if conditional_modmaps:
+        ctx = {
+            "wm_class": get_active_window_wm_class(),
+            "device_name": device_name
+        }
+        for modmap in conditional_modmaps:
+            if modmap.conditional(ctx):
+                active_modmap = modmap
                 break
-    if active_mod_map and key in active_mod_map:
-        key = active_mod_map[key]
+    if active_modmap and key in active_modmap:
+        key = active_modmap[key]
 
     return key
 
@@ -248,7 +249,7 @@ def on_event(event, device_name, quiet):
     #     return
 
     action = Action(event.value)
-    key = apply_modmap(Key(event.code))
+    key = apply_modmap(Key(event.code), device_name)
 
     wm_class = None
     active_multipurpose_map = _multipurpose_map

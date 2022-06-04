@@ -39,7 +39,7 @@ def test_weird_abc_to_ctrl_alt_del():
         Key.A: [Key.A, Key.LEFT_CTRL],
         Key.B: [Key.B, Key.LEFT_ALT],
     })
-    modmap(
+    modmap("default",
         {Key.C : Key.DELETE}
     )
 
