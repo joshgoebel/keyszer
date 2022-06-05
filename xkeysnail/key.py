@@ -725,6 +725,8 @@ class Key(IntEnum):
     SND_MAX       = 0x07
     SND_CNT       = (SND_MAX+1)
 
+    def __str__(self):
+        return self.name
 
 @unique
 class Action(IntEnum):

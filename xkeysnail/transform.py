@@ -169,7 +169,7 @@ _last_key_time = time()
 
 
 def multipurpose_handler(multipurpose_map, key, action, context):
-    debug("multipurple_handler", key, action)
+    # debug("multipurple_handler", key, action)
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
@@ -222,6 +222,7 @@ def apply_modmap(key, context):
                 active_modmap = modmap
                 break
     if active_modmap and key in active_modmap:
+        debug(f"modmap engaged: {key} => {active_modmap[key]} [{active_modmap.name}]")
         key = active_modmap[key]
 
     return key
@@ -263,6 +264,9 @@ def on_event(event, device_name, quiet):
     context = KeyContext(device_name)
     action = Action(event.value)
     key = Key(event.code)
+
+    debug(f"in {key} ({action})", ctx = "II")
+
     key = apply_modmap(key, context)
     # multipurpose modmaps fire their own on_key and do their own
     # pressed key updating, so if a multi-modmap decides to apply
