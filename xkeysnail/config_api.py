@@ -2,6 +2,7 @@ import itertools
 
 from .key import Action, Combo, Key, Modifier
 from .lib.modmap import Modmap
+from .lib.keymap import Keymap
 from sys import exit
 from .logger import *
 
@@ -169,6 +170,33 @@ def modmap(name, mappings):
     return mm
 
 
+def old_style_condition_to_fn(condition):
+    condition_fn = None
+    def re_search(re):
+        def fn(ctx):
+            return re.search(ctx.wm_class)
+        return fn
+
+    def wm_class(wm_class_fn):
+        def fn(ctx):
+            return wm_class_fn(ctx.wm_class)
+        return fn
+    
+    def wm_class_and_device(cond_fn):
+        def fn(ctx):
+            return cond_fn(ctx.wm_class, ctx.device_name)
+        return fn
+
+    if hasattr(condition, 'search'):
+        condition_fn = re_search(condition)
+    elif callable(condition):
+        if len(signature(condition).parameters) == 1:
+            condition_fn = wm_class(condition)
+        elif len(signature(condition).parameters) == 2:
+            condition_fn = wm_class_and_device(condition)
+    
+    return condition_fn
+
 def define_conditional_modmap(condition, mappings):
     """Defines conditional modmap (keycode translation)
 
@@ -178,32 +206,9 @@ def define_conditional_modmap(condition, mappings):
         Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
-    condition_fn = None
-    def re_search(re):
-        def fn(ctx):
-            print("running re_search", ctx)
-            return re.search(ctx["wm_class"])
-        return fn
-
-    def wm_class(wm_class_fn):
-        def fn(ctx):
-            return wm_class_fn(ctx["wm_class"])
-        return fn
-    
-    def wm_class_and_device(cond_fn):
-        def fn(ctx):
-            return cond_fn(ctx["wm_class"], ctx["device_name"])
-        return fn
-
-
+  
+    condition_fn = old_style_condition_to_fn(condition)
     name = "define_conditional_modmap (old API)"
-    if hasattr(condition, 'search'):
-        condition_fn = re_search(condition)
-    elif callable(condition):
-        if len(signature(condition).parameters) == 1:
-            condition_fn = wm_class(condition)
-        elif len(signature(condition).parameters) == 2:
-            condition_fn = wm_class_and_device(condition)
 
     if not callable(condition_fn):
         raise ValueError('condition must be a function or compiled regexp')
@@ -251,8 +256,7 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
 
 # ============================================================ #
 
-
-def define_keymap(condition, mappings, name="Anonymous keymap"):
+def keymap(name, mappings):
     global _toplevel_keymaps
 
     # Expand not L/R-specified modifiers
@@ -272,43 +276,48 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
     #      K("LC-d"): Key.C,
     #      K("RC-d"): Key.C}}
     def expand(target):
-        if isinstance(target, dict):
-            expanded_mappings = {}
-            keys_for_deletion = []
-            for k, v in target.items():
-                # Expand children
-                expand(v)
+        if not isinstance(target, dict):
+            return None
+        expanded_mappings = {}
+        keys_for_deletion = []
+        for k, v in target.items():
+            # Expand children
+            expand(v)
 
-                if isinstance(k, Combo):
-                    expanded_modifiers = []
-                    for modifier in k.modifiers:
-                        if not modifier.is_specified():
-                            expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
-                        else:
-                            expanded_modifiers.append([modifier])
+            if isinstance(k, Combo):
+                expanded_modifiers = []
+                for modifier in k.modifiers:
+                    if not modifier.is_specified():
+                        expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
+                    else:
+                        expanded_modifiers.append([modifier])
 
-                    # Create a Cartesian product of expanded modifiers
-                    expanded_modifier_lists = itertools.product(*expanded_modifiers)
-                    # Create expanded mappings
-                    for modifiers in expanded_modifier_lists:
-                        expanded_mappings[Combo(set(modifiers), k.key)] = v
-                    keys_for_deletion.append(k)
+                # Create a Cartesian product of expanded modifiers
+                expanded_modifier_lists = itertools.product(*expanded_modifiers)
+                # Create expanded mappings
+                for modifiers in expanded_modifier_lists:
+                    expanded_mappings[Combo(set(modifiers), k.key)] = v
+                keys_for_deletion.append(k)
 
-            # Delete original mappings whose key was expanded into expanded_mappings
-            for key in keys_for_deletion:
-                del target[key]
-            # Merge expanded mappings into original mappings
-            target.update(expanded_mappings)
+        # Delete original mappings whose key was expanded into expanded_mappings
+        for key in keys_for_deletion:
+            del target[key]
+        # Merge expanded mappings into original mappings
+        target.update(expanded_mappings)
 
     expand(mappings)
 
-    _toplevel_keymaps.append((condition, mappings, name))
-    return mappings
+    km = Keymap(name, mappings)
+    _toplevel_keymaps.append(km)
+    return km
+
+def define_keymap(condition, mappings, name="Anonymous keymap"):
+    condition_fn = old_style_condition_to_fn(condition)
+    return conditional(condition_fn, keymap(name, mappings))
 
 # aliases
 
 timeout = define_timeout
-keymap = define_keymap
 conditional_modmap = define_conditional_modmap
 multipurpose_modmap = define_multipurpose_modmap
 conditional_multipurpose_modmap = define_conditional_multipurpose_modmap

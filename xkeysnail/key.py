@@ -859,6 +859,9 @@ class Combo:
     def __str__(self):
         return "-".join([str(mod) for mod in self.modifiers] + [self.key.name])
 
+    def __repr__(self):
+        return self.__str__()
+
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
             modifiers = {modifiers}

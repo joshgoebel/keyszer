@@ -32,13 +32,39 @@ def setup_function(module):
     reset_transform()
 
 @pytest.mark.looptime(False)
-async def test_multiple_keys_at_once():
+async def test_OLD_API_multiple_keys_at_once():
 
     window("Firefox")
-    keymap(re.compile("Firefox"),{
+    define_keymap(re.compile("Firefox"),{
         K("C-M-j"): K("C-TAB"),
         K("C-M-k"): K("C-Shift-TAB"),
     })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.LEFT_ALT)
+    press(Key.J)    
+    release(Key.J)
+    release(Key.LEFT_ALT)
+    release(Key.LEFT_CTRL)
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_CTRL),
+    ]
+
+@pytest.mark.looptime(False)
+async def test_multiple_keys_at_once():
+
+    window("Firefox")
+    conditional(lambda ctx: re.compile("Firefox").search(ctx.wm_class),
+        keymap("Firefox",{
+            K("C-M-j"): K("C-TAB"),
+            K("C-M-k"): K("C-Shift-TAB"),
+        })
+    )
 
     boot_config()
 
@@ -60,10 +86,12 @@ async def test_multiple_combos_without_releasing_all_nonsticky():
     # NOTE: if we were sticky then techcanily the C on the output
     # should probalby be held without release
     window("Firefox")
-    keymap(re.compile("Firefox"),{
-        K("C-M-j"): K("C-TAB"),
-        K("C-M-k"): K("C-Shift-TAB"),
-    })
+    conditional(lambda ctx: re.compile("Firefox").search(ctx.wm_class),
+        keymap("Firefox",{
+            K("C-M-j"): K("C-TAB"),
+            K("C-M-k"): K("C-Shift-TAB"),
+        })
+    )
 
     boot_config()
 

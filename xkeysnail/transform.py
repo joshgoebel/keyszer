@@ -9,6 +9,7 @@ import asyncio
 
 import evdev
 
+from .lib.key_context import KeyContext
 from .key import Action, Combo, Key, Modifier
 from .logger import *
 from .output import Output 
@@ -169,14 +170,14 @@ _last_key = None
 _last_key_time = time()
 
 
-def multipurpose_handler(multipurpose_map, key, action):
+def multipurpose_handler(multipurpose_map, key, action, context):
     debug("multipurple_handler", key, action)
     def maybe_press_modifiers(multipurpose_map):
         """Search the multipurpose map for keys that are pressed. If found and
         we have not yet sent it's modifier translation we do so."""
         for k, [ _, mod_key, state ] in multipurpose_map.items():
             if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
-                on_key(mod_key, Action.PRESS)
+                on_key(mod_key, Action.PRESS, context)
 
     # we need to register the last key presses so we know if a multipurpose key
     # was a single press and release
@@ -194,11 +195,11 @@ def multipurpose_handler(multipurpose_map, key, action):
             # it is a single press and release
             if key_was_last_press and _last_key_time + _timeout > time():
                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
-                on_key(single_key, Action.PRESS)
-                on_key(single_key, Action.RELEASE)
+                on_key(single_key, Action.PRESS, context)
+                on_key(single_key, Action.RELEASE, context)
             # it is the modifier in a combo
             elif mod_is_down:
-                on_key(mod_key, Action.RELEASE)
+                on_key(mod_key, Action.RELEASE, context)
         elif action == Action.PRESS and not key_is_down:
             _last_key_time = time()
     # if key is not a multipurpose or mod key we want eventual modifiers down
@@ -211,19 +212,15 @@ def multipurpose_handler(multipurpose_map, key, action):
 
 
 # translate keycode (like xmodmap)
-def apply_modmap(key, device_name):
+def apply_modmap(key, context):
     # first modmap is always the default, unconditional
     active_modmap = _modmaps[0] 
-    print("active", active_modmap)
+    #print("active", active_modmap)
     conditional_modmaps = _modmaps[1:]
-    print("conditionals", conditional_modmaps)
+    #print("conditionals", conditional_modmaps)
     if conditional_modmaps:
-        ctx = {
-            "wm_class": get_active_window_wm_class(),
-            "device_name": device_name
-        }
         for modmap in conditional_modmaps:
-            if modmap.conditional(ctx):
+            if modmap.conditional(context):
                 active_modmap = modmap
                 break
     if active_modmap and key in active_modmap:
@@ -248,27 +245,26 @@ def on_event(event, device_name, quiet):
     #     _output.send_event(event)
     #     return
 
+    context = KeyContext(device_name)
     action = Action(event.value)
-    key = apply_modmap(Key(event.code), device_name)
+    key = apply_modmap(Key(event.code), context)
 
-    wm_class = None
     active_multipurpose_map = _multipurpose_map
     if _conditional_multipurpose_map:
-        wm_class = get_active_window_wm_class()
         for condition, mod_map in _conditional_multipurpose_map:
-            params = [wm_class]
+            params = [context.wm_class]
             if len(signature(condition).parameters) == 2:
-                params = [wm_class, device_name]
+                params = [context.wm_class, context.device_name]
 
             if condition(*params):
                 active_multipurpose_map = mod_map
                 break
     if active_multipurpose_map:
-        multipurpose_handler(active_multipurpose_map, key, action)
+        multipurpose_handler(active_multipurpose_map, key, action, context)
         if key in active_multipurpose_map:
             return
 
-    on_key(key, action, wm_class=wm_class, quiet=quiet)
+    on_key(key, action, context, quiet=quiet)
     update_pressed_keys(key, action)
 
 
@@ -278,7 +274,7 @@ def is_sticky(key):
             return True
     return False
 
-def on_key(key, action, wm_class=None, quiet=False):
+def on_key(key, action, context, quiet=False):
     # debug("on_key", key, action)
     if key in Modifier.get_all_keys():
         if none_pressed() and action.is_pressed():
@@ -304,10 +300,10 @@ def on_key(key, action, wm_class=None, quiet=False):
         if _output.is_pressed(key):
             _output.send_key_action(key, action)
     else:
-        transform_key(key, action, wm_class=wm_class, quiet=quiet)
+        transform_key(key, action, context, quiet=quiet)
 
 
-def transform_key(key, action, wm_class=None, quiet=False):
+def transform_key(key, action, context, quiet=False):
     global _mode_maps
     # global _toplevel_keymaps
     global _spent_modifiers_keys
@@ -325,17 +321,13 @@ def transform_key(key, action, wm_class=None, quiet=False):
         # Decide keymap(s)
         is_top_level = True
         _mode_maps = []
-        if wm_class is None:
-            wm_class = get_active_window_wm_class()
         keymap_names = []
-        for condition, mappings, name in _toplevel_keymaps:
-            if (callable(condition) and condition(wm_class)) \
-               or (hasattr(condition, "search") and condition.search(wm_class)) \
-               or condition is None:
-                _mode_maps.append(mappings)
-                keymap_names.append(name)
+        for keymap in _toplevel_keymaps:
+            if keymap.conditional(context):
+                _mode_maps.append(keymap.mappings)
+                keymap_names.append(keymap.name)
         if not quiet:
-            debug("WM_CLASS '{}' | active keymaps = [{}]".format(wm_class, ", ".join(keymap_names)))
+            debug("WM_CLASS '{}' | DEVICE '{}' | active keymaps = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
 
     if not quiet:
         debug("COMBO:", combo)
