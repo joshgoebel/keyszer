@@ -2,7 +2,10 @@
 
 from evdev import ecodes
 from evdev.uinput import UInput
-from .key import Action, Combo, Modifier
+from .models.action import Action 
+from .models.combo import Combo 
+from .models.modifier import Modifier
+
 from .logger import debug
 
 

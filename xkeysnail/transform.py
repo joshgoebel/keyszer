@@ -10,7 +10,10 @@ import asyncio
 import evdev
 
 from .lib.key_context import KeyContext
-from .key import Action, Combo, Key, Modifier
+from .key import Key 
+from .models.action import Action
+from .models.combo import Combo
+from .models.modifier import Modifier
 from .logger import *
 from .output import Output 
 from .xorg import get_active_window_wm_class

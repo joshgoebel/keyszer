@@ -1,6 +1,9 @@
 import itertools
 
-from .key import Action, Combo, Key, Modifier
+from .key import Key 
+from .models.action import Action
+from .models.combo import Combo
+from .models.modifier import Modifier
 from .lib.modmap import Modmap, MultiModmap
 from .lib.keymap import Keymap
 from sys import exit

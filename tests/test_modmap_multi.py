@@ -5,7 +5,8 @@ import sys
 sys.modules["xkeysnail.xorg"] = __import__('lib.xorg_mock',
     None, None, ["get_active_window_wm_class"])
 from xkeysnail.output import setup_uinput
-from xkeysnail.key import Key, Action
+from xkeysnail.key import Key
+from xkeysnail.models.action import Action
 from xkeysnail.config_api import *
 from xkeysnail.transform import suspend_keys, \
     resume_keys, \
