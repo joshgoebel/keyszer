@@ -24,6 +24,24 @@ Maybe.  _I'd call it late alpha or early beta._  I've been code refactoring (and
 That is the goal.  I haves plans to address the one major reason that kinto is using a fork with "sticky" modifier keys (for some combos)... at that point kinto should work just fine with `keyszer` - in fact even better since nested keymaps will start working again.
 
 
+**What features/fixes does it already have or have plans for in the near future?**
+
+- [x] Slightly simpler configuration API
+- [x] more debugging logging
+- [x] initial tests framework
+- [ ] more tests, tests, tests
+- [x] better conditional support (keymaps can now be conditional based on device name)
+- [ ] #10 No more running as root `root`
+- [x] #9 `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
+- [ ] #7 Support for `Hyper` as a modifier
+- [ ] #2 Support for `WM_NAME` conditionals
+- [ ] #11 Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
+
+
+**Can I help/contribute?**
+
+Sure.  Just open an issue to discuss how you'd like to get involved or respond on one of the existing issues. Or feel free to open new issues for feature requests.
+
 
 ---
 
