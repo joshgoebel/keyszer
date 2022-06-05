@@ -1,12 +1,33 @@
+# keyszer - a smart key remapper for Linux/X11
 
-This project has been forked from [xkeysnail](https://github.com/mooz/xkeysnail) but doesn't yet have a new name or have everything fully renamed - **or fully working**.  
+![work in progress](https://badgen.net/badge/status/alpha?color=red&scale=2)
+[![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink&scale=2)](https://discord.gg/nX6qSC8mer)
 
 
-![work in progress](https://badgen.net/badge/work%20in%20progress/yes?color=red&scale=2.5)
+**So this is a fork of xkeysnail?**
+
+Yes, this is a fork/reboot of the popular [xkeysnail](https://github.com/mooz/xkeysnail) project.  The xkeysnail project seems largely unmaintained since it's last release in Fall 2020;  by unmaintained I mean that the author no longer seems involved (no commits, no releases, no comms on issues, no response to emails, no GitHub activity, etc).
+
+**Why is the xkeysnail name still in so many places?**
+
+I've reached out to the author of `xkeysnail` to see if I might simply take over the maintainership... I'm not expecting a response (at this point) but I haven't entirely given up yet.  Becoming maintainer of the existing project would simplify several things, responding to older issues, avoiding the need to rename, etc.
+
+Sometime next week I'll likely change the name completely (and then release a beta on PyPi) if I haven't heard anything more.
+
+**Is it ready to use/test?**
+
+Maybe.  _I'd call it late alpha or early beta._  I've been code refactoring (and adding much needed tests) more than directly using, but that is now changing.  If you're comfortable running from the source and sending detailed bug reports I'd love to have your help.  If you're comfortable hacking on the source, even better!
+
+
+**Is this compatible with [Kinto.sh](https://github.com/rbreaves/kinto)?**
+
+That is the goal.  I haves plans to address the one major reason that kinto is using a fork with "sticky" modifier keys (for some combos)... at that point kinto should work just fine with `keyszer` - in fact even better since nested keymaps will start working again.
+
+
 
 ---
 
-# keyszer (placeholder name)
+# keyszer
 
 <!-- [![latest version](https://badgen.net/pypi/v/xkeysnail?label=latest)]() -->
 [![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/xkeysnail/releases) 
