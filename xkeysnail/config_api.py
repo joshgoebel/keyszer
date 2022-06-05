@@ -1,7 +1,7 @@
 import itertools
 
 from .key import Action, Combo, Key, Modifier
-from .lib.modmap import Modmap
+from .lib.modmap import Modmap, MultiModmap
 from .lib.keymap import Keymap
 from sys import exit
 from .logger import *
@@ -18,8 +18,7 @@ _modmaps = []
 
 # multipurpose keys
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
-_multipurpose_map = None
-_conditional_multipurpose_map = []
+_multi_modmaps = []
 
 # multipurpose timeout
 _timeout = 1
@@ -31,20 +30,19 @@ _toplevel_keymaps = []
 # needed for testing teardowns
 def reset_configuration():
     global _modmaps
-    global _multipurpose_map
-    global _conditional_multipurpose_map
+    global _multi_modmaps
     global _toplevel_keymaps
     global _timeout
 
     _modmaps = []
-    _multipurpose_map = None
-    _conditional_multipurpose_map = []
+    _multi_modmaps = []
     _toplevel_keymaps = []
     _timeout = 1
 
 # how transform hooks into the configuration
 def get_configuration():
     global _modmaps
+    global _multi_modmaps
 
     # setup modmaps
     conditional = [mm for mm in _modmaps if mm.conditional]
@@ -52,13 +50,19 @@ def get_configuration():
     if len(default) > 1:
         error(f"You may only have a single default (non-conditional modmap), you have {len(default)} currently.")
         exit(0)
-
     _modmaps = default + conditional
+
+    # setup multi-modmaps
+    conditional = [mm for mm in _multi_modmaps if mm.conditional]
+    default = [mm for mm in _multi_modmaps if not mm.conditional] or [MultiModmap("default", {})]
+    if len(default) > 1:
+        error(f"You may only have a single default (non-conditional multi-modmap), you have {len(default)} currently.")
+        exit(0)
+    _multi_modmaps = default + conditional
 
     return (
         _modmaps,
-        _multipurpose_map,
-        _conditional_multipurpose_map,
+        _multi_modmaps,
         _toplevel_keymaps,
         _timeout
     )
@@ -197,6 +201,7 @@ def old_style_condition_to_fn(condition):
     
     return condition_fn
 
+
 def define_conditional_modmap(condition, mappings):
     """Defines conditional modmap (keycode translation)
 
@@ -217,7 +222,15 @@ def define_conditional_modmap(condition, mappings):
     # _conditional_mod_map.append((condition, mod_remappings))
 
 
-def define_multipurpose_modmap(multipurpose_remappings):
+def multipurpose_modmap(name, mappings):
+    for key, value in mappings.items():
+        # TODO: why, we don't use this anywhere???
+        value.append(Action.RELEASE)
+    mmm = MultiModmap(name, mappings)
+    _multi_modmaps.append(mmm)
+    return mmm
+
+def define_multipurpose_modmap(mappings):
     """Defines multipurpose modmap (multi-key translations)
 
     Give a key two different meanings. One when pressed and released alone and
@@ -230,13 +243,10 @@ def define_multipurpose_modmap(multipurpose_remappings):
         {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
     })
     """
-    global _multipurpose_map
-    for key, value in multipurpose_remappings.items():
-        value.append(Action.RELEASE)
-    _multipurpose_map = multipurpose_remappings
+    return multipurpose_modmap("default", mappings)
 
 
-def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
+def define_conditional_multipurpose_modmap(condition, mappings):
     """Defines conditional multipurpose modmap (multi-key translation)
 
     Example:
@@ -245,13 +255,12 @@ def define_conditional_multipurpose_modmap(condition, multipurpose_remappings):
         {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
     })
     """
-    if hasattr(condition, 'search'):
-        condition = condition.search
-    if not callable(condition):
+    condition_fn = old_style_condition_to_fn(condition)
+    if not callable(condition_fn):
         raise ValueError('condition must be a function or compiled regexp')
-    for key, value in multipurpose_remappings.items():
-        value.append(Action.RELEASE)
-    _conditional_multipurpose_map.append((condition, multipurpose_remappings))
+ 
+    name = "anonymous multipurpose map (old API)"
+    return conditional(condition_fn, multipurpose_modmap(name, mappings))
 
 
 # ============================================================ #
@@ -319,6 +328,6 @@ def define_keymap(condition, mappings, name="Anonymous keymap"):
 
 timeout = define_timeout
 conditional_modmap = define_conditional_modmap
-multipurpose_modmap = define_multipurpose_modmap
-conditional_multipurpose_modmap = define_conditional_multipurpose_modmap
+# multipurpose_modmap = define_multipurpose_modmap
+# conditional_multipurpose_modmap = define_conditional_multipurpose_modmap
     

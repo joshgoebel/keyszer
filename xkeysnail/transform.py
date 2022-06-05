@@ -18,12 +18,10 @@ from .config_api import get_configuration,escape_next_key, pass_through_key, ign
 
 def boot_config():
     global _modmaps
-    global _multipurpose_map
-    global _conditional_multipurpose_map
+    global _multi_modmaps
     global _toplevel_keymaps
     global _timeout
-    _modmaps, _multipurpose_map, \
-        _conditional_multipurpose_map, _toplevel_keymaps, _timeout = \
+    _modmaps, _multi_modmaps, _toplevel_keymaps, _timeout = \
             get_configuration()
 
 
@@ -228,6 +226,23 @@ def apply_modmap(key, context):
 
     return key
 
+
+def apply_multi_modmap(key, action, context):
+    active_multi_modmap = _multi_modmaps[0]
+    conditional_multi_modmaps = _multi_modmaps[1:]
+    if conditional_multi_modmaps:
+        for modmap in conditional_multi_modmaps:
+            if modmap.conditional(context):
+                active_multi_modmap = modmap
+                break
+    if active_multi_modmap:
+        multipurpose_handler(active_multi_modmap, key, action, context)
+        if key in active_multi_modmap:
+            return True
+
+    return False
+
+
 JUST_KEYS = []
 JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
 
@@ -247,22 +262,13 @@ def on_event(event, device_name, quiet):
 
     context = KeyContext(device_name)
     action = Action(event.value)
-    key = apply_modmap(Key(event.code), context)
-
-    active_multipurpose_map = _multipurpose_map
-    if _conditional_multipurpose_map:
-        for condition, mod_map in _conditional_multipurpose_map:
-            params = [context.wm_class]
-            if len(signature(condition).parameters) == 2:
-                params = [context.wm_class, context.device_name]
-
-            if condition(*params):
-                active_multipurpose_map = mod_map
-                break
-    if active_multipurpose_map:
-        multipurpose_handler(active_multipurpose_map, key, action, context)
-        if key in active_multipurpose_map:
-            return
+    key = Key(event.code)
+    key = apply_modmap(key, context)
+    # multipurpose modmaps fire their own on_key and do their own
+    # pressed key updating, so if a multi-modmap decides to apply
+    # then we stop here and do not proceed with normal processing
+    if apply_multi_modmap(key, action, context):
+        return
 
     on_key(key, action, context, quiet=quiet)
     update_pressed_keys(key, action)
