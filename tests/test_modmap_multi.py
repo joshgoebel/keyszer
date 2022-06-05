@@ -35,7 +35,6 @@ def setup_function(module):
 
 def test_weird_abc_to_ctrl_alt_del():
     multipurpose_modmap({
-        # Enter is enter when pressed and released. Control when held down.
         Key.A: [Key.A, Key.LEFT_CTRL],
         Key.B: [Key.B, Key.LEFT_ALT],
     })
