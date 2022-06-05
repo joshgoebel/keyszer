@@ -31,11 +31,11 @@ That is the goal.  I haves plans to address the one major reason that kinto is u
 - [x] initial tests framework
 - [ ] more tests, tests, tests
 - [x] better conditional support (keymaps can now be conditional based on device name)
-- [ ] #10 No more running as root `root`
-- [x] #9 `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
-- [ ] #7 Support for `Hyper` as a modifier
-- [ ] #2 Support for `WM_NAME` conditionals
-- [ ] #11 Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
+- [ ] [#10](https://github.com/joshgoebel/xkeysnail/issues/10) No more running as root `root`
+- [x] [#9](https://github.com/joshgoebel/xkeysnail/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
+- [ ] [#7](https://github.com/joshgoebel/xkeysnail/issues/7) Support for `Hyper` as a modifier
+- [ ] [#2](https://github.com/joshgoebel/xkeysnail/issues/2) Support for `WM_NAME` conditionals
+- [ ] [#11](https://github.com/joshgoebel/xkeysnail/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
 
 
 **Can I help/contribute?**
