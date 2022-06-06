@@ -23,6 +23,10 @@ class Combo:
 
         self.ordered_mods = ordered_mods or list(modifiers)
         self.modifiers = modifiers
+        if len(self.modifiers) != len(self.ordered_mods):
+            print('mismatch in', self)
+            print(self.modifiers)
+            print(self.ordered_mods)
         self.key = key
 
     def __eq__(self, other):

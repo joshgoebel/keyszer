@@ -391,6 +391,17 @@ def handle_commands(commands, key, action, input_combo):
     if not isinstance(commands, list):
         commands = [commands]
 
+    # sticky only applies to 1 => 1 mappings
+    if len(commands)==1 and input_combo:
+        if isinstance(commands[0], Combo):
+            _sticky = simple_sticky(input_combo, command)
+            for k in _sticky.values():
+                if not _output.is_mod_pressed(k):
+                    _output.send_key_action(k, Action.PRESS)
+
+    if (suspended()):
+        resuspend_keys()
+
     # Execute commands
     for command in commands:
         if callable(command):
@@ -401,12 +412,6 @@ def handle_commands(commands, key, action, input_combo):
         if isinstance(command, Key):
             _output.send_key(command)
         elif isinstance(command, Combo):
-            _sticky = simple_sticky(input_combo, command)
-            if (suspended()):
-                resuspend_keys()
-            for k in _sticky.values():
-                if not _output.is_mod_pressed(k):
-                    _output.send_key_action(k, Action.PRESS)
             _output.send_combo(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
