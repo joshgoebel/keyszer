@@ -394,6 +394,7 @@ def handle_commands(commands, key, action, input_combo):
     # sticky only applies to 1 => 1 mappings
     if len(commands)==1 and input_combo:
         if isinstance(commands[0], Combo):
+            command = commands[0]
             _sticky = simple_sticky(input_combo, command)
             for k in _sticky.values():
                 if not _output.is_mod_pressed(k):
