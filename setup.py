@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 exec(open("xkeysnail/info.py").read())
 
 dependencies = [
@@ -17,7 +17,7 @@ setup(name             = "xkeysnail",
       url              = "https://github.com/jgoebel/xkeysnail",
       description      = __description__,
       long_description = __doc__,
-      packages         = ["xkeysnail"],
+      packages         = find_packages(),
       scripts          = ["bin/xkeysnail"],
       license          = "GPL",
       install_requires = dependencies,
