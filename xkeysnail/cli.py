@@ -30,8 +30,6 @@ def has_access_to_uinput():
 
 
 def main():
-    print(f"{__name__} v{__version__}")
-
     # Parse args
     import argparse
     from appdirs import user_config_dir
@@ -50,10 +48,25 @@ def main():
     parser.add_argument('--list-devices', dest='list_devices', action='store_true')
     parser.add_argument('--version', dest='show_version', action='store_true',
                         help='show version')
+    parser.add_argument('--very-bad-idea', dest='run_as_root', action='store_true',
+                        help="(deprecated: run as root, don't do this)")
     args = parser.parse_args()
 
     if args.show_version:
+        print(f"{__name__} v{__version__}")
         exit(0)
+
+    print(f"{__name__} v{__version__}")
+
+    import os
+    if os.getuid()==0:
+        if not args.run_as_root:
+            log("ROOT: All your base are belong to us! ;-)")
+            error("Please don't run me as root.  It's a --very-bad-idea, seriously.")
+            info("Running as root is deprecated, prefer running as a semi-priveleged user.")
+            exit(0)
+        else:
+            log("ROOT: Yes, I am.  --very-bad-idea received and acknowledged.")
 
     if args.list_devices:
         from .input import get_devices_list, print_device_list
@@ -62,17 +75,19 @@ def main():
 
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
-        print("""The '/dev/uinput' device does not exist.
+        error("""The '/dev/uinput' device does not exist.
 Please check kernel configuration.""")
         import sys
         sys.exit(1)
 
     # Make sure that user have root privilege
     if not has_access_to_uinput():
-        print("""Failed to open `uinput` in write mode.
+        error("""Failed to open `uinput` in write mode.
 Please check access permissions for /dev/uinput.""")
         import sys
         sys.exit(1)
+
+    
 
     # Load configuration file
     eval_config(args.config)

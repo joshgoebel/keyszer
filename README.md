@@ -31,9 +31,9 @@ That is the goal.  I haves plans to address the one major reason that kinto is u
 - [x] initial tests framework
 - [ ] more tests, tests, tests
 - [x] better conditional support (keymaps can now be conditional based on device name)
-- [ ] [#10](https://github.com/joshgoebel/xkeysnail/issues/10) No more running as root `root`
+- [x] [#10](https://github.com/joshgoebel/xkeysnail/issues/10) No more running as root `root`
 - [x] [#9](https://github.com/joshgoebel/xkeysnail/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
-- [ ] [#7](https://github.com/joshgoebel/xkeysnail/issues/7) Support for `Hyper` as a modifier
+- [x] [#7](https://github.com/joshgoebel/xkeysnail/issues/7) Support for `Hyper` as a modifier
 - [ ] [#2](https://github.com/joshgoebel/xkeysnail/issues/2) Support for `WM_NAME` conditionals
 - [ ] [#11](https://github.com/joshgoebel/xkeysnail/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
 
@@ -45,7 +45,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 
 ---
 
-# keyszer
+# keyszer - a smart key remapper for Linux/X11
 
 <!-- [![latest version](https://badgen.net/pypi/v/xkeysnail?label=latest)]() -->
 [![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/xkeysnail/releases) 
@@ -78,8 +78,6 @@ This project was originally forked from [xkeysnail](https://github.com/mooz/xkey
 
 
 ## Installation
-
-**These instructions are not correct yet.**
 
 Requires **Python 3**.
 
@@ -124,64 +122,58 @@ Requires **Python 3**.
     cd xkeysnail
     sudo pip3 install --upgrade .
 
-## Requirements
+### For testing/hacking/contributing
+
+    git clone https://github.com/joshgoebel/xkeysnail.git
+    cd xkeysnail
+    python -m venv .venv
+    source .venv/bin/activate
+    pip3 install -e .
+    ./bin/xkeysnail -c config_file
+
+## Setup Requirements
 
 We will need read/write access to:
 
-- `/dev/input/event*` - to capture input from actual hardware keyboards
-- `/dev/uinput` - to present ourselves as a pretend keyboard to the kernel
+- `/dev/input/event*` - to capture input from actual hardware input devices
+- `/dev/uinput` - to present a pretend keyboard to the kernel
 
 ### Running as a user in the `input` group (most secure)
 
-Some distros already have an input group, or you can create one.  You'll just need `udev` rules to make sure that the input devices are all given read/write access to that group.
+Some distros already have an input group, or you can create one.  You'll just need a few `udev` rules to make sure that the input devices are all given read/write access to that group.
 
-`/etc/udev/rules.d/90-input.rules`:
+`/etc/udev/rules.d/90-custom-input.rules`:
 
-```
-SUBSYSTEM=="input", GROUP="input"
-KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="input"
-```
+    SUBSYSTEM=="input", GROUP="input"
+    KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="input"
 
-Now create a new user that is a member of that group.  We'll name them `xkeysnail`.
+...and a new user that is a member of that group.
 
-```
-sudo useradd xkeysnail -G input
-```
+
+    sudo useradd keymapper -G input
+
 
 #### systemd
 
-Then lets have a systemd service to run:
+For a sample systemd service file please see [xkeysnail.service](https://github.com/joshgoebel/xkeysnail/blob/main/xkeysnail.service).
 
-```
-[Unit]
-Description=xkeysnail
 
-[Service]
-Type=simple
-KillMode=process
-ExecStart=xkeysnail --quiet --watch
-Restart=on-failure
-RestartSec=3
-Environment=DISPLAY=:0
-User=xkeysnail
-Group=input
+### Running as Your Logged in User
 
-[Install]
-WantedBy=graphical.target
-```
+#### Caveats / Security Concerns
 
-### Running under own user account 
+- any running programs can potentially log all your keystrokes (including your passwords!) simply by monitoring the input devices
 
 #### udev rules:
 
-`/etc/udev/rules.d/90-input.rules`:
+`/etc/udev/rules.d/90-custom-input.rules`:
 
 ```
 SUBSYSTEM=="input", GROUP="input"
 KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
 ```
 
-#### systemd
+#### With Systemd
 
 Would it make sense to use systemd here also?
 
@@ -191,7 +183,7 @@ Would it make sense to use systemd here also?
 HOW?
 
 
-#### with `.xinitrc`
+#### With `.xinitrc`
 
 If you're using a minimal setup you can simply add us to your `.xinitrc`. For example to start us up and then start Awesome WM.
 
@@ -203,62 +195,92 @@ exec awesome
 
 ### Running as root (most insecure)
 
-_Don't do this, it's bad, and wholly unnecessary._
+#### Caveats / Security Concerns
+
+_Don't do this, it's bad, dangerous, and wholly unnecessary._
+
 
 ## Usage
 
-    xkeysnail
+    xkeysnail 
 
-To specify the location of a config file (otherwise the default  `~/.config/xkeysnail/config.py` will be used):
 
-    xkeysnail -c config.py
+A successful startup will look a bit like:
 
-If you want to limit to only specify keyboard devices, use `--devices`:
+    keyszer v0.4.99
+    (--) CONFIG: /home/jgoebel/.config/xkeysnail/config.py
+    (+K) Grabbing Apple, Inc Apple Keyboard (/dev/input/event3)
+    (--) Ready to process input.
+
+**Limiting Devices**
+
+Limit remapping to specify devices with `--devices`:
 
     xkeysnail --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
-If you have hot-plugging keyboards, use `--watch` option.
+The path or full device name can be used.
 
-If you want to suppress output of key events, use `-q` / `--quiet` option especially when running as a daemon.
+**Other Options:**
+
+- `-c`, `--config` - specify the location of the configuration file to load
+- `-w`, `--watch` - watch for new keyboard devices that may be hot-plugged 
+- `-q`, `--quiet` - suppress output of key events, especially when running as a daemon.
+- `--list-devices` - list all available input devices
 
 
 ## Configuration
 
-By default we will look for the configuration in `~/.config/xkeysnail/config.py` but you can override this location with the `-c` switch.  The configuration file is a Python script that defines modmaps, keymaps, and other configuration details. 
+By default we will look for the configuration in `~/.config/xkeysnail/config.py` but you can override this location with the `-c`/`--config` switch.  The configuration file is a Python script that defines modmaps, keymaps, and other configuration details. 
+For an example configuration please see [`example/config.py`](https://github.com/joshgoebel/xkeysnail/blob/main/example/config.py).
+
+
+
 
 The configuration API:
 
-- `timeout`
-- `keymap`
-- `modmap`
-- `conditional_modmap`
-- `multipurpose_modmap`
-- `conditional_multipurpose_modmap`
+- `timeout(s)`
+- `keymap(name, map)`
+- `modmap(name, map)`
+- `multipurpose_modmap(name, map)`
+- `conditional(condition_fn, map)` - used to wrap maps and only apply them conditionally
 
-### `modmap`
+### `timeout(s)`
+
+Sets the number of seconds before multi-purpose modmaps timeout... ie, how long you have to press and release a key before it's instead assuming it's part of a combo.
+
+### `modmap(name, mappings)`
+
+Entirely maps one key to a different key, in all contexts.  Note that the default modmap will be overruled by any conditional modmaps that apply.
+
+```py
+modmap("default", {
+    # mapping caps lock to left control
+    Key.CAPSLOCK: Key.LEFT_CTRL
+})
+```
+
+### `multipurpose_modmap(name, mappings)`
+
+Used to map a key with multiple-purposes, both for regular usage and use as a modifier (when held down).
+
+```py
+multipurpose_modmap("default",
+    # Enter is enter when pressed and released. Control when held down.
+    {Key.ENTER: [Key.ENTER, Key.RIGHT_CTRL]}
+)
+```
 
 
+### `keymap(name, mappings)`
 
-### `conditional_modmap`
+Defines a keymap consisting of `mappings` of the input combos mapped to output equivalents.
 
-### `multipurpose_modmap`
-
-### `conditional_multipurpose_modmap`
-
-### `keymap(condition, mappings, name)`
-
-Defines a keymap consists of `mappings`, which is activated when the `condition`
-is satisfied.
-
-Argument `condition` specifies the condition of activating the `mappings` on an
-application and takes one of the following forms:
-- Regular expression (e.g., `re.compile("YYY")`)
-    - Activates the `mappings` if the pattern `YYY` matches the `WM_CLASS` of the application.
-    - Case Insensitivity matching against `WM_CLASS` via `re.IGNORECASE` (e.g. `re.compile('Gnome-terminal', re.IGNORECASE)`)
-- `lambda wm_class: some_condition(wm_class)`
-    - Activates the `mappings` if the `WM_CLASS` of the application satisfies the condition specified by the `lambda` function.
-    - Case Insensitivity matching via `casefold()` or `lambda wm_class: wm_class.casefold()` (see example below to see how to compare to a list of names)
-- `None`: Refers to no condition. `None`-specified keymap will be a global keymap and is always enabled.
+```py
+keymap("mac like", {
+    # when Cmd-S is hit instead send Ctrl-S
+    K("Cmd-s"): K("Ctrl-s"),
+})
+```
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
 command2, ...}` where `key` and `command` take following forms:
@@ -270,48 +292,70 @@ command2, ...}` where `key` and `command` take following forms:
     - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
     - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
     - `escape_next_key`: Escape next key.
-    - Arbitrary function: The function is executed and the returned value is used as a command.
-        - Can be used to invoke UNIX commands.
+    - arbitrary function: The function is executed and the returned value is used as a command.
 
-Argument `name` specifies the keymap name. This is an optional argument.
+Argument `name` specifies the keymap name. Every keymap should have a name.  `default` is suggested for non-conditional keymaps.
+
+
+### `conditional(fn, map)`
+
+Applies a map conditionally only when the `fn` function evaluates `True`.  The below example is a modmap that is only active when the current `WM_CLASS` is `Terminal`.
+
+```py
+conditional(
+    lambda ctx: ctx.wm_class == "Terminal",
+    modmap({
+        # ...
+    })
+)
+```
+
+The `context` object passed to the `fn` function has several attributes:
+
+- `wm_class` - the WM_CLASS of the currently focused X11 window
+- `device_name` - the name of the device an input event originated on
+
+---
 
 #### Key Specification
 
 Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 
-`<Modifier>` is one of the followings
+`<Modifier>` is one of the following:
+
 - `C` or `Ctrl` -> Control key
-- `M` or `Alt` -> Alt key
+- `Alt` -> Alt key
 - `Shift` -> Shift key
-- `Super` or `Win` -> Super/Windows key
+- `Super` or `Win` or `Cmd` -> Super/Windows/Command key
 
 You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
 
-And `<Key>` is a key whose name is defined
+`<Key>` is a key whose name is defined
 in [`key.py`](https://github.com/joshgoebel/xkeysnail/blob/main/xkeysnail/key.py).
 
 Here is a list of key specification examples:
 
-- `K("C-M-j")`: `Ctrl` + `Alt` + `j`
+- `K("LC-Alt-j")`: `Left Ctrl` + `Alt` + `j`
 - `K("Ctrl-m")`: `Ctrl` + `m`
 - `K("Win-o")`: `Super/Windows` + `o`
-- `K("M-Shift-comma")`: `Alt` + `Shift` + `comma` (= `Alt` + `>`)
+- `K("Alt-Shift-comma")`: `Alt` + `Shift` + `comma`
 
-#### Multiple stroke keys
+
+#### Multiple Stroke Keys
 
 When you needs multiple stroke keys, define a nested keymap. For example, the
 following example remaps `C-x C-c` to `C-q`.
 
 ```python
-define_keymap(None, {
+keymap(None, {
     K("C-x"): {
       K("C-c"): K("C-q"),
-      K("C-f"): K("C-q"),
     }
 })
 ```
 
-#### Checking an application's `WM_CLASS` with `xprop`
+
+#### Finding an Application's `WM_CLASS` with `xprop`
 
 To check `WM_CLASS` of the application you want to have custom keymap, use
 `xprop` command:
@@ -322,81 +366,29 @@ and then click the application. `xprop` tells `WM_CLASS` of the application as f
 
     WM_CLASS(STRING) = "Navigator", "Firefox"
 
-Use the second value (in this case `Firefox`) as the `WM_CLASS` value in your
-`config.py`.
+Use the second value (in this case `Firefox`) when matching `context.wm_class` when using a `conditional`.
 
-### Example `config.py`
 
-See [`example/config.py`](https://github.com/joshgoebel/xkeysnail/blob/main/example/config.py).
-
-Here is an excerpt of `example/config.py`.
-
-```python
-define_keymap(re.compile("Firefox|Google-chrome"), {
-    # Ctrl+Alt+j/k to switch next/previous tab
-    K("C-M-j"): K("C-TAB"),
-    K("C-M-k"): K("C-Shift-TAB"),
-}, "Firefox and Chrome")
-
-define_keymap(re.compile("Zeal"), {
-    # Ctrl+s to focus search area
-    K("C-s"): K("C-k"),
-}, "Zeal")
-
-define_keymap(lambda wm_class: wm_class not in ("Emacs", "URxvt"), {
-    # Cancel
-    K("C-g"): [K("esc"), set_mark(False)],
-    # Escape
-    K("C-q"): escape_next_key,
-    # C-x YYY
-    K("C-x"): {
-        # C-x h (select all)
-        K("h"): [K("C-home"), K("C-a"), set_mark(True)],
-        # C-x C-f (open)
-        K("C-f"): K("C-o"),
-        # C-x C-s (save)
-        K("C-s"): K("C-s"),
-        # C-x k (kill tab)
-        K("k"): K("C-f4"),
-        # C-x C-c (exit)
-        K("C-c"): K("M-f4"),
-        # cancel
-        K("C-g"): pass_through_key,
-        # C-x u (undo)
-        K("u"): [K("C-z"), set_mark(False)],
-    }
-}, "Emacs-like keys")
-```
-
-### Example of Case Insensitivity Matching
+#### Example of Case Insensitivity Matching
 
 ```py
 terminals = ["gnome-terminal","konsole","io.elementary.terminal","sakura"]
 terminals = [term.casefold() for term in terminals]
 termStr = "|".join(str(x) for x in terminals)
 
-# [Conditional modmap] Change modifier keys in certain applications
-define_conditional_modmap(lambda wm_class: wm_class.casefold() not in terminals,{
-    # Default Mac/Win
-    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
-    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
-    Key.LEFT_CTRL: Key.LEFT_META,   # WinMac
-    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
-    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
-    Key.RIGHT_CTRL: Key.RIGHT_META, # WinMac
-})
+conditional(
+    lambda ctx: ctx.wm_class.casefold() not in terminals,
+    modmap({
+        Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+        # ... 
+    }))
 
-# [Conditional modmap] Change modifier keys in certain applications
-define_conditional_modmap(re.compile(termStr, re.IGNORECASE), {
-
-    # Default Mac/Win
-    Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
-    Key.LEFT_META: Key.LEFT_ALT,    # WinMac
-    Key.LEFT_CTRL: Key.LEFT_CTRL,   # WinMac
-    Key.RIGHT_ALT: Key.RIGHT_CTRL,  # WinMac
-    Key.RIGHT_META: Key.RIGHT_ALT,  # WinMac
-    Key.RIGHT_CTRL: Key.LEFT_CTRL,  # WinMac
-})
+conditional(
+    lambda ctx: re.compile(termStr, re.IGNORECASE).search(ctx.wm_class),
+    modmap("default", {
+        Key.LEFT_ALT: Key.RIGHT_CTRL,   # WinMac
+        # ... 
+    }))
 ```
 
 ## FAQ
