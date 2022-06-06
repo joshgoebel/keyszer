@@ -99,7 +99,8 @@ def K(exp):
     import re
     modifier_strs = []
     while True:
-        m = re.match(r"\A(LC|LCtrl|RC|RCtrl|C|Ctrl|LM|LAlt|RM|RAlt|M|Alt|LShift|RShift|Shift|LSuper|LWin|RSuper|RWin|Super|Win)-", exp)
+        aliases = "|".join(Modifier.all_aliases())
+        m = re.match(f"\\A({aliases})-", exp)
         if m is None:
             break
         modifier = m.group(1)
@@ -109,33 +110,10 @@ def K(exp):
     key = getattr(Key, key_str)
     return Combo(_create_modifiers_from_strings(modifier_strs), key)
 
-STR_TO_MODIFIER = {
-    'LC': Modifier.L_CONTROL,
-    'LCtrl': Modifier.L_CONTROL,
-    'RC': Modifier.R_CONTROL,
-    'RCtrl': Modifier.R_CONTROL,
-    'C': Modifier.CONTROL,
-    'LM': Modifier.L_ALT,
-    'LAlt': Modifier.L_ALT,
-    'RM': Modifier.R_ALT,
-    'RAlt': Modifier.R_ALT,
-    'M': Modifier.ALT,
-    'Alt': Modifier.ALT,
-    'Win': Modifier.SUPER,
-    'LWin': Modifier.L_SUPER,
-    'RWin': Modifier.R_SUPER,
-    'Super': Modifier.SUPER,
-    'LSuper': Modifier.L_SUPER,
-    'RSuper': Modifier.R_SUPER,
-    'LShift': Modifier.L_SHIFT,
-    'RShift': Modifier.R_SHIFT,
-    'Shift': Modifier.SHIFT
-}
-
 def _create_modifiers_from_strings(modifier_strs):
     modifiers = []
     for modifier_str in modifier_strs:
-        key = STR_TO_MODIFIER[modifier_str]
+        key = Modifier.from_alias(modifier_str)
         if not key in modifiers:
             modifiers.append(key)
     return modifiers
