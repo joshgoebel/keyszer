@@ -130,7 +130,8 @@ def resume_keys():
 
     _suspend_timer.cancel()
     _suspend_timer = None
-    debug("resuming keys:", _pressed_modifier_keys)
+    if (len(_pressed_modifier_keys) > 1):
+        debug("resuming keys:", _pressed_modifier_keys)
     _spent_modifiers_keys = {}
     for mod in _pressed_modifier_keys:
         # sticky keys (input side) remain silently held
@@ -147,13 +148,16 @@ def suspended():
 def resuspend_keys():
     global _suspend_timer
     _suspend_timer.cancel()
-    debug("resuspending keys")
+    debug("resuspending keys (after output combo)")
     suspend_keys(True)
+
+def pressed_mods_not_exerted_on_output():
+    return [key for key in _pressed_modifier_keys if not _output.is_mod_pressed(key)]
 
 def suspend_keys(quiet=False):
     global _suspend_timer
     if not quiet:
-        debug("suspending keys")
+        debug("suspending keys", pressed_mods_not_exerted_on_output())
     loop = asyncio.get_event_loop()
     _suspend_timer = loop.call_later(1, resume_keys)
 
@@ -225,7 +229,7 @@ def apply_modmap(key, context):
                 active_modmap = modmap
                 break
     if active_modmap and key in active_modmap:
-        debug(f"modmap engaged: {key} => {active_modmap[key]} [{active_modmap.name}]")
+        debug(f"modmap: {key} => {active_modmap[key]} [{active_modmap.name}]")
         key = active_modmap[key]
 
     return key
@@ -268,7 +272,7 @@ def on_event(event, device_name, quiet):
     action = Action(event.value)
     key = Key(event.code)
 
-    debug(f"in {key} ({action})", ctx = "II")
+    # debug(f"in {key} ({action})", ctx = "II")
 
     key = apply_modmap(key, context)
     # multipurpose modmaps fire their own on_key and do their own
@@ -288,10 +292,11 @@ def is_sticky(key):
     return False
 
 def on_key(key, action, context, quiet=False):
+    need_suspend = False
     # debug("on_key", key, action)
     if key in Modifier.get_all_keys():
         if none_pressed() and action.is_pressed():
-            suspend_keys()        
+            need_suspend = True
 
         if action.is_released():
             if is_sticky(key):
@@ -307,6 +312,8 @@ def on_key(key, action, context, quiet=False):
                 resume_keys()
 
         update_pressed_modifier_keys(key, action)
+        if need_suspend:
+            suspend_keys()
         if not suspended():
             _output.send_key_action(key, action)
     elif not action.is_pressed():
@@ -339,16 +346,17 @@ def transform_key(key, action, context, quiet=False):
             if keymap.conditional(context):
                 _mode_maps.append(keymap.mappings)
                 keymap_names.append(keymap.name)
-        if not quiet:
-            debug("WM_CLASS '{}' | DEVICE '{}' | active keymaps = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
-
-    if not quiet:
-        debug("COMBO:", combo)
 
     # _mode_maps: [global_map, local_1, local_2, ...]
     for mappings in _mode_maps:
         if combo not in mappings:
             continue
+
+        if not quiet:
+            print("")
+            debug("WM_CLS '{}' | DEV '{}' | act kms = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
+            debug("  COMBO:", combo, "=>", mappings[combo])
+
         _spent_modifiers_keys |= _pressed_modifier_keys
         debug("spent modifiers", _spent_modifiers_keys)
         # Found key in "mappings". Execute commands defined for the key.
@@ -372,7 +380,7 @@ def simple_sticky(combo, output_combo):
     out = output_combo.modifiers or {}
     if len(inp) != 1 or len(out) != 1:
         return {}
-    debug("simple_sticky (one mod => one mod)", combo, output_combo)
+    # debug("simple_sticky (one mod => one mod)", combo, output_combo)
 
     m = {}
     m[next(iter(inp)).get_key()] = next(iter(out)).get_key()
