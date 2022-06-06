@@ -162,6 +162,10 @@ async def supervisor():
 
 def receive_input(device, quiet):
     for event in device.read():
+        if (event.type == ecodes.EV_KEY and event.code == Key.F16):
+            error("BAIL: Emergency shutdown requested.")
+            shutdown()
+            exit(0)
         on_event(event, device.name, quiet)
 
 
