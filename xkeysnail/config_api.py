@@ -7,6 +7,7 @@ from .models.modifier import Modifier
 from .lib.modmap import Modmap, MultiModmap
 from .lib.keymap import Keymap
 from sys import exit
+from inspect import signature
 from .logger import *
 
 # GLOBALS
