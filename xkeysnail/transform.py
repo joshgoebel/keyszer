@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from time import time
+import time
 from inspect import signature
 from evdev import ecodes
 from ordered_set import OrderedSet
@@ -172,7 +172,7 @@ def suspend_keys(quiet=False):
 _last_key = None
 
 # last key time record time when execute multi press
-_last_key_time = time()
+_last_key_time = time.time()
 
 
 def multipurpose_handler(multipurpose_map, key, action, context):
@@ -389,7 +389,7 @@ def simple_sticky(combo, output_combo):
 
 _sticky = {}
 
-def handle_commands(commands, key, action, input_combo):
+def handle_commands(commands, key, action, input_combo = None):
     """
     returns: reset_mode (True/False) if this is True, _mode_maps will be reset
     """
@@ -414,14 +414,17 @@ def handle_commands(commands, key, action, input_combo):
     # Execute commands
     for command in commands:
         if callable(command):
-            reset_mode = handle_commands(command(), key, action)
-            if reset_mode:
-                return True
-
-        if isinstance(command, Key):
-            _output.send_key(command)
+            commands = command()
+            # very likely we're given None though which 
+            # means we can just do nothing at all and
+            # assume that running the command was the
+            # actual operation we care about
+            if commands:
+                handle_commands(commands, key, action)
         elif isinstance(command, Combo):
             _output.send_combo(command)
+        elif isinstance(command, Key):
+            _output.send_key(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False

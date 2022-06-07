@@ -92,6 +92,14 @@ def sleep(sec):
         time.sleep(sec)
     return sleeper
 
+
+def usleep(usec):
+    """Sleep usec in commands"""
+    def sleeper():
+        import time
+        time.sleep(usec/1000)
+    return sleeper
+
 # ============================================================ #
 
 
