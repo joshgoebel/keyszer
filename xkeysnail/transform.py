@@ -344,7 +344,7 @@ def transform_key(key, action, context, quiet=False):
         keymap_names = []
         for keymap in _toplevel_keymaps:
             if keymap.conditional(context):
-                _mode_maps.append(keymap.mappings)
+                _mode_maps.append(keymap)
                 keymap_names.append(keymap.name)
 
     # _mode_maps: [global_map, local_1, local_2, ...]
@@ -354,8 +354,8 @@ def transform_key(key, action, context, quiet=False):
 
         if not quiet:
             print("")
-            debug("WM_CLS '{}' | DEV '{}' | act kms = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
-            debug("  COMBO:", combo, "=>", mappings[combo])
+            debug("WM_CLS '{}' | DEV '{}' | KMAPS = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
+            debug("  COMBO:", combo, "=>", mappings[combo], f"  [{mappings.name}]")
 
         _spent_modifiers_keys |= _pressed_modifier_keys
         debug("spent modifiers", _spent_modifiers_keys)

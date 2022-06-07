@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from evdev import ecodes, InputDevice, list_devices
+from evdev import ecodes, InputDevice, list_devices, InputEvent
+from .models.action import Action
 from select import select
 from sys import exit
 from .transform import on_event, boot_config
@@ -107,13 +108,26 @@ def watch_dev_input():
     inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB | flags.DELETE)
     return inotify
 
+
+# Why? xmodmap won't persist mapping changes until it's seen at least
+# one keystroke on a new device, so we need to give it something that
+# won't do any harm, but is still an actual keypress, hence shift.
+def wakeup_output():
+    down=InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.PRESS)
+    up=InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.RELEASE)
+    for ev in [down, up]:
+        on_event(ev, "", True)
+
+
 def main_loop(device_matches, device_watch, quiet):
     devices = []
     inotify = None
 
     boot_config()
     setup_uinput()
+    wakeup_output()
 
+    # fake=InputEvent(0, 0, ecodes.EV_SYN, 0,0)
     device_filter = DeviceFilter(device_matches)
     selected_devices = select_devices(device_filter)
     for device in selected_devices:
