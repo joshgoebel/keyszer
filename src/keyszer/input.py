@@ -246,7 +246,7 @@ def add_device(devices, device):
     try:
         device.grab()
     except IOError:
-        print("IOError when grabbing keyboard. Maybe, another instance is running?")
+        error("IOError when grabbing keyboard. Maybe, another instance is running?")
         shutdown()
         exit(1)
     # except IOError:
