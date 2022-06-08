@@ -1,7 +1,7 @@
 __pycache__/
 .venv
 .pyc
-xkeysnail.egg-info
+keyszer.egg-info
 
 extended.sh
 real_config.py

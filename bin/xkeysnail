@@ -2,6 +2,6 @@
 # -*- coding: utf-8 -*-
 
 if __name__ == '__main__':
-    from xkeysnail.cli import main
+    from keyszer.cli import main
     main()
 

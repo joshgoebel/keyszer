@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./bin/xkeysnail $@ &
+./bin/keyszer $@ &
 PID=$!
 
 function cleanup()

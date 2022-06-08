@@ -8,7 +8,7 @@ from .models.modifier import Modifier
 from .logger import debug
 
 
-# Remove all buttons so udev doesn't think xkeysnail is a joystick
+# Remove all buttons so udev doesn't think keyszer is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN
 
 # But we want mouse buttons, so let's enumerate those and add them

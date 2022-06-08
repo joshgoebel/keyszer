@@ -5,8 +5,8 @@ from .info import __version__, __name__
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-
 import re
-from xkeysnail.transform import with_mark, set_mark, with_or_set_mark
-from xkeysnail.config_api import *
+from keyszer.transform import with_mark, set_mark, with_or_set_mark
+from keyszer.config_api import *
 """
 
 def eval_config(path):
@@ -23,7 +23,7 @@ def uinput_device_exists():
 def has_access_to_uinput():
     from evdev.uinput import UInputError
     try:
-        from xkeysnail.output import _uinput  # noqa: F401
+        from keyszer.output import _uinput  # noqa: F401
         return True
     except UInputError:
         return False
@@ -34,13 +34,13 @@ def main():
     import argparse
     from appdirs import user_config_dir
     parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
-#    parser.add_argument('config', metavar='config.py', type=str, default=user_config_dir('xkeysnail/config.py'), nargs='?',
+#    parser.add_argument('config', metavar='config.py', type=str, default=user_config_dir('keyszer/config.py'), nargs='?',
 #                        help='configuration file (See README.md for syntax)')
     parser.add_argument('-c', '--config', dest="config", metavar="config_file", type=str, 
-                        default=user_config_dir('xkeysnail/config.py'),
+                        default=user_config_dir('keyszer/config.py'),
                         help='configuration file (See README.md for syntax)')
     parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
-                        help='keyboard devices to remap (if omitted, xkeysnail choose proper keyboard devices)')
+                        help='keyboard devices to remap (if omitted, keyszer choose proper keyboard devices)')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',
                         help='watch keyboard devices plug in ')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
@@ -101,5 +101,5 @@ Please check access permissions for /dev/uinput.""")
         log("WATCH: Watching for new devices to hot-plug.")
 
     # Enter event loop
-    from xkeysnail.input import main_loop
+    from keyszer.input import main_loop
     main_loop(args.devices, args.watch, args.quiet)

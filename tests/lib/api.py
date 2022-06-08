@@ -1,9 +1,9 @@
 from evdev.ecodes import EV_KEY, EV_SYN
 from evdev.events import InputEvent
 
-from xkeysnail.models.action import Action
+from keyszer.models.action import Action
 
-from xkeysnail.transform import on_event
+from keyszer.transform import on_event
 
 from lib.xorg_mock import set_window
 

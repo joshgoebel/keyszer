@@ -8,11 +8,6 @@
 
 Yes, this is a fork/reboot of the popular [xkeysnail](https://github.com/mooz/xkeysnail) project.  The xkeysnail project seems largely unmaintained since it's last release in Fall 2020;  by unmaintained I mean that the author no longer seems involved (no commits, no releases, no comms on issues, no response to emails, no GitHub activity, etc).
 
-**Why is the xkeysnail name still in so many places?**
-
-I've reached out to the author of `xkeysnail` to see if I might simply take over the maintainership... I'm not expecting a response (at this point) but I haven't entirely given up yet.  Becoming maintainer of the existing project would simplify several things, responding to older issues, avoiding the need to rename, etc.
-
-Sometime next week I'll likely change the name completely (and then release a beta on PyPi) if I haven't heard anything more.
 
 **Is it ready to use/test?**
 
@@ -31,11 +26,11 @@ That is the goal.  I haves plans to address the one major reason that kinto is u
 - [x] initial tests framework
 - [ ] more tests, tests, tests
 - [x] better conditional support (keymaps can now be conditional based on device name)
-- [x] [#10](https://github.com/joshgoebel/xkeysnail/issues/10) No more running as root `root`
-- [x] [#9](https://github.com/joshgoebel/xkeysnail/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
-- [x] [#7](https://github.com/joshgoebel/xkeysnail/issues/7) Support for `Hyper` as a modifier
-- [ ] [#2](https://github.com/joshgoebel/xkeysnail/issues/2) Support for `WM_NAME` conditionals
-- [ ] [#11](https://github.com/joshgoebel/xkeysnail/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
+- [x] [#10](https://github.com/joshgoebel/keyszer/issues/10) No more running as root `root`
+- [x] [#9](https://github.com/joshgoebel/keyszer/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
+- [x] [#7](https://github.com/joshgoebel/keyszer/issues/7) Support for `Hyper` as a modifier
+- [ ] [#2](https://github.com/joshgoebel/keyszer/issues/2) Support for `WM_NAME` conditionals
+- [ ] [#11](https://github.com/joshgoebel/keyszer/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
 
 
 **Can I help/contribute?**
@@ -47,20 +42,20 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 
 # keyszer - a smart key remapper for Linux/X11
 
-<!-- [![latest version](https://badgen.net/pypi/v/xkeysnail?label=latest)]() -->
-[![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/xkeysnail/releases) 
+<!-- [![latest version](https://badgen.net/pypi/v/keyszer?label=latest)]() -->
+[![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/keyszer/releases) 
 [![](https://badgen.net/badge/python/3.10%20|%20%3F/blue)]()
-[![license](https://badgen.net/badge/license/GPL3/xkeysnail?color=cyan)](https://github.com/joshgoebel/xkeysnail/blob/main/LICENSE)
+[![license](https://badgen.net/badge/license/GPL3/keyszer?color=cyan)](https://github.com/joshgoebel/keyszer/blob/main/LICENSE)
 
-<!-- ![build and CI status](https://badgen.net/github/checks/joshgoebel/xkeysnail/main?label=build) -->
-<!-- [![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/xkeysnail/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/xkeysnail/?mode=list) -->
-<!-- [![vulnerabilities](https://badgen.net/snyk/joshgoebel/xkeysnail)](https://snyk.io/test/github/joshgoebel/xkeysnail?targetFile=package.json) -->
+<!-- ![build and CI status](https://badgen.net/github/checks/joshgoebel/keyszer/main?label=build) -->
+<!-- [![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/keyszer/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/keyszer/?mode=list) -->
+<!-- [![vulnerabilities](https://badgen.net/snyk/joshgoebel/keyszer)](https://snyk.io/test/github/joshgoebel/keyszer?targetFile=package.json) -->
 
 
 [![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink)](https://discord.gg/nX6qSC8mer)
-[![open issues](https://badgen.net/github/open-issues/joshgoebel/xkeysnail?label=issues)](https://github.com/joshgoebel/xkeysnail/issues)
-[![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/xkeysnail/help%20welcome/open)](https://github.com/joshgoebel/xkeysnail/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
-[![good first issue](https://badgen.net/github/label-issues/joshgoebel/xkeysnail/good%20first%20issue/open)](https://github.com/joshgoebel/xkeysnail/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+[![open issues](https://badgen.net/github/open-issues/joshgoebel/keyszer?label=issues)](https://github.com/joshgoebel/keyszer/issues)
+[![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/keyszer/help%20welcome/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
+[![good first issue](https://badgen.net/github/label-issues/joshgoebel/keyszer/good%20first%20issue/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
 `keyszer` is a keyboard remapping tool for X environment written in Python. It's similar `xmodmap` but allows more flexible remappings.
 
@@ -73,7 +68,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 - Uses low-level libraries (`evdev` and `uinput`), making remapping work almost everywhere
 
 
-This project was originally forked from [xkeysnail](https://github.com/mooz/xkeysnail) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs). The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
+This project was originally forked from [keyszer](https://github.com/mooz/keyszer) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs). The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
 
 
 
@@ -85,7 +80,7 @@ Requires **Python 3**.
 ### Ubuntu
 
     sudo apt install python3-pip
-    sudo pip3 install xkeysnail
+    sudo pip3 install keyszer
     
     # If you plan to compile from source
     sudo apt install python3-dev
@@ -93,8 +88,8 @@ Requires **Python 3**.
 ### Fedora
 
     sudo dnf install python3-pip
-    sudo pip3 install xkeysnail
-    # Add your user to input group if you don't want to run xkeysnail
+    sudo pip3 install keyszer
+    # Add your user to input group if you don't want to run keyszer
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
     
@@ -118,18 +113,18 @@ Requires **Python 3**.
 
 ### From source
 
-    git clone https://github.com/joshgoebel/xkeysnail.git
-    cd xkeysnail
+    git clone https://github.com/joshgoebel/keyszer.git
+    cd keyszer
     sudo pip3 install --upgrade .
 
 ### For testing/hacking/contributing
 
-    git clone https://github.com/joshgoebel/xkeysnail.git
-    cd xkeysnail
+    git clone https://github.com/joshgoebel/keyszer.git
+    cd keyszer
     python -m venv .venv
     source .venv/bin/activate
     pip3 install -e .
-    ./bin/xkeysnail -c config_file
+    ./bin/keyszer -c config_file
 
 ## Setup Requirements
 
@@ -155,7 +150,7 @@ Some distros already have an input group, or you can create one.  You'll just ne
 
 #### systemd
 
-For a sample systemd service file please see [xkeysnail.service](https://github.com/joshgoebel/xkeysnail/blob/main/xkeysnail.service).
+For a sample systemd service file please see [keyszer.service](https://github.com/joshgoebel/keyszer/blob/main/keyszer.service).
 
 
 ### Running as Your Logged in User
@@ -188,7 +183,7 @@ HOW?
 If you're using a minimal setup you can simply add us to your `.xinitrc`. For example to start us up and then start Awesome WM.
 
 ```
-xkeysnail &
+keyszer &
 exec awesome
 ```
 
@@ -202,13 +197,13 @@ _Don't do this, it's bad, dangerous, and wholly unnecessary._
 
 ## Usage
 
-    xkeysnail 
+    keyszer 
 
 
 A successful startup will look a bit like:
 
     keyszer v0.4.99
-    (--) CONFIG: /home/jgoebel/.config/xkeysnail/config.py
+    (--) CONFIG: /home/jgoebel/.config/keyszer/config.py
     (+K) Grabbing Apple, Inc Apple Keyboard (/dev/input/event3)
     (--) Ready to process input.
 
@@ -216,7 +211,7 @@ A successful startup will look a bit like:
 
 Limit remapping to specify devices with `--devices`:
 
-    xkeysnail --devices /dev/input/event3 'Topre Corporation HHKB Professional'
+    keyszer --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
 The path or full device name can be used.
 
@@ -230,8 +225,8 @@ The path or full device name can be used.
 
 ## Configuration
 
-By default we will look for the configuration in `~/.config/xkeysnail/config.py` but you can override this location with the `-c`/`--config` switch.  The configuration file is a Python script that defines modmaps, keymaps, and other configuration details. 
-For an example configuration please see [`example/config.py`](https://github.com/joshgoebel/xkeysnail/blob/main/example/config.py).
+By default we will look for the configuration in `~/.config/keyszer/config.py` but you can override this location with the `-c`/`--config` switch.  The configuration file is a Python script that defines modmaps, keymaps, and other configuration details. 
+For an example configuration please see [`example/config.py`](https://github.com/joshgoebel/keyszer/blob/main/example/config.py).
 
 
 
@@ -331,7 +326,7 @@ Key specification in a keymap is in a form of `K("(<Modifier>-)*<Key>")` where
 You can specify left/right modifiers by adding any one of prefixes `L`/`R`.
 
 `<Key>` is a key whose name is defined
-in [`key.py`](https://github.com/joshgoebel/xkeysnail/blob/main/xkeysnail/key.py).
+in [`key.py`](https://github.com/joshgoebel/keyszer/blob/main/keyszer/key.py).
 
 Here is a list of key specification examples:
 
@@ -397,6 +392,6 @@ None yet.
 
 ## License
 
-`keyszer` is distributed under GPL.  See our [LICENSE](https://github.com/joshgoebel/xkeysnail/blob/main/LICENSE).
+`keyszer` is distributed under GPL.  See our [LICENSE](https://github.com/joshgoebel/keyszer/blob/main/LICENSE).
 
     

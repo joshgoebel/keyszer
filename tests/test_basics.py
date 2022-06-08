@@ -1,12 +1,12 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
-from xkeysnail.output import setup_uinput
-from xkeysnail.key import Key
-from xkeysnail.models.action import Action
-from xkeysnail import input
-from xkeysnail.config_api import *
-from xkeysnail.transform import suspend_keys, \
+from keyszer.output import setup_uinput
+from keyszer.key import Key
+from keyszer.models.action import Action
+from keyszer import input
+from keyszer.config_api import *
+from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
