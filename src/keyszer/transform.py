@@ -197,7 +197,7 @@ def multipurpose_handler(multipurpose_map, key, action, context):
         update_pressed_keys(key, action)
         if action == Action.RELEASE and key_is_down:
             # it is a single press and release
-            if key_was_last_press and _last_key_time + _timeout > time():
+            if key_was_last_press and _last_key_time + _timeout > time.time():
                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
                 on_key(single_key, Action.PRESS, context)
                 on_key(single_key, Action.RELEASE, context)
@@ -205,7 +205,7 @@ def multipurpose_handler(multipurpose_map, key, action, context):
             elif mod_is_down:
                 on_key(mod_key, Action.RELEASE, context)
         elif action == Action.PRESS and not key_is_down:
-            _last_key_time = time()
+            _last_key_time = time.time()
     # if key is not a multipurpose or mod key we want eventual modifiers down
     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
         maybe_press_modifiers(multipurpose_map)
