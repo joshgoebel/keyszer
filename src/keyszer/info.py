@@ -4,10 +4,10 @@ __name__ = "keyszer"
 
 __version__ = "0.4.99"
 
-__description__ = "A smart, flexible keyboard remapping tool for the X environment."
+__description__ = "A smart, flexible key remapper for Linux/X11."
 
 __doc__ = """
-``keyszer`` is a smart and flexible keyboard remapping tool for the X environment.
+``keyszer`` is a smart and flexible key remapper for Linux/X11t.
 It's like ``xmodmap`` but better.
 
 -  Has high-level and flexible remapping mechanisms, such as
