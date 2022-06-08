@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .logger import *
-from .info import __version__, __name__
+from .info import __version__, __name__, __description__
 
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-
@@ -33,21 +33,20 @@ def main():
     # Parse args
     import argparse
     from appdirs import user_config_dir
-    parser = argparse.ArgumentParser(description='Yet another keyboard remapping tool for X environment.')
-#    parser.add_argument('config', metavar='config.py', type=str, default=user_config_dir('keyszer/config.py'), nargs='?',
-#                        help='configuration file (See README.md for syntax)')
-    parser.add_argument('-c', '--config', dest="config", metavar="config_file", type=str, 
+    parser = argparse.ArgumentParser(description=__description__)
+    parser.add_argument('-c', '--config', dest="config", metavar="config.py", type=str, 
                         default=user_config_dir('keyszer/config.py'),
-                        help='configuration file (See README.md for syntax)')
+                        help='use custom configuration file')
     parser.add_argument('-d', '--devices', dest="devices", metavar='device', type=str, nargs='+',
-                        help='keyboard devices to remap (if omitted, keyszer choose proper keyboard devices)')
+                        help='manually specify devices to remap')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',
-                        help='watch keyboard devices plug in ')
+                        help='watch for new hot-plugged devices')
     parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
                         help='suppress output of key events')
-    parser.add_argument('--list-devices', dest='list_devices', action='store_true')
+    parser.add_argument('--list-devices', dest='list_devices', action='store_true',
+                        help="")
     parser.add_argument('--version', dest='show_version', action='store_true',
-                        help='show version')
+                        help='')
     parser.add_argument('--very-bad-idea', dest='run_as_root', action='store_true',
                         help="(deprecated: run as root, don't do this)")
     args = parser.parse_args()
