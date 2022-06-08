@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .logger import *
+from . import logger
 from .info import __version__, __name__, __description__
 
 CONFIG_HEADER = b"""
@@ -41,19 +42,22 @@ def main():
                         help='manually specify devices to remap')
     parser.add_argument('-w', '--watch', dest='watch', action='store_true',
                         help='watch for new hot-plugged devices')
-    parser.add_argument('-q', '--quiet', dest='quiet', action='store_true',
-                        help='suppress output of key events')
+    parser.add_argument('-v', dest='verbose', action='store_true',
+                        help='increase debug logging')
     parser.add_argument('--list-devices', dest='list_devices', action='store_true',
                         help="")
     parser.add_argument('--version', dest='show_version', action='store_true',
                         help='')
     parser.add_argument('--very-bad-idea', dest='run_as_root', action='store_true',
-                        help="(deprecated: run as root, don't do this)")
+                        help="(deprecated: run as root)")
     args = parser.parse_args()
 
     if args.show_version:
         print(f"{__name__} v{__version__}")
         exit(0)
+
+    if args.verbose:
+        logger.VERBOSE = True
 
     print(f"{__name__} v{__version__}")
 
@@ -91,14 +95,11 @@ Please check access permissions for /dev/uinput.""")
     # Load configuration file
     eval_config(args.config)
 
-    log(f"CONFIG: {args.config}")
-
-    if args.quiet:
-        log("QUIET: key output supressed.")
+    debug(f"CONFIG: {args.config}")
 
     if args.watch:
         log("WATCH: Watching for new devices to hot-plug.")
 
     # Enter event loop
     from keyszer.input import main_loop
-    main_loop(args.devices, args.watch, args.quiet)
+    main_loop(args.devices, args.watch)

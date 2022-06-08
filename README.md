@@ -217,9 +217,9 @@ The path or full device name can be used.
 
 **Other Options:**
 
-- `-c`, `--config` - specify the location of the configuration file to load
-- `-w`, `--watch` - watch for new keyboard devices that may be hot-plugged 
-- `-q`, `--quiet` - suppress output of key events, especially when running as a daemon.
+- `-c`, `--config` - location of the configuration file 
+- `-w`, `--watch` - watch for new keyboard devices to hot-plug 
+- `-v` - much increased verbosity to help with debugging
 - `--list-devices` - list all available input devices
 
 

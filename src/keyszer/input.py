@@ -116,10 +116,10 @@ def wakeup_output():
     down=InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.PRESS)
     up=InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.RELEASE)
     for ev in [down, up]:
-        on_event(ev, "", True)
+        on_event(ev, "")
 
 
-def main_loop(device_matches, device_watch, quiet):
+def main_loop(device_matches, device_watch):
     devices = []
     inotify = None
 
@@ -140,7 +140,7 @@ def main_loop(device_matches, device_watch, quiet):
         loop = asyncio.get_event_loop()
 
         for device in devices:
-            loop.add_reader(device, receive_input, device, quiet)
+            loop.add_reader(device, receive_input, device)
         if device_watch:
             loop.add_reader(inotify.fd, _inotify_handler, devices, device_filter, inotify)
         
@@ -174,13 +174,13 @@ async def supervisor():
                 _tasks.remove(task)
 
 
-def receive_input(device, quiet):
+def receive_input(device):
     for event in device.read():
         if (event.type == ecodes.EV_KEY and event.code == Key.F16):
             error("BAIL: Emergency shutdown requested.")
             shutdown()
             exit(0)
-        on_event(event, device.name, quiet)
+        on_event(event, device.name)
 
 
 _add_timer = None

@@ -1,4 +1,14 @@
+
+VERBOSE = False
+
 def debug(*args, ctx = "DD"):
+    if not VERBOSE: 
+        return
+
+    # allow blank lines without context
+    if len(args) == 1 and args[0]=="":
+        print("")
+        return
     print(f"({ctx})", *args)
 
 

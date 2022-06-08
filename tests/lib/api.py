@@ -21,11 +21,11 @@ def window(name):
 
 def press(key):
     ev = InputEvent(0, 0, EV_KEY, key, Action.PRESS)
-    on_event(ev, _kb, quiet = False)
+    on_event(ev, _kb)
 
 def release(key):
     ev = InputEvent(0, 0, EV_KEY, key, Action.RELEASE)
-    on_event(ev, _kb, quiet = False)
+    on_event(ev, _kb)
 
 def hit(key):
     press(key)

@@ -149,15 +149,14 @@ def resuspend_keys():
     global _suspend_timer
     _suspend_timer.cancel()
     debug("resuspending keys (after output combo)")
-    suspend_keys(True)
+    suspend_keys()
 
 def pressed_mods_not_exerted_on_output():
     return [key for key in _pressed_modifier_keys if not _output.is_mod_pressed(key)]
 
-def suspend_keys(quiet=False):
+def suspend_keys():
     global _suspend_timer
-    if not quiet:
-        debug("suspending keys", pressed_mods_not_exerted_on_output())
+    debug("suspending keys", pressed_mods_not_exerted_on_output())
     loop = asyncio.get_event_loop()
     _suspend_timer = loop.call_later(1, resume_keys)
 
@@ -220,9 +219,9 @@ def multipurpose_handler(multipurpose_map, key, action, context):
 def apply_modmap(key, context):
     # first modmap is always the default, unconditional
     active_modmap = _modmaps[0] 
-    #print("active", active_modmap)
+    #debug("active", active_modmap)
     conditional_modmaps = _modmaps[1:]
-    #print("conditionals", conditional_modmaps)
+    #debug("conditionals", conditional_modmaps)
     if conditional_modmaps:
         for modmap in conditional_modmaps:
             if modmap.conditional(context):
@@ -257,7 +256,7 @@ JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
 #from .lib.benchit import *
 
 # @benchit
-def on_event(event, device_name, quiet):
+def on_event(event, device_name):
     # we do not attempt to transform non-key events 
     #debug(evdev.util.categorize(event))
     if event.type != ecodes.EV_KEY:
@@ -281,7 +280,7 @@ def on_event(event, device_name, quiet):
     if apply_multi_modmap(key, action, context):
         return
 
-    on_key(key, action, context, quiet=quiet)
+    on_key(key, action, context)
     update_pressed_keys(key, action)
 
 
@@ -291,7 +290,7 @@ def is_sticky(key):
             return True
     return False
 
-def on_key(key, action, context, quiet=False):
+def on_key(key, action, context):
     need_suspend = False
     # debug("on_key", key, action)
     if key in Modifier.get_all_keys():
@@ -320,10 +319,10 @@ def on_key(key, action, context, quiet=False):
         if _output.is_pressed(key):
             _output.send_key_action(key, action)
     else:
-        transform_key(key, action, context, quiet=quiet)
+        transform_key(key, action, context)
 
 
-def transform_key(key, action, context, quiet=False):
+def transform_key(key, action, context):
     global _mode_maps
     # global _toplevel_keymaps
     global _spent_modifiers_keys
@@ -352,10 +351,9 @@ def transform_key(key, action, context, quiet=False):
         if combo not in mappings:
             continue
 
-        if not quiet:
-            print("")
-            debug("WM_CLS '{}' | DEV '{}' | KMAPS = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
-            debug("  COMBO:", combo, "=>", mappings[combo], f"  [{mappings.name}]")
+        debug("")
+        debug("WM_CLS '{}' | DEV '{}' | KMAPS = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
+        debug("  COMBO:", combo, "=>", mappings[combo], f"  [{mappings.name}]")
 
         _spent_modifiers_keys |= _pressed_modifier_keys
         debug("spent modifiers", _spent_modifiers_keys)
