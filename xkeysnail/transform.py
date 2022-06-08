@@ -343,7 +343,7 @@ def transform_key(key, action, context, quiet=False):
         _mode_maps = []
         keymap_names = []
         for keymap in _toplevel_keymaps:
-            if keymap.conditional(context):
+            if keymap.conditional == None or keymap.conditional(context):
                 _mode_maps.append(keymap)
                 keymap_names.append(keymap.name)
 
