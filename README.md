@@ -1,6 +1,6 @@
 # keyszer - a smart key remapper for Linux/X11
 
-![work in progress](https://badgen.net/badge/status/alpha?color=red&scale=2)
+![work in progress](https://badgen.net/badge/status/beta?color=orange&scale=2)
 [![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink&scale=2)](https://discord.gg/nX6qSC8mer)
 
 
@@ -11,7 +11,7 @@ Yes, this is a fork/reboot of the popular [xkeysnail](https://github.com/mooz/xk
 
 **Is it ready to use/test?**
 
-Maybe.  _I'd call it late alpha or early beta._  I've been code refactoring (and adding much needed tests) more than directly using, but that is now changing.  If you're comfortable running from the source and sending detailed bug reports I'd love to have your help.  If you're comfortable hacking on the source, even better!
+Maybe.  _I'd call it early beta._  I've been using it myself full time with the Kinto.sh config file.  It's still a little rough and there are no doubt edge case bugs.  If you're comfortable running from source and sending detailed bug reports I'd love to have your help.  If you're comfortable hacking on the source, even better!
 
 
 **Is this compatible with [Kinto.sh](https://github.com/rbreaves/kinto)?**
@@ -25,6 +25,7 @@ That is the goal.  I haves plans to address the one major reason that kinto is u
 - [x] more debugging logging
 - [x] initial tests framework
 - [ ] more tests, tests, tests
+- [x] entirely rewritten multi-modmap support
 - [x] better conditional support (keymaps can now be conditional based on device name)
 - [x] [#10](https://github.com/joshgoebel/keyszer/issues/10) No more running as root `root`
 - [x] [#9](https://github.com/joshgoebel/keyszer/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
