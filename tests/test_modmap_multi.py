@@ -89,8 +89,21 @@ async def test_enter_is_enter_and_control():
         (RELEASE, Key.RIGHT_CTRL),
     ]  
 
-@pytest.mark.skip
-def test_held_enter_is_mod_after_timeout():
-    pass
-# need to figure out how to stub out the 
-# internal non-async io timekeeping before we can test these
+@pytest.mark.looptime
+async def test_held_enter_is_mod_after_timeout():
+
+    multipurpose_modmap("default",
+        # Enter is enter when pressed and released. Control when held down.
+        {Key.ENTER: [Key.ENTER, Key.RIGHT_CTRL]}
+    )
+
+    boot_config()
+
+    press(Key.ENTER)
+    await asyncio.sleep(2)
+    release(Key.ENTER)
+
+    assert _out.keys() == [
+        (PRESS, Key.RIGHT_CTRL),
+        (RELEASE, Key.RIGHT_CTRL),
+    ]  
