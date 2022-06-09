@@ -52,10 +52,6 @@ class Modifier:
             return None
 
     @classmethod
-    def get_all_keys(cls):
-        return cls._BY_KEY.keys()
-
-    @classmethod
     def from_key(cls, key):
         return cls._BY_KEY[key]
 
