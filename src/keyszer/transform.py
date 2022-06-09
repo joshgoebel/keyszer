@@ -10,7 +10,7 @@ import asyncio
 import evdev
 
 from .lib.key_context import KeyContext
-from .key import Key 
+from .models.key import Key 
 from .models.action import Action
 from .models.modifier import Modifier
 from .models.combo import Combo
@@ -71,9 +71,28 @@ def get_pressed_states():
     return [x for x in _states.values() if x.is_pressed()]
 
 
-# ============================================================ #
-# Mark
-# ============================================================ #
+def is_sticky(key):
+    for k in _sticky.keys():
+        if k == key:
+            return True
+    return False
+
+
+def update_pressed_states(keystate):
+    # release
+    if keystate.action == Action.RELEASE:
+        del _states[keystate.inkey]
+    
+    # press / add
+    if not keystate.inkey in _states:
+        # add state
+        if keystate.action == Action.PRESS:
+            _states[keystate.inkey] = keystate
+        return
+
+
+# ─── MARK ───────────────────────────────────────────────────────────────────────
+
 
 _mark_set = False
 
@@ -107,9 +126,9 @@ def with_or_set_mark(combo):
     return _with_or_set_mark
 
 
-# ============================================================ #
-# Suspend / Resume input side
-# ============================================================ #
+# ─── SUSPEND AND RESUME INPUT SIDE ──────────────────────────────────────────────
+
+
 
 # keep track of how long until we need to resume the input
 # and send held keys to the output (that haven't been used
@@ -149,17 +168,21 @@ def resume_state(keystate):
     resume_keys()
 
 def is_suspended():
-    global _suspend_timer
     return _suspend_timer != None
 
 def resuspend_keys():
-    global _suspend_timer
     _suspend_timer.cancel()
-    debug("resuspending keys (after output combo)")
+    debug("resuspending keys")
     suspend_keys()
 
 def pressed_mods_not_exerted_on_output():
     return [key for key in get_pressed_mods() if not _output.is_mod_pressed(key)]
+
+def suspend_or_resuspend_keys():
+    if is_suspended():
+        resuspend_keys()
+    else:
+        suspend_keys()
 
 def suspend_keys():
     global _suspend_timer
@@ -171,58 +194,56 @@ def suspend_keys():
     _suspend_timer = loop.call_later(1, resume_keys)
 
 
-# ============================================================
-# Key handler
-# ============================================================
+# ─── KEYBOARD INPUT PROCESSING HELPERS ──────────────────────────────────────────
 
 
-# last key that sent a PRESS event or a non-mod or non-multi key that sent a RELEASE
-# or REPEAT
+# last key that sent a PRESS event (used to track press/release of multi-keys
+# to decide to use their temporary form)
 _last_key = None
 
 # last key time record time when execute multi press
-_last_key_time = time.time()
+# _last_key_time = time.time()
 
 
-def multipurpose_handler(multipurpose_map, key, action, context):
-    # debug("multipurple_handler", key, action)
-    def maybe_press_modifiers(multipurpose_map):
-        """Search the multipurpose map for keys that are pressed. If found and
-        we have not yet sent it's modifier translation we do so."""
-        for k, [ _, mod_key, state ] in multipurpose_map.items():
-            if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
-                on_key(mod_key, Action.PRESS, context)
+# def multipurpose_handler(multipurpose_map, key, action, context):
+#     # debug("multipurple_handler", key, action)
+#     def maybe_press_modifiers(multipurpose_map):
+#         """Search the multipurpose map for keys that are pressed. If found and
+#         we have not yet sent it's modifier translation we do so."""
+#         for k, [ _, mod_key, state ] in multipurpose_map.items():
+#             if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
+#                 on_key(mod_key, Action.PRESS, context)
 
-    # we need to register the last key presses so we know if a multipurpose key
-    # was a single press and release
-    global _last_key
-    global _last_key_time
+#     # we need to register the last key presses so we know if a multipurpose key
+#     # was a single press and release
+#     global _last_key
+#     global _last_key_time
 
-    if key in multipurpose_map:
-        single_key, mod_key, key_state = multipurpose_map[key]
-        key_is_down = key in _pressed_keys
-        mod_is_down = mod_key in _pressed_modifier_keys
-        key_was_last_press = key == _last_key
+#     if key in multipurpose_map:
+#         single_key, mod_key, key_state = multipurpose_map[key]
+#         key_is_down = key in _pressed_keys
+#         mod_is_down = mod_key in _pressed_modifier_keys
+#         key_was_last_press = key == _last_key
 
-        update_pressed_keys(key, action)
-        if action == Action.RELEASE and key_is_down:
-            # it is a single press and release
-            if key_was_last_press and _last_key_time + _timeout > time.time():
-                maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
-                on_key(single_key, Action.PRESS, context)
-                on_key(single_key, Action.RELEASE, context)
-            # it is the modifier in a combo
-            elif mod_is_down:
-                on_key(mod_key, Action.RELEASE, context)
-        elif action == Action.PRESS and not key_is_down:
-            _last_key_time = time.time()
-    # if key is not a multipurpose or mod key we want eventual modifiers down
-    elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
-        maybe_press_modifiers(multipurpose_map)
+#         update_pressed_keys(key, action)
+#         if action == Action.RELEASE and key_is_down:
+#             # it is a single press and release
+#             if key_was_last_press and _last_key_time + _timeout > time.time():
+#                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
+#                 on_key(single_key, Action.PRESS, context)
+#                 on_key(single_key, Action.RELEASE, context)
+#             # it is the modifier in a combo
+#             elif mod_is_down:
+#                 on_key(mod_key, Action.RELEASE, context)
+#         elif action == Action.PRESS and not key_is_down:
+#             _last_key_time = time.time()
+#     # if key is not a multipurpose or mod key we want eventual modifiers down
+#     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
+#         maybe_press_modifiers(multipurpose_map)
 
-    # we want to register all key-presses
-    if action == Action.PRESS:
-        _last_key = key
+#     # we want to register all key-presses
+#     if action == Action.PRESS:
+#         _last_key = key
 
 
 # translate keycode (like xmodmap)
@@ -239,9 +260,10 @@ def apply_modmap(keystate, context):
             if modmap.conditional(context):
                 active_modmap = modmap
                 break
-    if active_modmap and inkey in active_modmap:
-        debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
-        keystate.key = active_modmap[inkey]
+    if active_modmap: 
+        if inkey in active_modmap:
+            debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
+            keystate.key = active_modmap[inkey]
 
 
 def apply_multi_modmap(keystate, context):
@@ -278,6 +300,22 @@ def find_keystate_or_new(inkey, action):
     return ks
 
 
+# ─── KEYBOARD INPUT PROCESSING PIPELINE ─────────────────────────────────────────
+
+# The input processing pipeline:
+#
+# - on_event
+#   - forward non key events
+#   - modmapping
+#   - multi-mapping
+# - on_key
+#   - suspend/resume, etc
+# - transform_key
+# - handle_commands
+#   - process the actual combos, commands
+
+
+
 # @benchit
 def on_event(event, device_name):
     # we do not attempt to transform non-key events 
@@ -285,7 +323,10 @@ def on_event(event, device_name):
     if event.type != ecodes.EV_KEY:
         _output.send_event(event)
         return
-        
+    
+    # if none pressed and not a modifier and not used in any 
+    # modmap or multi-modmaps
+
     # if len(_pressed_modifier_keys) == 0 and event.code in JUST_KEYS:
     #     _output.send_event(event)
     #     return
@@ -311,57 +352,38 @@ def on_event(event, device_name):
     on_key(ks, context)
 
 
-def is_sticky(key):
-    for k in _sticky.keys():
-        if k == key:
-            return True
-    return False
-
-
-def update_pressed_states(keystate):
-    # release
-    if keystate.action == Action.RELEASE:
-        del _states[keystate.inkey]
-    
-    # press / add
-    if not keystate.inkey in _states:
-        # add state
-        if keystate.action == Action.PRESS:
-            _states[keystate.inkey] = keystate
-        return
-
-
 def on_key(keystate, context):
     global _last_key
     key = keystate.key
     action = keystate.action
 
-    skip_output = False
-    need_suspend = False
+    hold_output = False
+    can_suspend = False
     debug("on_key", key, action)
     if Modifier.is_modifier(key):
-        if none_pressed() and action.is_pressed():
-            need_suspend = True
+        if action.is_pressed():
+            if none_pressed():
+                can_suspend = True
 
-        if action.is_released():
+        elif action.is_released():
             if is_sticky(key):
                 outkey = _sticky[key]
                 _output.send_key_action(outkey, Action.RELEASE)    
                 del _sticky[key]
             elif keystate.spent:
                 debug("silent lift of spent modifier", key)
-                skip_output = True
+                hold_output = True
                 keystate.spent = False
             else:     
                 debug("resume because of mod release")
                 resume_keys()
 
         update_pressed_states(keystate)
-        if need_suspend or is_suspended():
+        if can_suspend or is_suspended():
             keystate.suspended = True
-            suspend_keys()
-            skip_output = True
-        if not skip_output:
+            suspend_or_resuspend_keys()
+            hold_output = True
+        if not hold_output:
             _output.send_key_action(key, action)
     elif keystate.is_multi and keystate.action.just_pressed():
         # debug("multi pressed", key)
@@ -387,7 +409,7 @@ def on_key(keystate, context):
         # not a modifier or a multi-key, so pass straight to transform
         transform_key(key, action, context)
 
-    if action.is_pressed():
+    if action.just_pressed():
         _last_key = key
 
 
@@ -426,7 +448,6 @@ def transform_key(key, action, context):
         for s in held:
             s.spent = True
         debug("spent modifiers", [_.key for _ in held])
-        # Found key in "mappings". Execute commands defined for the key.
         reset_mode = handle_commands(mappings[combo], key, action, combo)
         if reset_mode:
             _mode_maps = None
@@ -440,6 +461,10 @@ def transform_key(key, action, context):
         _output.send_key_action(key, action)
 
     _mode_maps = None
+
+
+# ─── AUTO BIND AND STICKY KEYS SUPPORT ──────────────────────────────────────────
+
 
 # deals with the single modifier mapped to another modifier case
 def simple_sticky(combo, output_combo):
@@ -465,6 +490,9 @@ def auto_sticky(commands, input_combo):
             for k in _sticky.values():
                 if not _output.is_mod_pressed(k):
                     _output.send_key_action(k, Action.PRESS)
+
+
+# ─── COMMAND PROCESSING ─────────────────────────────────────────────────────────
 
 
 def handle_commands(commands, key, action, input_combo = None):

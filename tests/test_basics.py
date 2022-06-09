@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
 from keyszer.output import setup_uinput
-from keyszer.key import Key
+from keyszer.models.key import Key
 from keyszer.models.action import Action
 from keyszer import input
 from keyszer.config_api import *

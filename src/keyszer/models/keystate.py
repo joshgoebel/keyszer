@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, replace
-from ..key import Key
-from ..models.action import Action
+from .key import Key
+from .action import Action
 import time
 
 @dataclass

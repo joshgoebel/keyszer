@@ -1,4 +1,4 @@
-from ..key import Key
+from .key import Key
 from .modifier import Modifier
 from ..logger import *
 

@@ -1,4 +1,4 @@
-from ..key import Key
+from .key import Key
 
 class Modifier:
     _BY_KEY = {}

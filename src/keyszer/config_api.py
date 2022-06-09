@@ -1,6 +1,6 @@
 import itertools
 
-from .key import Key 
+from .models.key import Key 
 from .models.action import Action
 from .models.combo import Combo
 from .models.modifier import Modifier

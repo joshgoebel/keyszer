@@ -8,7 +8,7 @@ from .transform import on_event, boot_config
 from . import transform
 from .output import setup_uinput
 from .logger import *
-from .key import Key
+from .models.key import Key
 import asyncio
 import signal
 
