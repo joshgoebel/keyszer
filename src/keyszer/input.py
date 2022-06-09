@@ -2,13 +2,13 @@
 
 from evdev import ecodes, InputDevice, list_devices, InputEvent
 from .models.action import Action
+from .models.key import Key
 from select import select
 from sys import exit
 from .transform import on_event, boot_config
 from . import transform
 from .output import setup_uinput
 from .logger import *
-from .models.key import Key
 import asyncio
 import signal
 

@@ -354,12 +354,12 @@ def on_event(event, device_name):
 
 def on_key(keystate, context):
     global _last_key
-    key = keystate.key
-    action = keystate.action
-
     hold_output = False
     can_suspend = False
+
+    key, action = (keystate.key, keystate.action)
     debug("on_key", key, action)
+
     if Modifier.is_modifier(key):
         if action.is_pressed():
             if none_pressed():
@@ -385,12 +385,12 @@ def on_key(keystate, context):
             hold_output = True
         if not hold_output:
             _output.send_key_action(key, action)
-    elif keystate.is_multi and keystate.action.just_pressed():
+    elif keystate.is_multi and action.just_pressed():
         # debug("multi pressed", key)
         keystate.suspended = True
         update_pressed_states(keystate)
         suspend_keys()
-    elif not action.is_pressed():
+    elif action.is_released():
         if _output.is_pressed(key):
             _output.send_key_action(key, action)
         if keystate.is_multi:
@@ -399,7 +399,7 @@ def on_key(keystate, context):
             # before the timeout, so we are a normal momentary
             # input
             if _last_key == key:
-                keystate.resolve_momentary()
+                keystate.resolve_as_momentary()
             else: 
                 keystate.resolve_as_modifier()
             resume_state(keystate)

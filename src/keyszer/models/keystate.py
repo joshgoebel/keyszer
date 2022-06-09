@@ -28,7 +28,8 @@ class Keystate:
         return self.action == Action.PRESS \
             or self.action == Action.REPEAT
 
-    def resolve_momentary(self):
+    def resolve_as_momentary(self):
+        # self.key = self.key # NOP
         self.is_multi = False
         self.multikey = False
 
