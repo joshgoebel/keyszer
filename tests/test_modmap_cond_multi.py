@@ -16,7 +16,7 @@ from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    suspended
+    is_suspended
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
@@ -39,7 +39,7 @@ def setup_function(module):
     reset_configuration()
 
 # OLD API
-def test_weird_salute_firefox():
+async def test_weird_salute_firefox():
     define_conditional_multipurpose_modmap(re.compile(r'Firefox'),{
         Key.A: [Key.A, Key.LEFT_CTRL],
         Key.B: [Key.B, Key.LEFT_ALT],
@@ -68,7 +68,7 @@ def test_weird_salute_firefox():
 
 
 # OLD API
-def test_weird_salute_not_firefox():
+async def test_weird_salute_not_firefox():
     define_conditional_multipurpose_modmap(re.compile(r'Firefox'),{
         Key.A: [Key.A, Key.LEFT_CTRL],
         Key.B: [Key.B, Key.LEFT_ALT],

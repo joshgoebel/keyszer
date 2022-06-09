@@ -10,13 +10,15 @@ from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    suspended, \
+    is_suspended, \
     reset_transform
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
 from evdev.ecodes import EV_KEY, EV_SYN
 from evdev.events import InputEvent
+from keyszer import logger
+logger.VERBOSE = True
 import asyncio
 import pytest
 import pytest_asyncio
@@ -36,13 +38,13 @@ def setup_function(module):
 async def test_suspended():
     suspend_keys()
     await asyncio.sleep(0.1)
-    assert suspended()
+    assert is_suspended()
 
 @pytest.mark.looptime
 async def test_unsuspend_after_second():
     suspend_keys()
     await asyncio.sleep(2)
-    assert not suspended()
+    assert not is_suspended()
 
 async def test_plain_keys():
     boot_config()

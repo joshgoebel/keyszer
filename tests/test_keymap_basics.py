@@ -12,7 +12,8 @@ from keyszer.config_api import *
 from keyszer.transform import boot_config, on_event, reset_transform
 from lib.uinput_stub import UInputStub
 from lib.api import *
-
+from keyszer import logger
+logger.VERBOSE = True
 from evdev.ecodes import EV_KEY, EV_SYN
 from evdev.events import InputEvent
 import asyncio

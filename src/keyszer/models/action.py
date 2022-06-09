@@ -8,6 +8,9 @@ class Action(IntEnum):
     def is_pressed(self):
         return self == Action.PRESS or self == Action.REPEAT
 
+    def just_pressed(self):
+        return self == Action.PRESS
+
     def is_released(self):
         return self == Action.RELEASE
 

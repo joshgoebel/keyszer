@@ -2,7 +2,7 @@
 
 __name__ = "keyszer"
 
-__version__ = "0.4.99"
+__version__ = "0.5.0"
 
 __description__ = "A smart, flexible key remapper for Linux/X11."
 

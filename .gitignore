@@ -7,3 +7,7 @@ extended.sh
 real_config.py
 tmp/
 config0/
+
+build
+dist
+.vscode

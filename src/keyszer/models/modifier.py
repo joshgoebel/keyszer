@@ -63,7 +63,11 @@ class Modifier:
     def all_aliases(cls):
         mods = cls._MODIFIERS.values()
         return [alias for mod in mods for alias in mod.aliases]
-    
+
+    @classmethod
+    def is_modifier(cls, key):
+        return key in cls._BY_KEY
+
     @classmethod
     def from_alias(cls, alias):
         for mod in cls._MODIFIERS.values():

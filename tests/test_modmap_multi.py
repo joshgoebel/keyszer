@@ -12,12 +12,14 @@ from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    suspended
+    is_suspended
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
 from evdev.ecodes import EV_KEY, EV_SYN
 from evdev.events import InputEvent
+from keyszer import logger
+logger.VERBOSE = True
 import asyncio
 import pytest
 import pytest_asyncio
@@ -34,7 +36,7 @@ def setup_function(module):
     setup_uinput(_out)
     reset_configuration()
 
-def test_weird_abc_to_ctrl_alt_del():
+async def test_weird_abc_to_ctrl_alt_del():
     multipurpose_modmap("default",{
         Key.A: [Key.A, Key.LEFT_CTRL],
         Key.B: [Key.B, Key.LEFT_ALT],
@@ -61,7 +63,7 @@ def test_weird_abc_to_ctrl_alt_del():
     ]  
 
 
-def test_enter_is_enter_and_control():
+async def test_enter_is_enter_and_control():
     multipurpose_modmap("default",
         # Enter is enter when pressed and released. Control when held down.
         {Key.ENTER: [Key.ENTER, Key.RIGHT_CTRL]}

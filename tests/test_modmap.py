@@ -9,7 +9,7 @@ from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    suspended
+    is_suspended
 from lib.uinput_stub import UInputStub
 from lib.api import *
 

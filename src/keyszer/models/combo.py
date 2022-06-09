@@ -1,6 +1,6 @@
 from ..key import Key
 from .modifier import Modifier
-
+from ..logger import *
 
 class Combo:
 
@@ -23,11 +23,11 @@ class Combo:
 
         self.ordered_mods = ordered_mods or list(modifiers)
         self.modifiers = modifiers
+        self.key = key
         if len(self.modifiers) != len(self.ordered_mods):
             debug('mismatch in', self)
-            debug(self.modifiers)
-            debug(self.ordered_mods)
-        self.key = key
+            debug("mods", self.modifiers)
+            debug("ordered mods", self.ordered_mods)
 
     def __eq__(self, other):
         if isinstance(other, Combo):
