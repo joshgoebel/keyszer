@@ -152,9 +152,9 @@ def resume_keys():
     for mod in states:
         # sticky keys (input side) remain silently held
         # and are only lifted when they are lifted from the input
-        # if mod in _sticky:
-            # continue
         mod.suspended = False
+        if mod.key in _sticky:
+            continue
         # if some other key is waking us up then we must be a modifier (we know
         # because if we were waking ourself it would happn in on_key)
         if mod.is_multi:

@@ -9,7 +9,8 @@ from keyszer.transform import suspend_keys, \
     resume_keys, \
     boot_config, \
     on_event, \
-    is_suspended
+    is_suspended, \
+    reset_transform
 from lib.uinput_stub import UInputStub
 from lib.api import *
 
@@ -28,6 +29,7 @@ def setup_function(module):
     _out = UInputStub()
     setup_uinput(_out)
     reset_configuration()
+    reset_transform()
 
 async def test_command_to_control():
     modmap("default", {
