@@ -1,6 +1,7 @@
 from .key import Key
 
 class Modifier:
+    """represents a keyboard combo modifier, such as Shift or Cmd"""
     _BY_KEY = {}
     _MODIFIERS = {}
     _IDS = iter(range(100))
@@ -25,7 +26,7 @@ class Modifier:
 
     def __eq__(self, other):
         return self._id == other._id
-    
+
     def __hash__(self):
         return self._id
 

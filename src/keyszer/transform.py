@@ -10,16 +10,20 @@ import asyncio
 import evdev
 
 from .lib.key_context import KeyContext
-from .models.key import Key 
+from .models.key import Key
 from .models.action import Action
 from .models.modifier import Modifier
 from .models.combo import Combo
 from .models.keystate import Keystate
-from .models.modifier import Modifier
 from .logger import *
-from .output import Output 
+from .output import Output
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
+
+_modmaps = None
+_multi_modmaps = None
+_toplevel_keymaps = None
+_timeout = None
 
 def boot_config():
     global _modmaps
@@ -82,7 +86,7 @@ def update_pressed_states(keystate):
     # release
     if keystate.action == Action.RELEASE:
         del _states[keystate.inkey]
-    
+
     # press / add
     if not keystate.inkey in _states:
         # add state
@@ -145,7 +149,7 @@ def resume_keys():
 
     # keys = get_suspended_mods()
     states = [x for x in _states.values() if x.suspended]
-    if (len(states) > 1):
+    if len(states) > 1:
         debug("resuming keys:", [x.key for x in states])
     # TODO: does resuming mean we need to mark as unspent?
     _spent_modifiers_keys = {}
@@ -162,7 +166,7 @@ def resume_keys():
             mod.multikey=False
             mod.is_multi=False
         _output.send_key_action(mod.key, Action.PRESS)
-    
+
 
 def resume_state(keystate):
     resume_keys()
@@ -251,7 +255,7 @@ def apply_modmap(keystate, context):
     inkey = keystate.inkey
     keystate.key = inkey
     # first modmap is always the default, unconditional
-    active_modmap = _modmaps[0] 
+    active_modmap = _modmaps[0]
     #debug("active", active_modmap)
     conditional_modmaps = _modmaps[1:]
     #debug("conditionals", conditional_modmaps)
@@ -260,7 +264,7 @@ def apply_modmap(keystate, context):
             if modmap.conditional(context):
                 active_modmap = modmap
                 break
-    if active_modmap: 
+    if active_modmap:
         if inkey in active_modmap:
             debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
             keystate.key = active_modmap[inkey]
@@ -336,14 +340,14 @@ def on_event(event, device_name):
     key = Key(event.code)
 
     ks = find_keystate_or_new(
-        inkey = key, 
+        inkey = key,
         action = action
     )
 
     debug(f"in {key} ({action})", ctx = "II")
 
     # we only do modmap on the PRESS pass, keys may not
-    # redefine themselves midstream while repeating or 
+    # redefine themselves midstream while repeating or
     # as they are lifted
     if not ks.key:
         apply_modmap(ks, context)
@@ -368,13 +372,13 @@ def on_key(keystate, context):
         elif action.is_released():
             if is_sticky(key):
                 outkey = _sticky[key]
-                _output.send_key_action(outkey, Action.RELEASE)    
+                _output.send_key_action(outkey, Action.RELEASE)
                 del _sticky[key]
             elif keystate.spent:
                 debug("silent lift of spent modifier", key)
                 hold_output = True
                 keystate.spent = False
-            else:     
+            else:
                 debug("resume because of mod release")
                 resume_keys()
 
@@ -400,7 +404,7 @@ def on_key(keystate, context):
             # input
             if _last_key == key:
                 keystate.resolve_as_momentary()
-            else: 
+            else:
                 keystate.resolve_as_modifier()
             resume_state(keystate)
             transform_key(key, action, context)
@@ -474,10 +478,10 @@ def simple_sticky(combo, output_combo):
         return {}
     # debug("simple_sticky (one mod => one mod)", combo, output_combo)
 
-    m = {}
-    m[next(iter(inp)).get_key()] = next(iter(out)).get_key()
-    debug("AUTO-STICKY:", m)
-    return m
+    stuck = {}
+    stuck[list(inp)[0].get_key()] = list(out)[0].get_key()
+    debug("AUTO-STICKY:", stuck)
+    return stuck
 
 def auto_sticky(commands, input_combo):
     global _sticky
@@ -507,16 +511,16 @@ def handle_commands(commands, key, action, input_combo = None):
 
     auto_sticky(commands, input_combo)
 
-    # resuspend any keys still not exerted on the output, giving 
+    # resuspend any keys still not exerted on the output, giving
     # them a chance to be lifted or to trigger another macro as-is
-    if (is_suspended()):
+    if is_suspended():
         resuspend_keys()
 
     # Execute commands
     for command in commands:
         if callable(command):
             commands = command()
-            # very likely we're given None though which 
+            # very likely we're given None though which
             # means we can just do nothing at all and
             # assume that running the command was the
             # actual operation we care about

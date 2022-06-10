@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from enum import Enum, unique, IntEnum
+from enum import IntEnum
 
 # https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
 class Key(IntEnum):
+    """ representation of a single keyboard key"""
     RESERVED = 0
     ESC = 1
     KEY_1 = 2
@@ -726,5 +727,3 @@ class Key(IntEnum):
 
     def __str__(self):
         return self.name
-
-

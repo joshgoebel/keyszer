@@ -1,6 +1,6 @@
 
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import sys
 sys.modules["keyszer.xorg"] = __import__('lib.xorg_mock',
@@ -41,7 +41,7 @@ async def test_cond_modmap_wins_over_default_modmap():
     modmap("default", {
         Key.RIGHT_CTRL: Key.LEFT_META,
     })
-    conditional_modmap(re.compile(r'Emacs'), {
+    define_conditional_modmap(re.compile(r'Emacs'), {
         Key.RIGHT_CTRL: Key.ESC,
     })
 
@@ -70,10 +70,10 @@ async def test_cond_modmap_wins_over_default_modmap():
         (PRESS, Key.F),
         (RELEASE, Key.F),
         (RELEASE, Key.ESC),
-    ]   
+    ]
 
 async def test_when_in_emacs():
-    conditional_modmap(re.compile(r'Emacs'), {
+    define_conditional_modmap(re.compile(r'Emacs'), {
         Key.RIGHT_CTRL: Key.ESC,
     })
 
@@ -102,7 +102,7 @@ async def test_when_in_emacs():
         (PRESS, Key.F),
         (RELEASE, Key.F),
         (RELEASE, Key.ESC),
-    ]   
+    ]
 
 @pytest.mark.skip
 async def test_sticky_switch_modmaps_midstream():
