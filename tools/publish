@@ -1,0 +1,12 @@
+#!/bin/bash
+
+function publish {
+  echo "Publishing..."
+  python3 -m twine upload dist/*
+}
+
+read -p "Publish [y/N]? " yn
+case $yn in
+  [Yy]*) publish ;;
+  [Nn]*) echo "Doing nothing"; return 1 ;;
+esac
