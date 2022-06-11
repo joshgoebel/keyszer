@@ -24,7 +24,8 @@ def uinput_device_exists():
 def has_access_to_uinput():
     from evdev.uinput import UInputError
     try:
-        from keyszer.output import _uinput  # noqa: F401
+        from keyszer.output import setup_uinput  # noqa: F401
+        setup_uinput()
         return True
     except UInputError:
         return False

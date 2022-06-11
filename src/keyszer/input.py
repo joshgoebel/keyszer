@@ -132,7 +132,6 @@ def main_loop(device_matches, device_watch):
     inotify = None
 
     boot_config()
-    setup_uinput()
     wakeup_output()
 
     device_filter = DeviceFilter(device_matches)
