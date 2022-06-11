@@ -46,6 +46,8 @@ def main():
                         help='increase debug logging')
     parser.add_argument('--list-devices', dest='list_devices', action='store_true',
                         help="")
+    parser.add_argument('--check', dest='check_config', action='store_true',
+                        help="evaluate config script, check for syntax errors")
     parser.add_argument('--version', dest='show_version', action='store_true',
                         help='')
     parser.add_argument('--very-bad-idea', dest='run_as_root', action='store_true',
@@ -76,6 +78,19 @@ def main():
         print_device_list(get_devices_list())
         exit(0)
 
+    if args.check_config:
+        config_good = False
+        try:
+            eval_config(args.config)
+            log("CONFIG: Looks good to me.")
+            config_good = True
+        except:
+            import traceback
+            error("CONFIG: No bueno, we have a problem...")
+            traceback.print_exc()
+        exit(0) if config_good else exit(1)
+
+
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
         error("""The '/dev/uinput' device does not exist.
@@ -91,7 +106,6 @@ Please check access permissions for /dev/uinput.""")
         sys.exit(1)
 
     
-
     # Load configuration file
     eval_config(args.config)
 
