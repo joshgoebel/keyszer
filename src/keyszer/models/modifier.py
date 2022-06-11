@@ -83,9 +83,9 @@ Modifier("ALT", aliases = ["Alt", "M"], keys = [Key.LEFT_ALT, Key.RIGHT_ALT])
 Modifier("R_SHIFT", aliases = ["RShift"], key = Key.RIGHT_SHIFT)
 Modifier("L_SHIFT", aliases = ["LShift"], key = Key.LEFT_SHIFT)
 Modifier("SHIFT", aliases = ["Shift"], keys = [Key.LEFT_SHIFT, Key.RIGHT_SHIFT])
-Modifier("R_SUPER", aliases = ["RSuper", "RWin"], key = Key.RIGHT_META)
-Modifier("L_SUPER", aliases = ["LSuper", "LWin"], key = Key.LEFT_META)
-Modifier("SUPER", aliases = ["Super", "Win"], keys = [Key.LEFT_META, Key.RIGHT_META])
+Modifier("R_SUPER", aliases = ["RSuper", "RWin", "RCommand", "RCmd"], key = Key.RIGHT_META)
+Modifier("L_SUPER", aliases = ["LSuper", "LWin", "LCommand", "LCmd"], key = Key.LEFT_META)
+Modifier("SUPER", aliases = ["Super", "Win", "Command", "Cmd"], keys = [Key.LEFT_META, Key.RIGHT_META])
 
 
 
