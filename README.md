@@ -389,7 +389,18 @@ conditional(
 
 ## FAQ
 
-None yet.
+*Can I remap the `Fn` key?*
+
+Most laptops do not allow this as the `Fn` key is not directly exposed to the operating system.  On some keyboards it's just another key.  To find out you can run `evtest`.  Point it to your keyboard device and then hit a few keys; then try `Fn`.  If you get output, then you can map `Fn`.  If not, you can't.
+
+Here is an example from a full size Apple keyboard I have:
+
+```
+Event: time 1654948033.572989, type 1 (EV_KEY), code 464 (KEY_FN), value 1
+Event: time 1654948033.572989, -------------- SYN_REPORT ------------
+Event: time 1654948033.636611, type 1 (EV_KEY), code 464 (KEY_FN), value 0
+Event: time 1654948033.636611, -------------- SYN_REPORT ------------
+```
 
 ## License
 
