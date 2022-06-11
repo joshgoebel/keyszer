@@ -236,7 +236,7 @@ The configuration API:
 
 - `timeout(s)`
 - `add_modifier(name, aliases, key/keys)`
-- `keymap(name, map)`
+- `keymap(name, map, when)`
 - `modmap(name, map)`
 - `multipurpose_modmap(name, map)`
 - `conditional(condition_fn, map)` - used to wrap maps and only apply them conditionally
@@ -270,9 +270,9 @@ conditional(wm_class_match("^Firefox$"),
 The opposite of `wm_class_match`, matches only when the regex is NOT a match.
 
 
-### `modmap(name, mappings)`
+### `modmap(name, mappings, when)`
 
-Entirely maps one key to a different key, in all contexts.  Note that the default modmap will be overruled by any conditional modmaps that apply.
+Entirely maps one key to a different key, in all contexts.  Note that the default modmap will be overruled by any conditional modmaps that apply.  `when` can optionally be passed to make the modmap conditional.
 
 ```py
 modmap("default", {
@@ -298,10 +298,10 @@ multipurpose_modmap("default",
 Defines a keymap consisting of `mappings` of the input combos mapped to output equivalents.
 
 ```py
-keymap("mac like", {
+keymap("Firefox", {
     # when Cmd-S is hit instead send Ctrl-S
     K("Cmd-s"): K("Ctrl-s"),
-})
+}, when = lambda ctx: ctx.wm_class == "Firefox")
 ```
 
 Argument `mappings` is a dictionary in the form of `{key: command, key2:
