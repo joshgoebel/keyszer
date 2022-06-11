@@ -38,8 +38,8 @@ async def test_OLD_API_multiple_keys_at_once():
 
     window("Firefox")
     define_keymap(re.compile("Firefox"),{
-        K("C-M-j"): K("C-TAB"),
-        K("C-M-k"): K("C-Shift-TAB"),
+        K("C-Alt-j"): K("C-TAB"),
+        K("C-Alt-k"): K("C-Shift-TAB"),
     })
 
     boot_config()
@@ -90,8 +90,8 @@ async def test_multiple_keys_at_once():
     window("Firefox")
     conditional(lambda ctx: re.compile("Firefox").search(ctx.wm_class),
         keymap("Firefox",{
-            K("C-M-j"): K("C-TAB"),
-            K("C-M-k"): K("C-Shift-TAB"),
+            K("C-Alt-j"): K("C-TAB"),
+            K("C-Alt-k"): K("C-Shift-TAB"),
         })
     )
 
@@ -117,8 +117,8 @@ async def test_multiple_combos_without_releasing_all_nonsticky():
     window("Firefox")
     conditional(lambda ctx: re.compile("Firefox").search(ctx.wm_class),
         keymap("Firefox",{
-            K("C-M-j"): K("C-TAB"),
-            K("C-M-k"): K("C-Shift-TAB"),
+            K("C-Alt-j"): K("C-TAB"),
+            K("C-Alt-k"): K("C-Shift-TAB"),
         })
     )
 
