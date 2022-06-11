@@ -144,6 +144,18 @@ def define_timeout(seconds=1):
     _TIMEOUT = seconds
 
 
+def add_modifier(name, aliases, key = None, keys = None):
+    """
+    Creates a new modifier and binds it to a key (or keys)
+
+    After creation this modifier can be used in combos by using
+    it's alias just like any of the built-in modifiers.
+
+    add_modifier("HYPER", aliases = ["Hyper"], key = Key.F24)
+    """
+    return Modifier(name, aliases, key = key, keys = keys)
+
+
 def conditional(fn, what):
     """apply a conditional function to a keymap or modmap"""
     # TODO: check that fn is a valid conditional

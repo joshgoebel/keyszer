@@ -235,6 +235,7 @@ For an example configuration please see [`example/config.py`](https://github.com
 The configuration API:
 
 - `timeout(s)`
+- `add_modifier(name, aliases, key/keys)`
 - `keymap(name, map)`
 - `modmap(name, map)`
 - `multipurpose_modmap(name, map)`
@@ -243,6 +244,14 @@ The configuration API:
 ### `timeout(s)`
 
 Sets the number of seconds before multi-purpose modmaps timeout... ie, how long you have to press and release a key before it's instead assuming it's part of a combo.
+
+### `add_modifier(name, aliases, key/keys)`
+
+Allows you to add custom modifiers and then map them to actual keys.
+
+```py
+add_modifier("HYPER", aliases = ["Hyper"], key = Key.F24)
+```
 
 ### `modmap(name, mappings)`
 
