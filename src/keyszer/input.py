@@ -135,11 +135,8 @@ def main_loop(device_matches, device_watch):
     setup_uinput()
     wakeup_output()
 
-    # fake=InputEvent(0, 0, ecodes.EV_SYN, 0,0)
     device_filter = DeviceFilter(device_matches)
     selected_devices = select_devices(device_filter)
-    for device in selected_devices:
-        add_device(devices, device)
 
     if device_watch:
         inotify = watch_dev_input()
@@ -147,8 +144,13 @@ def main_loop(device_matches, device_watch):
     try:
         loop = asyncio.get_event_loop()
 
-        for device in devices:
-            loop.add_reader(device, receive_input, device)
+        def add_initial_devices():
+            for device in selected_devices:
+                add_device(devices, device)
+
+        # add_device expects to be run from inside a running event loop
+        loop.call_soon(add_initial_devices)
+
         if device_watch:
             loop.add_reader(inotify.fd, _inotify_handler, devices, device_filter, inotify)
         
@@ -250,6 +252,8 @@ def remove_device(devices, device):
 
 def add_device(devices, device):
     info(f"Grabbing {device.name} ({device.fn})", ctx = "+K")
+    loop = asyncio.get_running_loop()
+    loop.add_reader(device, receive_input, device)
     devices.append(device)
     try:
         device.grab()
@@ -257,7 +261,3 @@ def add_device(devices, device):
         error("IOError when grabbing keyboard. Maybe, another instance is running?")
         shutdown()
         exit(1)
-    # except IOError:
-    #     # Ignore errors on new devices
-    #     print("IOError when grabbing new device: " + str(new_device.name))
-    #     continue
