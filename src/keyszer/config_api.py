@@ -293,7 +293,7 @@ def define_conditional_multipurpose_modmap(condition, mappings):
 
 # ============================================================ #
 
-def keymap(name, mappings):
+def keymap(name, mappings, when = None):
     """define and register a new keymap"""
     # Expand not L/R-specified modifiers
     # Suppose a nesting is not so deep
@@ -343,7 +343,7 @@ def keymap(name, mappings):
 
     expand(mappings)
 
-    km = Keymap(name, mappings)
+    km = Keymap(name, mappings, when = when)
     _KEYMAPS.append(km)
     return km
 

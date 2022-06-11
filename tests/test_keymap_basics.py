@@ -57,6 +57,33 @@ async def test_OLD_API_multiple_keys_at_once():
         (RELEASE, Key.LEFT_CTRL),
     ]
 
+
+@pytest.mark.looptime(False)
+async def test_wm_conditional_as_argument():
+
+    keymap("Firefox",{
+        K("a"): K("b"),
+    }, when = wm_class_match("Firefox"))
+    keymap("Firefox",{
+        K("a"): K("c"),
+    }, when = not_wm_class_match("Firefox"))
+
+    boot_config()
+
+    window("Firefox")
+    hit(Key.A)
+
+    window("shell")
+    hit(Key.A)
+
+    assert _out.keys() == [
+        (PRESS, Key.B),
+        (RELEASE, Key.B),
+        (PRESS, Key.C),
+        (RELEASE, Key.C),
+    ]
+
+
 @pytest.mark.looptime(False)
 async def test_multiple_keys_at_once():
 
