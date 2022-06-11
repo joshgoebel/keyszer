@@ -156,6 +156,20 @@ def add_modifier(name, aliases, key = None, keys = None):
     return Modifier(name, aliases, key = key, keys = keys)
 
 
+def wm_class_match(re_str):
+    rgx = re.compile(re_str)
+    def cond(ctx):
+        return rgx.search(ctx.wm_class)
+    return cond
+
+
+def not_wm_class_match(re_str):
+    rgx = re.compile(re_str)
+    def cond(ctx):
+        return not rgx.search(ctx.wm_class)
+    return cond
+
+
 def conditional(fn, what):
     """apply a conditional function to a keymap or modmap"""
     # TODO: check that fn is a valid conditional

@@ -253,6 +253,23 @@ Allows you to add custom modifiers and then map them to actual keys.
 add_modifier("HYPER", aliases = ["Hyper"], key = Key.F24)
 ```
 
+### `wm_class_match(re_str)`
+
+Helper to make matching conditionals a tiny bit simpler.
+
+```py
+conditional(wm_class_match("^Firefox$"),
+    keymap("Firefox",{
+        # ... keymap here
+    }))
+```
+
+
+### `not_wm_class_match(re_str)`
+
+The opposite of `wm_class_match`, matches only when the regex is NOT a match.
+
+
 ### `modmap(name, mappings)`
 
 Entirely maps one key to a different key, in all contexts.  Note that the default modmap will be overruled by any conditional modmaps that apply.
