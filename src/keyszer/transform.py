@@ -389,6 +389,7 @@ def on_key(keystate, context):
         elif action.is_released():
             if is_sticky(key):
                 outkey = _sticky[key]
+                debug(f"lift of sticky {key} => {outkey}")
                 _output.send_key_action(outkey, Action.RELEASE)
                 del _sticky[key]
             elif keystate.spent:
@@ -502,6 +503,9 @@ def simple_sticky(combo, output_combo):
 
 def auto_sticky(commands, input_combo):
     global _sticky
+
+    if len(_sticky) > 0:
+        return
 
     # sticky only applies to 1 => 1 mappings
     if len(commands)==1 and input_combo:
