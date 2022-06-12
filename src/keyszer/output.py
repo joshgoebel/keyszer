@@ -63,6 +63,13 @@ class Output:
         else:
             self._pressed_keys.discard(key)
 
+    def diag(self):
+        print("*** OUTPUT ***")
+        print("_pressed_modifier_keys:")
+        print(self._pressed_modifier_keys)
+        print("_pressed_keys")
+        print(self._pressed_keys)
+
     def __send_sync(self ):
         _uinput.syn()
 

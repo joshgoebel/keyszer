@@ -24,6 +24,9 @@ class Modifier:
     def __str__(self):
         return self.aliases[0]
 
+    def __repr__(self):
+        return self.aliases[0] + f"<Key.{self.keys[0]}>"
+
     def __eq__(self, other):
         return self._id == other._id
 

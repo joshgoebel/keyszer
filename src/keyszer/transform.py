@@ -197,6 +197,22 @@ def suspend_keys():
     loop = asyncio.get_event_loop()
     _suspend_timer = loop.call_later(1, resume_keys)
 
+# --- DUMP DIAGNOTICS ----
+
+def dump_diagnostics():
+    print("\n*** TRANSFORM  ***")
+    print(f"are we suspended: {is_suspended()}")
+    print("_suspend_timer:")
+    print(_suspend_timer)
+    print("_last_key:")
+    print(_last_key)
+    print("_states:")
+    print(_states)
+    print("_sticky:")
+    print(_sticky)
+    _output.diag()
+    print("")
+
 
 # ─── KEYBOARD INPUT PROCESSING HELPERS ──────────────────────────────────────────
 

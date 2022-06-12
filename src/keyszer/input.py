@@ -5,7 +5,7 @@ from .models.action import Action
 from .models.key import Key
 from select import select
 from sys import exit
-from .transform import on_event, boot_config
+from .transform import on_event, boot_config, dump_diagnostics
 from . import transform
 from .output import setup_uinput, VIRT_DEVICE_PREFIX
 from .logger import *
@@ -185,10 +185,15 @@ async def supervisor():
 
 def receive_input(device):
     for event in device.read():
-        if (event.type == ecodes.EV_KEY and event.code == Key.F16):
+        if event.type == ecodes.EV_KEY and event.code == Key.F16:
             error("BAIL: Emergency shutdown requested.")
             shutdown()
             exit(0)
+        if event.type == ecodes.EV_KEY and event.code == Key.F15:
+            action = Action(event.value)
+            if action.just_pressed():
+                dump_diagnostics()
+
         on_event(event, device.name)
 
 
