@@ -149,23 +149,24 @@ def resume_keys():
 
     # keys = get_suspended_mods()
     states = [x for x in _states.values() if x.suspended]
-    if len(states) > 1:
+    if len(states) > 0:
         debug("resuming keys:", [x.key for x in states])
-    # TODO: does resuming mean we need to mark as unspent?
-    _spent_modifiers_keys = {}
-    for mod in states:
+
+    for ks in states:
+        # TODO: does resuming mean we need to mark as unspent?
+        ks.spent = False
         # sticky keys (input side) remain silently held
         # and are only lifted when they are lifted from the input
-        mod.suspended = False
-        if mod.key in _sticky:
+        ks.suspended = False
+        if ks.key in _sticky:
             continue
         # if some other key is waking us up then we must be a modifier (we know
         # because if we were waking ourself it would happn in on_key)
-        if mod.is_multi:
-            mod.key=mod.multikey
-            mod.multikey=False
-            mod.is_multi=False
-        _output.send_key_action(mod.key, Action.PRESS)
+        if ks.is_multi:
+            ks.key=ks.multikey
+            ks.multikey=False
+            ks.is_multi=False
+        _output.send_key_action(ks.key, Action.PRESS)
 
 
 def resume_state(keystate):
