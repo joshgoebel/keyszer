@@ -360,6 +360,7 @@ def on_event(event, device_name):
         action = action
     )
 
+    debug()
     debug(f"in {key} ({action})", ctx = "II")
 
     # we only do modmap on the PRESS pass, keys may not

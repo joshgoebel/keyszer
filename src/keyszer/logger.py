@@ -6,7 +6,7 @@ def debug(*args, ctx = "DD"):
         return
 
     # allow blank lines without context
-    if len(args) == 1 and args[0]=="":
+    if len(args)==0 or (len(args) == 1 and args[0]==""):
         print("")
         return
     print(f"({ctx})", *args)
