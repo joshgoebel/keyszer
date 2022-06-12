@@ -7,7 +7,7 @@ from select import select
 from sys import exit
 from .transform import on_event, boot_config
 from . import transform
-from .output import setup_uinput
+from .output import setup_uinput, VIRT_DEVICE_PREFIX
 from .logger import *
 import asyncio
 import signal
@@ -66,7 +66,7 @@ class DeviceFilter(object):
                     return True
             return False
         # Exclude evdev device, we use for output emulation, from input monitoring list
-        if device.name == "py-evdev-uinput":
+        if VIRT_DEVICE_PREFIX in device.name:
             return False
         # Exclude none keyboard devices
         return is_keyboard_device(device)

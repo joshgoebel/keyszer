@@ -7,6 +7,7 @@ from .models.combo import Combo
 from .models.modifier import Modifier
 from .logger import debug
 
+VIRT_DEVICE_PREFIX = "Keyszer VIRTUAL"
 
 # Remove all buttons so udev doesn't think keyszer is a joystick
 _keyboard_codes = ecodes.keys.keys() - ecodes.BTN
@@ -31,7 +32,7 @@ _keyboard_codes.update(mouse_btns)
 _uinput = None
 
 def real_uinput():
-    return UInput(name="Keyszer VIRTUAL Keyboard",
+    return UInput(name=f"{VIRT_DEVICE_PREFIX} Keyboard",
         events={ecodes.EV_KEY: _keyboard_codes,
         ecodes.EV_REL: set([0,1,6,8,9]),
         })
