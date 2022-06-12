@@ -74,7 +74,8 @@ class Output:
 
     def send_event(self, event):
         _uinput.write_event(event)
-        self.__send_sync()
+        # TODO: do we need this? I think not.
+        #self.__send_sync()
 
     def send_key_action(self, key, action):
         self.__update_modifier_key_pressed(key, action)
