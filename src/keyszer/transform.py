@@ -470,7 +470,12 @@ def transform_key(key, action, context):
 
         held = get_pressed_states()
         for s in held:
-            s.spent = True
+            # if we are triggering a momentary on the output then we can mark ourselves
+            # spent, but if the key is already asserted on the output then we cannot
+            # count it as spent and must hold it so that it's release later will
+            # trigger the release on the output
+            if not _output.is_mod_pressed(s.key):
+                s.spent = True
         debug("spent modifiers", [_.key for _ in held])
         reset_mode = handle_commands(mappings[combo], key, action, combo)
         if reset_mode:
