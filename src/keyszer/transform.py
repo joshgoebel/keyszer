@@ -393,6 +393,7 @@ def on_key(keystate, context):
                 debug(f"lift of sticky {key} => {outkey}")
                 _output.send_key_action(outkey, Action.RELEASE)
                 del _sticky[key]
+                hold_output = True
             elif keystate.spent:
                 debug("silent lift of spent modifier", key)
                 hold_output = True
