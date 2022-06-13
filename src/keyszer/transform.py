@@ -16,21 +16,22 @@ from .models.modifier import Modifier
 from .models.combo import Combo
 from .models.keystate import Keystate
 from .logger import *
+from . import logger
 from .output import Output
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
 
 _modmaps = None
 _multi_modmaps = None
-_toplevel_keymaps = None
+_keymaps = None
 _timeout = None
 
 def boot_config():
     global _modmaps
     global _multi_modmaps
-    global _toplevel_keymaps
+    global _keymaps
     global _timeout
-    _modmaps, _multi_modmaps, _toplevel_keymaps, _timeout = \
+    _modmaps, _multi_modmaps, _keymaps, _timeout = \
             get_configuration()
 
 
@@ -437,47 +438,47 @@ def on_key(keystate, context):
         _last_key = key
 
 
-def transform_key(key, action, context):
+def transform_key(key, action, ctx):
     global _mode_maps
+    is_top_level = False
 
     combo = Combo(get_pressed_mods(), key)
 
     if _mode_maps is escape_next_key:
-        debug("Escape key: {}".format(combo))
+        debug(f"Escape key: {combo}")
         _output.send_key_action(key, action)
         _mode_maps = None
         return
 
-    is_top_level = False
+    # Decide keymap(s)
     if _mode_maps is None:
-        # Decide keymap(s)
         is_top_level = True
-        _mode_maps = []
-        keymap_names = []
-        for keymap in _toplevel_keymaps:
-            if keymap.conditional == None or keymap.conditional(context):
-                _mode_maps.append(keymap)
-                keymap_names.append(keymap.name)
+        _mode_maps = [km for km in _keymaps if km.matches(ctx)]
 
-    # _mode_maps: [global_map, local_1, local_2, ...]
-    for mappings in _mode_maps:
-        if combo not in mappings:
+    for keymap in _mode_maps:
+        if combo not in keymap:
             continue
 
-        debug("")
-        debug("WM_CLS '{}' | DEV '{}' | KMAPS = [{}]".format(context.wm_class, context.device_name, ", ".join(keymap_names)))
-        debug("  COMBO:", combo, "=>", mappings[combo], f"  [{mappings.name}]")
+        if logger.VERBOSE:
+            keymap_names = [map.name for map in _mode_maps]
+            name_list = ", ".join(keymap_names)
+            debug("")
+            debug(
+                f"WM_CLS '{ctx.wm_class}' | "
+                f"DV '{ctx.device_name}' | "
+                f"KMAPS = [{name_list}]")
+            debug(f"  COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
 
         held = get_pressed_states()
-        for s in held:
+        for ks in held:
             # if we are triggering a momentary on the output then we can mark ourselves
             # spent, but if the key is already asserted on the output then we cannot
             # count it as spent and must hold it so that it's release later will
             # trigger the release on the output
-            if not _output.is_mod_pressed(s.key):
-                s.spent = True
+            if not _output.is_mod_pressed(ks.key):
+                ks.spent = True
         debug("spent modifiers", [_.key for _ in held])
-        reset_mode = handle_commands(mappings[combo], key, action, combo)
+        reset_mode = handle_commands(keymap[combo], key, action, combo)
         if reset_mode:
             _mode_maps = None
         return
