@@ -378,7 +378,7 @@ def on_event(event, device_name):
 def on_key(keystate, context):
     global _last_key
     hold_output = False
-    can_suspend = False
+    should_suspend = False
 
     key, action = (keystate.key, keystate.action)
     debug("on_key", key, action)
@@ -386,7 +386,7 @@ def on_key(keystate, context):
     if Modifier.is_modifier(key):
         if action.is_pressed():
             if none_pressed():
-                can_suspend = True
+                should_suspend = True
 
         elif action.is_released():
             if is_sticky(key):
@@ -404,10 +404,13 @@ def on_key(keystate, context):
                 resume_keys()
 
         update_pressed_states(keystate)
-        if can_suspend or is_suspended():
+
+        if should_suspend or is_suspended():
             keystate.suspended = True
-            suspend_or_resuspend_keys()
             hold_output = True
+            if action.just_pressed():
+                suspend_or_resuspend_keys()
+
         if not hold_output:
             _output.send_key_action(key, action)
     elif keystate.is_multi and action.just_pressed():
