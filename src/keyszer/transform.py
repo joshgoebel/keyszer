@@ -154,7 +154,8 @@ def resume_keys():
         debug("resuming keys:", [x.key for x in states])
 
     for ks in states:
-        # TODO: does resuming mean we need to mark as unspent?
+        # spent keys that are held long enough to resume
+        # no longer count as spent
         ks.spent = False
         # sticky keys (input side) remain silently held
         # and are only lifted when they are lifted from the input
@@ -167,7 +168,10 @@ def resume_keys():
             ks.key=ks.multikey
             ks.multikey=False
             ks.is_multi=False
-        _output.send_key_action(ks.key, Action.PRESS)
+
+        if not ks.exerted_on_output:
+            ks.exerted_on_output = True
+            _output.send_key_action(ks.key, Action.PRESS)
 
 
 def resume_state(keystate):
@@ -394,11 +398,12 @@ def on_key(keystate, context):
                 debug(f"lift of BIND {key} => {outkey}")
                 _output.send_key_action(outkey, Action.RELEASE)
                 del _sticky[key]
-                hold_output = True
+                hold_output = not keystate.exerted_on_output
             elif keystate.spent:
-                debug("silent lift of spent modifier", key)
-                hold_output = True
-                keystate.spent = False
+                # if we are being released (after spent) before we can be resumed
+                # then our press (as far as output is concerned) should be silent
+                debug("silent lift of spent mod", key)
+                hold_output = not keystate.exerted_on_output
             else:
                 debug("resume because of mod release")
                 resume_keys()
@@ -413,11 +418,16 @@ def on_key(keystate, context):
 
         if not hold_output:
             _output.send_key_action(key, action)
+            if action.is_released():
+                keystate.exerted_on_output = False
+
     elif keystate.is_multi and action.just_pressed():
         # debug("multi pressed", key)
         keystate.suspended = True
         update_pressed_states(keystate)
         suspend_keys()
+
+    # regular key releases, not modifiers (though possibly a multi-mod)
     elif action.is_released():
         if _output.is_pressed(key):
             _output.send_key_action(key, action)
@@ -448,7 +458,7 @@ def transform_key(key, action, ctx):
     combo = Combo(get_pressed_mods(), key)
 
     if _mode_maps is escape_next_key:
-        debug(f"Escape key: {combo}")
+        debug(f"Escape key: {combo} => {key}")
         _output.send_key_action(key, action)
         _mode_maps = None
         return
@@ -480,7 +490,7 @@ def transform_key(key, action, ctx):
             # trigger the release on the output
             if not _output.is_mod_pressed(ks.key):
                 ks.spent = True
-        debug("spent modifiers", [_.key for _ in held])
+        debug("spent modifiers", [_.key for _ in held if _.spent])
         reset_mode = handle_commands(keymap[combo], key, action, combo)
         if reset_mode:
             _mode_maps = None
@@ -501,14 +511,26 @@ def transform_key(key, action, ctx):
 
 # binds the first input modifier to the first output modifier
 def simple_sticky(combo, output_combo):
-    inmods = combo.ordered_mods or []
-    outmods = output_combo.ordered_mods or []
+    inmods = combo.ordered_mods
+    outmods = output_combo.ordered_mods
     if len(inmods) == 0 or len(outmods) == 0:
         return {}
+    inkey = inmods[0].get_key()
+    outkey = outmods[0].get_key()
 
-    stuck = {
-        inmods[0].get_key(): outmods[0].get_key()
-    }
+    if inkey in _states:
+        ks = _states[inkey]
+        if ks.exerted_on_output:
+            # we are replacing the input key with the bound outkey, so if
+            # the input key is exerted on the output we should lift it
+            _output.send_key_action(inkey, Action.RELEASE)
+            # it's release later will still need to result in us lifting
+            # the sticky out key from output, but that is currently handled
+            # by `_sticky` in `on_key`
+            # TODO: this state info should likely move into `KeyState`
+            ks.exerted_on_output = False
+
+    stuck = { inkey: outkey }
     debug("BIND:", stuck)
     return stuck
 
@@ -518,6 +540,7 @@ def auto_sticky(combo, input_combo):
 
     # can not engage a second sticky over top of a first
     if len(_sticky) > 0:
+        debug("refusing to engage second sticky bind over existing sticky bind")
         return
 
     _sticky = simple_sticky(input_combo, combo)
@@ -566,7 +589,7 @@ def handle_commands(commands, key, action, input_combo = None):
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False
-        elif command == ComboHint.BIND:
+        elif command is ComboHint.BIND:
             _next_bind = True
             continue
         elif command is ignore_key:

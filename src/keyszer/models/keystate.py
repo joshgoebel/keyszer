@@ -19,6 +19,8 @@ class Keystate:
     # transform engine waiting for other input  
     suspended: bool = False
     is_multi: bool = False
+    exerted_on_output: bool = False
+    # if this keystate was spent by executing a combo
     spent: bool = False
     
     def copy(self):
