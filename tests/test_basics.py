@@ -109,3 +109,81 @@ async def test_terminate_should_release_keys():
         (RELEASE, Key.LEFT_SHIFT),
         (RELEASE, Key.LEFT_CTRL),
     ]
+
+@pytest.mark.looptime
+async def test_after_combo_should_lift_exerted_keys():
+    keymap("Firefox",{
+        K("C-j"): K("Alt-TAB"),
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    await asyncio.sleep(2)
+    press(Key.J)
+    release(Key.J)
+    release(Key.LEFT_CTRL)
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        # beginning of combo will release left ctrl since it's not part of combo
+        (RELEASE, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_ALT),
+        # but now we reassert left ctrl
+        (PRESS, Key.LEFT_CTRL),
+        # and finally we release it
+        (RELEASE, Key.LEFT_CTRL),
+    ]
+
+@pytest.mark.looptime
+async def test_sticky_combo_should_lift_exerted_keys_before_combo():
+    keymap("Firefox",{
+        K("C-j"): [bind, K("Alt-TAB")],
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    await asyncio.sleep(2)
+    press(Key.J)
+    release(Key.J)
+    release(Key.LEFT_CTRL)
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        # beginning of combo will release left ctrl since it's the inkey
+        # sticky and no longer needed once we assert the outkey sticky (alt)
+        (RELEASE, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_ALT),
+    ]
+
+@pytest.mark.looptime
+async def test_sticky_combo_with_sticky_inkey_in_output_combo():
+    keymap("Firefox",{
+        K("C-j"): [bind, K("Alt-C-TAB")],
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    await asyncio.sleep(2)
+    press(Key.J)
+    release(Key.J)
+    release(Key.LEFT_CTRL)
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        # we never lift left control (that was held)
+        # because it's part of the output combo
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.TAB),
+        (RELEASE, Key.TAB),
+        (RELEASE, Key.LEFT_ALT),
+        (RELEASE, Key.LEFT_CTRL),
+    ]
