@@ -93,9 +93,7 @@ Modifier("R_META", aliases = ["RSuper", "RWin", "RCommand", "RCmd", "RMeta"], ke
 Modifier("L_META", aliases = ["LSuper", "LWin", "LCommand", "LCmd", "LMeta"], key = Key.LEFT_META)
 Modifier("META", aliases = ["Super", "Win", "Command", "Cmd", "Meta"], keys = [Key.LEFT_META, Key.RIGHT_META])
 
-
-
-
-
-
-
+# Fn is either invisible to the OS (on some laptop hardware) or it's just a normal
+# key, but as a normal key it likely should be flagged as a modifier based on how
+# it's typically used
+Modifier("FN", aliases = ["Fn"], key = Key.KEY_FN)
