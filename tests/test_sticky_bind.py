@@ -39,7 +39,7 @@ def setup_function(module):
 async def test_single_key_auto_sticky():
 
     keymap("default", {
-        K("Super-TAB"): K("C-TAB"),
+        K("Super-TAB"): [bind, K("C-TAB") ],
         K("Super-Shift-Tab"): K("C-Shift-TAB"),
     })
 

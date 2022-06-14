@@ -13,7 +13,7 @@ from .lib.key_context import KeyContext
 from .models.key import Key
 from .models.action import Action
 from .models.modifier import Modifier
-from .models.combo import Combo
+from .models.combo import Combo, ComboHint
 from .models.keystate import Keystate
 from .logger import *
 from . import logger
@@ -391,7 +391,7 @@ def on_key(keystate, context):
         elif action.is_released():
             if is_sticky(key):
                 outkey = _sticky[key]
-                debug(f"lift of sticky {key} => {outkey}")
+                debug(f"lift of BIND {key} => {outkey}")
                 _output.send_key_action(outkey, Action.RELEASE)
                 del _sticky[key]
                 hold_output = True
@@ -499,33 +499,31 @@ def transform_key(key, action, ctx):
 # ─── AUTO BIND AND STICKY KEYS SUPPORT ──────────────────────────────────────────
 
 
-# deals with the single modifier mapped to another modifier case
+# binds the first input modifier to the first output modifier
 def simple_sticky(combo, output_combo):
-    inp = combo.modifiers or {}
-    out = output_combo.modifiers or {}
-    if len(inp) != 1 or len(out) != 1:
+    inmods = combo.ordered_mods or []
+    outmods = output_combo.ordered_mods or []
+    if len(inmods) == 0 or len(outmods) == 0:
         return {}
-    # debug("simple_sticky (one mod => one mod)", combo, output_combo)
 
-    stuck = {}
-    stuck[list(inp)[0].get_key()] = list(out)[0].get_key()
-    debug("AUTO-STICKY:", stuck)
+    stuck = {
+        inmods[0].get_key(): outmods[0].get_key()
+    }
+    debug("BIND:", stuck)
     return stuck
 
-def auto_sticky(commands, input_combo):
+
+def auto_sticky(combo, input_combo):
     global _sticky
 
+    # can not engage a second sticky over top of a first
     if len(_sticky) > 0:
         return
 
-    # sticky only applies to 1 => 1 mappings
-    if len(commands)==1 and input_combo:
-        if isinstance(commands[0], Combo):
-            command = commands[0]
-            _sticky = simple_sticky(input_combo, command)
-            for k in _sticky.values():
-                if not _output.is_mod_pressed(k):
-                    _output.send_key_action(k, Action.PRESS)
+    _sticky = simple_sticky(input_combo, combo)
+    for k in _sticky.values():
+        if not _output.is_mod_pressed(k):
+            _output.send_key_action(k, Action.PRESS)
 
 
 # ─── COMMAND PROCESSING ─────────────────────────────────────────────────────────
@@ -536,12 +534,13 @@ def handle_commands(commands, key, action, input_combo = None):
     returns: reset_mode (True/False) if this is True, _mode_maps will be reset
     """
     global _mode_maps
+    _next_bind = False
 
     if not isinstance(commands, list):
         commands = [commands]
 
-
-    auto_sticky(commands, input_combo)
+    # if input_combo and input_combo.hint == ComboHint.BIND:
+        # auto_sticky(commands[0], input_combo)
 
     # resuspend any keys still not exerted on the output, giving
     # them a chance to be lifted or to trigger another macro as-is
@@ -559,12 +558,17 @@ def handle_commands(commands, key, action, input_combo = None):
             if commands:
                 handle_commands(commands, key, action)
         elif isinstance(command, Combo):
+            if _next_bind:
+                auto_sticky(command, input_combo)
             _output.send_combo(command)
         elif isinstance(command, Key):
             _output.send_key(command)
         elif command is escape_next_key:
             _mode_maps = escape_next_key
             return False
+        elif command == ComboHint.BIND:
+            _next_bind = True
+            continue
         elif command is ignore_key:
             debug("ignore_key", key)
             return True
@@ -578,5 +582,6 @@ def handle_commands(commands, key, action, input_combo = None):
             return False
         else:
             debug("unknown command")
+        _next_bind = False
     # Reset keymap in ordinary flow
     return True

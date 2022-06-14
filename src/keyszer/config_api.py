@@ -7,14 +7,14 @@ from subprocess import Popen
 
 from .models.key import Key
 from .models.action import Action
-from .models.combo import Combo
+from .models.combo import Combo, ComboHint
 from .models.modifier import Modifier
 from .lib.modmap import Modmap, MultiModmap
 from .lib.keymap import Keymap
 from .logger import *
 
 # GLOBALS
-
+bind = ComboHint.BIND
 escape_next_key = {}
 pass_through_key = {}
 ignore_key = {}
