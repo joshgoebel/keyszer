@@ -521,14 +521,16 @@ def simple_sticky(combo, output_combo):
     if inkey in _states:
         ks = _states[inkey]
         if ks.exerted_on_output:
-            # we are replacing the input key with the bound outkey, so if
-            # the input key is exerted on the output we should lift it
-            _output.send_key_action(inkey, Action.RELEASE)
-            # it's release later will still need to result in us lifting
-            # the sticky out key from output, but that is currently handled
-            # by `_sticky` in `on_key`
-            # TODO: this state info should likely move into `KeyState`
-            ks.exerted_on_output = False
+            key_in_output = any([inkey in mod.keys for mod in outmods])
+            if not key_in_output:
+                # we are replacing the input key with the bound outkey, so if
+                # the input key is exerted on the output we should lift it
+                _output.send_key_action(inkey, Action.RELEASE)
+                # it's release later will still need to result in us lifting
+                # the sticky out key from output, but that is currently handled
+                # by `_sticky` in `on_key`
+                # TODO: this state info should likely move into `KeyState`
+                ks.exerted_on_output = False
 
     stuck = { inkey: outkey }
     debug("BIND:", stuck)
