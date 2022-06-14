@@ -323,7 +323,7 @@ def keymap(name, mappings, when = None):
             if isinstance(k, Combo):
                 expanded_modifiers = []
                 for modifier in k.modifiers:
-                    if not modifier.is_specified():
+                    if not modifier.is_specific():
                         expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
                     else:
                         expanded_modifiers.append([modifier])

@@ -33,9 +33,8 @@ class Modifier:
     def __hash__(self):
         return self._id
 
-    def is_specified(self):
-        prefix = self.name[0:2]
-        return prefix == "L_" or prefix == "R_"
+    def is_specific(self):
+        return len(self.keys) == 1
 
     def get_keys(self):
         return self.keys
