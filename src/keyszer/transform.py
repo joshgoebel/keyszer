@@ -575,13 +575,11 @@ def handle_commands(commands, key, action, input_combo = None):
     # Execute commands
     for command in commands:
         if callable(command):
-            commands = command()
-            # very likely we're given None though which
-            # means we can just do nothing at all and
-            # assume that running the command was the
-            # actual operation we care about
-            if commands:
-                handle_commands(commands, key, action)
+            # very likely we're just passing None forwards here but that OK
+            reset_mode = handle_commands(command(), key, action)
+            # if the command wants to disable reset, lets propogate that
+            if reset_mode is False:
+                return False
         elif isinstance(command, Combo):
             if _next_bind:
                 auto_sticky(command, input_combo)
