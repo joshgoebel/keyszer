@@ -1,4 +1,4 @@
-# keyszer - a smart key remapper for Linux/X11
+# keyszer - a smart key remapper for Linux
 
 ![work in progress](https://badgen.net/badge/status/beta?color=orange&scale=2)
 [![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink&scale=2)](https://discord.gg/nX6qSC8mer)
@@ -9,14 +9,18 @@
 Yes, this is a fork/reboot of the popular [xkeysnail](https://github.com/mooz/xkeysnail) project.  The xkeysnail project seems largely unmaintained since it's last release in Fall 2020;  by unmaintained I mean that the author no longer seems involved (no commits, no releases, no comms on issues, no response to emails, no GitHub activity, etc).
 
 
-**Is it ready to use/test?**
+**Is it ready for me to use/test?**
 
-Maybe.  _I'd call it early beta._  I've been using it myself full time with the Kinto.sh config file.  It's still a little rough and there are no doubt edge case bugs.  If you're comfortable running from source and sending detailed bug reports I'd love to have your help.  If you're comfortable hacking on the source, even better!
+Certainly.  I've been using it myself full time with a 99% stock Kinto.sh config file.  If you're comfortable running from source and sending detailed bug reports we'd love to have your help.  If you're comfortable hacking on the source, even better!
+
+See [UPGRADING_FROM_XKEYSNAIL.md](https://github.com/joshgoebel/keyszer/blob/exerted/UPGRADE_FROM_XKEYSNAIL.md) to get started with your upgrade.
 
 
 **Is this compatible with [Kinto.sh](https://github.com/rbreaves/kinto)?**
 
-That is the goal.  I haves plans to address the one major reason that kinto is using a fork with "sticky" modifier keys (for some combos)... at that point kinto should work just fine with `keyszer` - in fact even better since nested keymaps will start working again.
+**That is the plan.**  The major reason that Kinto.sh is using a fork has been resolved. Kinto.sh should simply "just work" with `keyszer`. In fact it should work better than before since many quirks with the Kinto version of xkeysnail are resolved. (such as nested combos not working, etc)
+
+Note: If you want to get ahead of the curve you will need to alter your `kinto.py` config file just slightly. [USING_WITH_KINTO.md](https://github.com/joshgoebel/keyszer/blob/exerted/USING_WITH_KINTO.md)
 
 
 **What features/fixes does it already have or have plans for in the near future?**
@@ -31,7 +35,7 @@ That is the goal.  I haves plans to address the one major reason that kinto is u
 - [x] [#9](https://github.com/joshgoebel/keyszer/issues/9) `Alt`/`Super` wrongly trigger other non-combos when used as part of a combo
 - [x] [#7](https://github.com/joshgoebel/keyszer/issues/7) Support for `Hyper` as a modifier
 - [ ] [#2](https://github.com/joshgoebel/keyszer/issues/2) Support for `WM_NAME` conditionals
-- [ ] [#11](https://github.com/joshgoebel/keyszer/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
+- [x] [#11](https://github.com/joshgoebel/keyszer/issues/11) Support "sticky" `Command-TAB` to proper support [Kinto.sh](https://github.com/rbreaves/kinto)
 
 
 **Can I help/contribute?**
@@ -41,7 +45,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 
 ---
 
-# keyszer - a smart key remapper for Linux/X11
+# keyszer - a smart key remapper for Linux
 
 <!-- [![latest version](https://badgen.net/pypi/v/keyszer?label=latest)]() -->
 [![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/keyszer/releases) 
