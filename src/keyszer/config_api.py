@@ -16,7 +16,6 @@ from .logger import *
 # GLOBALS
 bind = ComboHint.BIND
 escape_next_key = {}
-pass_through_key = {}
 ignore_key = {}
 
 # keycode translation

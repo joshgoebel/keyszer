@@ -19,7 +19,7 @@ from .logger import *
 from . import logger
 from .output import Output
 from .xorg import get_active_window_wm_class
-from .config_api import get_configuration,escape_next_key, pass_through_key, ignore_key
+from .config_api import get_configuration,escape_next_key, ignore_key
 
 _modmaps = None
 _multi_modmaps = None
@@ -596,10 +596,6 @@ def handle_commands(commands, key, action, input_combo = None):
             continue
         elif command is ignore_key:
             debug("ignore_key", key)
-            return True
-        elif command is pass_through_key:
-            debug("pass_thru_key", key)
-            _output.send_key_action(key, action)
             return True
         # Go to next keymap
         elif isinstance(command, dict):
