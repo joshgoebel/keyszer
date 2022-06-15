@@ -110,7 +110,7 @@ async def test_terminate_should_release_keys():
         (RELEASE, Key.LEFT_CTRL),
     ]
 
-def test_escape_next_key():
+async def test_escape_next_key():
     keymap("Firefox",{
         K("C-j"): escape_next_key,
         K("C-b"): K("Alt-TAB"),

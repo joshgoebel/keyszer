@@ -35,7 +35,7 @@ def setup_function(module):
     reset_configuration()
 
 
-def test_nested_keymaps():
+async def test_nested_keymaps():
     keymap("Firefox",{
         K("C-a"): {
             K("C-b"): {

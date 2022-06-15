@@ -7,6 +7,7 @@ from select import select
 from sys import exit
 from .transform import on_event, boot_config, dump_diagnostics
 from . import transform
+from . import config_api
 from .output import setup_uinput, VIRT_DEVICE_PREFIX
 from .logger import *
 import asyncio
@@ -15,6 +16,8 @@ import signal
 
 QWERTY = [Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y]
 A_Z_SPACE = [Key.SPACE, Key.A, Key.Z]
+
+CONFIG = config_api
 
 
 def is_keyboard_device(device):
@@ -185,14 +188,16 @@ async def supervisor():
 
 def receive_input(device):
     for event in device.read():
-        if event.type == ecodes.EV_KEY and event.code == Key.F16:
-            error("BAIL: Emergency shutdown requested.")
-            shutdown()
-            exit(0)
-        if event.type == ecodes.EV_KEY and event.code == Key.F15:
-            action = Action(event.value)
-            if action.just_pressed():
-                dump_diagnostics()
+        if event.type == ecodes.EV_KEY:
+            if event.code == CONFIG.EMERGENCY_EJECT_KEY:
+                error("BAIL OUT: Emergency eject - shutting down.")
+                shutdown()
+                exit(0)
+            if event.code == CONFIG.DUMP_DIAGNOSTICS_KEY:
+                debug("DIAG: Diagnostics requested.")
+                action = Action(event.value)
+                if action.just_pressed():
+                    dump_diagnostics()
 
         on_event(event, device.name)
 
