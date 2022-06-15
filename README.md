@@ -312,7 +312,6 @@ command2, ...}` where `key` and `command` take following forms:
     - `K("YYY")`: Dispatch custom key to the application.
     - `[command1, command2, ...]`: Execute commands sequentially.
     - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [multiple stroke keys](#multiple-stroke-keys) for details.
-    - `pass_through_key`: Pass through `key` to the application. Useful to override the global mappings behavior on certain applications.
     - `escape_next_key`: Escape next key.
     - arbitrary function: The function is executed and the returned value is used as a command.
 
