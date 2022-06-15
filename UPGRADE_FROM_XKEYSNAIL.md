@@ -14,6 +14,15 @@ import re
 from xkeysnail.transform import *
 ```
 
+### `LM`, `RM`, and `M` (Alt) no longer supported
+
+Replace these with the clearler `Alt` equivalents:
+
+- `LM` => `LAlt`
+- `RM` => `RAlt`
+- `M` => `Alt`
+
+
 ### Remove `pass_through_key`
 
 This feature never worked and has been removed.  If you want to pass a key, just repeat the combo on both sides:
