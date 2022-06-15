@@ -1,12 +1,15 @@
 __pycache__/
 .venv
 .pyc
+.idea
 keyszer.egg-info
 
 extended.sh
 real_config.py
 tmp/
 config0/
+reference_data/
+work/
 
 build
 dist
