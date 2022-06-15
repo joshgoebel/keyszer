@@ -1,26 +1,71 @@
 [project]
 name = "keyszer"
-version = "0.5.0"
-description = "A smart, flexible keymapper for Linux/X11."
+description = "A smart, flexible keymapper for Linux."
 keywords = [
     "keymapper"
 ]
 maintainers = [
     { name = "Josh Goebel", email = "hello@joshgoebel.com" }
 ]
+requires-python = ">=3.6"
 readme = "README.md"
+dynamic = ["version"]
 license.file = "LICENSE"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GPL3",
     "Operating System :: Linux"
 ]
+dependencies = [
+    "evdev ~= 1.5",
+    "python-xlib == 0.31",
+    "inotify_simple ~= 1.3",
+    "appdirs ~= 1.4",
+    "ordered_set ~= 4.1"
+]
 
 [project.urls]
 Home-page = "https://github.com/jgoebel/keyszer"
 Bug-tracker = "https://github.com/jgoebel/keyszer/issues"
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+[tool.hatch.envs.test]
+dependencies = [
+    "pytest",
+    "pytest-asyncio",
+    "looptime",
+    "toml"
+]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "looptime",
+    "toml"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool]
+
+[tool.hatch.version]
+path = "src/keyszer/info.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/bin",
+    "/src",
+    "/tests",
+    "/example",
+    "/*.md"
+]
+exclude = [
+    "/.github",
+    "/.gitignore",
+    "/docs"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/keyszer"]
