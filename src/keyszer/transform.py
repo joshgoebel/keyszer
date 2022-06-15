@@ -207,7 +207,7 @@ def suspend_keys():
 # --- DUMP DIAGNOTICS ----
 
 def dump_diagnostics():
-    print("\n*** TRANSFORM  ***")
+    print("*** TRANSFORM  ***")
     print(f"are we suspended: {is_suspended()}")
     print("_suspend_timer:")
     print(_suspend_timer)

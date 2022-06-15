@@ -32,6 +32,10 @@ _TIMEOUT = 1
 # keymaps
 _KEYMAPS = []
 
+# hotkeys for debugging
+DUMP_DIAGNOSTICS_KEY = Key.F15
+EMERGENCY_EJECT_KEY = Key.F16
+
 
 # needed for testing teardowns
 def reset_configuration():
@@ -79,6 +83,18 @@ def get_configuration():
         _TIMEOUT
     )
 
+
+# ─── HOTKEYS ──────────────────────────────────────────────────────────────────
+
+def dump_diagnostics_key(key):
+    global DUMP_DIAGNOSTICS_KEY
+    if isinstance(key, Key):
+        DUMP_DIAGNOSTICS_KEY = key
+
+def emergency_eject_key(key):
+    global EMERGENCY_EJECT_KEY
+    if isinstance(key, Key):
+        EMERGENCY_EJECT_KEY = key
 
 # ============================================================ #
 # Utility functions for keymap
