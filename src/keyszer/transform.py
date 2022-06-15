@@ -15,6 +15,7 @@ from .models.action import Action
 from .models.modifier import Modifier
 from .models.combo import Combo, ComboHint
 from .models.keystate import Keystate
+from .lib.keymap import Keymap
 from .logger import *
 from . import logger
 from .output import Output
@@ -597,7 +598,9 @@ def handle_commands(commands, key, action, input_combo = None):
             return True
         # Go to next keymap
         elif isinstance(command, dict):
-            _mode_maps = [command]
+            # TODO: we should really handle this at startup so we have a
+            # proper name here such as "Firefox (nested)" or something
+            _mode_maps = [Keymap("nested (anon)", command)]
             return False
         else:
             debug("unknown command")
