@@ -110,6 +110,28 @@ async def test_terminate_should_release_keys():
         (RELEASE, Key.LEFT_CTRL),
     ]
 
+def test_escape_next_key():
+    keymap("Firefox",{
+        K("C-j"): escape_next_key,
+        K("C-b"): K("Alt-TAB"),
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.J)
+    release(Key.J)
+    press(Key.B)
+    release(Key.B)
+    release(Key.LEFT_CTRL)
+
+    # thanks to escaping with just get a B rather
+    # than the C-b combo
+    assert _out.keys() == [
+        (PRESS, Key.B),
+        (RELEASE, Key.B),
+    ]
+
 @pytest.mark.looptime
 async def test_after_combo_should_lift_exerted_keys():
     keymap("Firefox",{
