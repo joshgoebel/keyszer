@@ -199,7 +199,7 @@ def define_modmap(mappings, name = "unnamed"):
 
 
 # new API, requires name
-def modmap(name, mappings):
+def modmap(name, mappings, when = None):
     """Defines modmap (keycode translation)
 
     Example:
@@ -208,7 +208,7 @@ def modmap(name, mappings):
         Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
-    mm = Modmap(name, mappings)
+    mm = Modmap(name, mappings, when = when)
     _MODMAPS.append(mm)
     return mm
 
@@ -262,12 +262,12 @@ def define_conditional_modmap(condition, mappings):
     # _conditional_mod_map.append((condition, mod_remappings))
 
 
-def multipurpose_modmap(name, mappings):
+def multipurpose_modmap(name, mappings, when = None):
     """new API for declaring multipurpose modmaps"""
     for _, value in mappings.items():
         # TODO: why, we don't use this anywhere???
         value.append(Action.RELEASE)
-    mmm = MultiModmap(name, mappings)
+    mmm = MultiModmap(name, mappings, when = when)
     _MULTI_MODMAPS.append(mmm)
     return mmm
 

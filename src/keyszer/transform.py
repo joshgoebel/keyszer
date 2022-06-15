@@ -164,7 +164,7 @@ def resume_keys():
         if ks.key in _sticky:
             continue
         # if some other key is waking us up then we must be a modifier (we know
-        # because if we were waking ourself it would happn in on_key)
+        # because if we were waking ourself it would happen in on_key)
         if ks.is_multi:
             ks.key=ks.multikey
             ks.multikey=False
