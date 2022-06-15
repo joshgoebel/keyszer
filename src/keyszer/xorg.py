@@ -5,8 +5,9 @@ import Xlib.display
 
 # TODO: keep tabs on active window vs constant querying?
 
-def get_active_window_wm_class(display=Xlib.display.Display()):
+def get_active_window_wm_class():
     """Get active window's WM_CLASS"""
+    display=Xlib.display.Display()
     current_window = display.get_input_focus().focus
     pair = get_class_name(current_window)
     if pair:
