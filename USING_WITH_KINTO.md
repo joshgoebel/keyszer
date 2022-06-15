@@ -1,16 +1,16 @@
-# Using `keyszer` with Kinto release 1.2-13
+# Using keyszer with Kinto release 1.2-13
 
-## Uppdate your `kinto.py` config file
+## Uppdating your kinto.py config file
 
-See `UPGRADE_FROM_XKEYSNAIL.md`.
+First, have a glace thru `UPGRADE_FROM_XKEYSNAIL.md`.
 
 - TLDR, remove `imports` from the top.
 - Fix `pass_through_key`, which has been removed.
 - Add `bind` to tabbing key combos (for sticky tabbing).
 
-**Replacing pass_through_key**
+**Replacing `pass_through_key`**
 
-This never worked, and Kinto has been using it as an "ignore" helper.  Luckily we can add this feature back with a single line at the top:
+This never worked, and Kinto has been using it as an "ignore" helper.  Luckily we can patch thiswith a single line at the top:
 
 ```py
 pass_through_key = ignore_key
@@ -33,9 +33,9 @@ K("RC-Shift-Tab"): [bind, K("Alt-Shift-Tab")],
 Note that you are replacing a single combo with an array of commands and adding `bind` as the first command in the sequence.
 
 
-## Running as root
+## Running as `root`
 
-This is no longer recommended but can be forced by passing `--very-bad-idea` to `keyszer`.This may be required (short-term) for use with the existing release of Kinto.  See our `README` for best security practices.
+This is no longer recommended but can be enabled by passing `--very-bad-idea` to `keyszer`.  This may be required (short-term) for use with the existing release of Kinto.  See our `README` for best security practices.
 
 
 ## Quiet vs Verbose
@@ -45,7 +45,7 @@ This is no longer recommended but can be forced by passing `--very-bad-idea` to 
 
 ## Updating your `xkeysnail.service`
 
-You'll need to update this to reference `keyszer` and also update the arguments:
+You'll need to update this to reference the `keyszer` script and also update the arguments:
 
 ```sh
 # before
@@ -61,9 +61,12 @@ _This is not exact_ (since the above is from the template rather than the final 
 - the config file is passed with `-c` now
 - replace any references to `xkeysnail` with `keyszer`
 - you may need to source your `venv` if you're using Python's Venv
+- you'll also need to update your `killdups.sh` script with the new executable name
 
 
 Contributions to these instructions are welcome for any early adventurers.
+
+For help: https://github.com/joshgoebel/keyszer/issues/36
 
 
 
