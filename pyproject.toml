@@ -24,6 +24,9 @@ dependencies = [
     "ordered_set ~= 4.1"
 ]
 
+[project.scripts]
+keyszer = "keyszer.cli:main"
+
 [project.urls]
 Home-page = "https://github.com/jgoebel/keyszer"
 Bug-tracker = "https://github.com/jgoebel/keyszer/issues"
