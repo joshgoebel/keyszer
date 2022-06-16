@@ -48,7 +48,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 # keyszer - a smart key remapper for Linux
 
 <!-- [![latest version](https://badgen.net/pypi/v/keyszer?label=latest)]() -->
-[![latest version](https://badgen.net/badge/version/0.4.99?color=orange)](https://github.com/joshgoebel/keyszer/releases) 
+[![latest version](https://badgen.net/badge/version/0.5.0?color=orange)](https://github.com/joshgoebel/keyszer/releases)
 [![](https://badgen.net/badge/python/3.10%20|%20%3F/blue)]()
 [![license](https://badgen.net/badge/license/GPL3/keyszer?color=cyan)](https://github.com/joshgoebel/keyszer/blob/main/LICENSE)
 
@@ -62,7 +62,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 [![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/keyszer/help%20welcome/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
 [![good first issue](https://badgen.net/github/label-issues/joshgoebel/keyszer/good%20first%20issue/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 
-`keyszer` is a keyboard remapping tool for X environment written in Python. It's similar `xmodmap` but allows more flexible remappings.
+`keyszer` is a keyboard remapping tool for the X environment written in Python. It's similar `xmodmap` but allows more flexible remappings.
 
 #### Features
 
@@ -73,7 +73,7 @@ Sure.  Just open an issue to discuss how you'd like to get involved or respond o
 - Uses low-level libraries (`evdev` and `uinput`), making remapping work almost everywhere
 
 
-This project was originally forked from [keyszer](https://github.com/mooz/keyszer) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs). The primary goals are to once again have an active maintainer and focus on improved reliability and security (no more root!).
+This project was forked from [keyszer](https://github.com/mooz/keyszer) which itself was based on the older [pykeymacs](https://github.com/DreaminginCodeZH/pykeymacs).
 
 
 
@@ -122,6 +122,7 @@ Requires **Python 3**.
     cd keyszer
     sudo pip3 install --upgrade .
 
+
 ### For testing/hacking/contributing
 
     git clone https://github.com/joshgoebel/keyszer.git
@@ -130,6 +131,7 @@ Requires **Python 3**.
     source .venv/bin/activate
     pip3 install -e .
     ./bin/keyszer -c config_file
+
 
 ## Setup Requirements
 
