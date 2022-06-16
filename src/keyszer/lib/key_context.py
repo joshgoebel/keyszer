@@ -5,7 +5,7 @@ class KeyContext:
         self._device_name = device_name
         self._X_ctx = None
 
-    def _query_window_context():
+    def _query_window_context(self):
         # cache this,  think it might be expensive
         if self._X_ctx is None:
             self._X_ctx = get_xorg_context()

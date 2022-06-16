@@ -17,7 +17,6 @@ from .models.keymap import Keymap
 from .lib.logger import *
 from .lib import logger
 from .output import Output
-from .xorg import get_active_window_wm_class
 from .config_api import get_configuration, escape_next_key, ignore_key
 
 _MODMAPS = None
@@ -307,13 +306,15 @@ def on_event(event, device_name):
     # if there is an X error (we don't have any window context)
     # then we turn off all mappings until it's resolved and act
     # more or less as a pass thru for all input => output
-    if not context.x_error:
-        # we only do modmap on the PRESS pass, keys may not
-        # redefine themselves midstream while repeating or
-        # as they are lifted
-        if not ks.key:
-            apply_modmap(ks, context)
-            apply_multi_modmap(ks, context)
+    if context.x_error:
+        ks.key = ks.key or ks.inkey
+
+    # we only do modmap on the PRESS pass, keys may not
+    # redefine themselves midstream while repeating or
+    # as they are lifted
+    if not ks.key:
+        apply_modmap(ks, context)
+        apply_multi_modmap(ks, context)
 
     on_key(ks, context)
 

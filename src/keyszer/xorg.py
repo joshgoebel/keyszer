@@ -1,45 +1,51 @@
 import Xlib.display
-from .logger import *
+from Xlib.display import Display
+from Xlib.error import ConnectionClosedError, DisplayConnectionError
+
+from .logger import error
 
 # https://github.com/python-xlib/python-xlib/blob/master/Xlib/display.py#L153
 # https://stackoverflow.com/questions/23786289/how-to-correctly-detect-application-name-when-changing-focus-event-occurs-with
 
 # TODO: keep tabs on active window vs constant querying?
 
-def get_display():
-    """Try to get the X display object"""
-    try:
-        display = Xlib.display.Display()
-        return display
-    except Xlib.error.DisplayConnectionError as xerror:
-        error(xerror)
-        return None
 
-X_ERROR_NO_CONTEXT = {
+NO_CONTEXT_WAS_ERROR = {
     "wm_class": "",
     "wm_name": "",
     "x_error": True
 }
 
+
 def get_xorg_context():
     """Get window context from Xorg, window name, class, whether there is an X error"""
-    display = get_display()
-    if display is None:
-        return X_ERROR_NO_CONTEXT
+    try:
+        display = Display()
 
-    wm_class = ""
-    wm_name = ""
-    input_focus_window = display.get_input_focus().focus
-    # (process name, class name)
-    pair = get_class_name(input_focus_window)
-    if pair:
-        wm_class = str(pair[1])
+        wm_class = ""
+        wm_name = ""
 
-    return {
-        "wm_class": wm_class,
-        "wm_name": wm_name,
-        "x_error": False
-    }
+        input_focus_window = display.get_input_focus().focus
+        wm_name = input_focus_window.get_wm_name()
+        # (process name, class name)
+        pair = get_class_name(input_focus_window)
+        #TODO: is this sometomes not a pair, but a string???
+        if pair:
+            wm_class = str(pair[1])
+
+        return {
+            "wm_class": wm_class,
+            "wm_name": wm_name,
+            "x_error": False
+        }
+
+    except ConnectionClosedError as xerror:
+        error(xerror)
+        return NO_CONTEXT_WAS_ERROR
+    # seen when we don't have permission to the X display
+    except DisplayConnectionError as xerror:
+        error(xerror)
+        return NO_CONTEXT_WAS_ERROR
 
 
 def get_class_name(window):
