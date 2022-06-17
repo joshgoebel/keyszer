@@ -51,7 +51,7 @@ class Output:
 
 
     def __update_modifier_key_pressed(self, key, action):
-        if Modifier.is_modifier(key):
+        if Modifier.is_key_modifier(key):
             if action.is_pressed():
                 self._pressed_modifier_keys.add(key)
             else:

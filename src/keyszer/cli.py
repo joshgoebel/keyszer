@@ -6,7 +6,6 @@ from .info import __version__, __name__, __description__
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-
 import re
-from keyszer.transform import with_mark, set_mark, with_or_set_mark
 from keyszer.config_api import *
 """
 

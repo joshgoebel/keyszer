@@ -64,7 +64,7 @@ class Modifier:
         return [alias for mod in mods for alias in mod.aliases]
 
     @classmethod
-    def is_modifier(cls, key):
+    def is_key_modifier(cls, key):
         return key in cls._BY_KEY
 
     @classmethod

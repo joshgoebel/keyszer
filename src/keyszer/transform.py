@@ -39,22 +39,19 @@ def boot_config():
 # ============================================================ #
 
 
-_mode_maps = None
+_active_keymaps = None
 _output = Output()
-_pressed_keys = set()
-_states = {}
+_key_states = {}
 _sticky = {}
 
 def reset_transform():
-    global _mode_maps
-    global _pressed_keys
+    global _active_keymaps
     global _output
-    global _states
+    global _key_states
     global _sticky
-    _mode_maps = None
-    _pressed_keys = set()
+    _active_keymaps = None
     _output = Output()
-    _states = {}
+    _key_states = {}
     _sticky = {}
 
 
@@ -64,17 +61,17 @@ def shutdown():
 # ============================================================ #
 
 def none_pressed():
-    return len(_states) == 0
+    return len(_key_states) == 0
 
 
 def get_pressed_mods():
-    keys = [x.key for x in _states.values() if x.is_pressed()]
-    keys = [x for x in keys if Modifier.is_modifier(x)]
+    keys = [x.key for x in _key_states.values() if x.is_pressed()]
+    keys = [x for x in keys if Modifier.is_key_modifier(x)]
     return [Modifier.from_key(key) for key in keys]
 
 
 def get_pressed_states():
-    return [x for x in _states.values() if x.is_pressed()]
+    return [x for x in _key_states.values() if x.is_pressed()]
 
 
 def is_sticky(key):
@@ -87,18 +84,17 @@ def is_sticky(key):
 def update_pressed_states(keystate):
     # release
     if keystate.action == Action.RELEASE:
-        del _states[keystate.inkey]
+        del _key_states[keystate.inkey]
 
     # press / add
-    if not keystate.inkey in _states:
+    if not keystate.inkey in _key_states:
         # add state
         if keystate.action == Action.PRESS:
-            _states[keystate.inkey] = keystate
+            _key_states[keystate.inkey] = keystate
         return
 
 
 # ─── SUSPEND AND RESUME INPUT SIDE ──────────────────────────────────────────────
-
 
 
 # keep track of how long until we need to resume the input
@@ -117,7 +113,7 @@ def resume_keys():
     _suspend_timer = None
 
     # keys = get_suspended_mods()
-    states = [x for x in _states.values() if x.suspended]
+    states = [x for x in _key_states.values() if x.suspended]
     if len(states) > 0:
         debug("resuming keys:", [x.key for x in states])
 
@@ -180,7 +176,7 @@ def suspend_or_resuspend_keys(timeout):
 def suspend_keys(timeout):
     global _suspend_timer
     debug("suspending keys", pressed_mods_not_exerted_on_output())
-    states = [x for x in _states.values() if x.is_pressed()]
+    states = [x for x in _key_states.values() if x.is_pressed()]
     for s in states:
         s.suspended = True
     loop = asyncio.get_event_loop()
@@ -196,8 +192,8 @@ def dump_diagnostics():
     print(_suspend_timer)
     print("_last_key:")
     print(_last_key)
-    print("_states:")
-    print(_states)
+    print("_key_states:")
+    print(_key_states)
     print("_sticky:")
     print(_sticky)
     _output.diag()
@@ -210,50 +206,6 @@ def dump_diagnostics():
 # last key that sent a PRESS event (used to track press/release of multi-keys
 # to decide to use their temporary form)
 _last_key = None
-
-# last key time record time when execute multi press
-# _last_key_time = time.time()
-
-
-# def multipurpose_handler(multipurpose_map, key, action, context):
-#     # debug("multipurple_handler", key, action)
-#     def maybe_press_modifiers(multipurpose_map):
-#         """Search the multipurpose map for keys that are pressed. If found and
-#         we have not yet sent it's modifier translation we do so."""
-#         for k, [ _, mod_key, state ] in multipurpose_map.items():
-#             if k in _pressed_keys and mod_key not in _pressed_modifier_keys:
-#                 on_key(mod_key, Action.PRESS, context)
-
-#     # we need to register the last key presses so we know if a multipurpose key
-#     # was a single press and release
-#     global _last_key
-#     global _last_key_time
-
-#     if key in multipurpose_map:
-#         single_key, mod_key, key_state = multipurpose_map[key]
-#         key_is_down = key in _pressed_keys
-#         mod_is_down = mod_key in _pressed_modifier_keys
-#         key_was_last_press = key == _last_key
-
-#         update_pressed_keys(key, action)
-#         if action == Action.RELEASE and key_is_down:
-#             # it is a single press and release
-#             if key_was_last_press and _last_key_time + _timeout > time.time():
-#                 maybe_press_modifiers(multipurpose_map)  # maybe other multipurpose keys are down
-#                 on_key(single_key, Action.PRESS, context)
-#                 on_key(single_key, Action.RELEASE, context)
-#             # it is the modifier in a combo
-#             elif mod_is_down:
-#                 on_key(mod_key, Action.RELEASE, context)
-#         elif action == Action.PRESS and not key_is_down:
-#             _last_key_time = time.time()
-#     # if key is not a multipurpose or mod key we want eventual modifiers down
-#     elif (key not in Modifier.get_all_keys()) and action == Action.PRESS:
-#         maybe_press_modifiers(multipurpose_map)
-
-#     # we want to register all key-presses
-#     if action == Action.PRESS:
-#         _last_key = key
 
 
 # translate keycode (like xmodmap)
@@ -299,10 +251,10 @@ JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
 #from .lib.benchit import *
 
 def find_keystate_or_new(inkey, action):
-    if not inkey in _states:
+    if not inkey in _key_states:
         return Keystate(inkey = inkey, action = action)
 
-    ks = _states[inkey]
+    ks = _key_states[inkey]
     ks.prior = ks.copy()
     delattr(ks.prior, "prior")
     ks.action = action
@@ -371,7 +323,7 @@ def on_key(keystate, context):
     key, action = (keystate.key, keystate.action)
     debug("on_key", key, action)
 
-    if Modifier.is_modifier(key):
+    if Modifier.is_key_modifier(key):
         if action.is_pressed():
             if none_pressed():
                 should_suspend = True
@@ -436,28 +388,28 @@ def on_key(keystate, context):
 
 
 def transform_key(key, action, ctx):
-    global _mode_maps
+    global _active_keymaps
     is_top_level = False
 
     combo = Combo(get_pressed_mods(), key)
 
-    if _mode_maps is escape_next_key:
+    if _active_keymaps is escape_next_key:
         debug(f"Escape key: {combo} => {key}")
         _output.send_key_action(key, action)
-        _mode_maps = None
+        _active_keymaps = None
         return
 
     # Decide keymap(s)
-    if _mode_maps is None:
+    if _active_keymaps is None:
         is_top_level = True
-        _mode_maps = [km for km in _KEYMAPS if km.matches(ctx)]
+        _active_keymaps = [km for km in _KEYMAPS if km.matches(ctx)]
 
-    for keymap in _mode_maps:
+    for keymap in _active_keymaps:
         if combo not in keymap:
             continue
 
         if logger.VERBOSE:
-            keymap_names = [map.name for map in _mode_maps]
+            keymap_names = [map.name for map in _active_keymaps]
             name_list = ", ".join(keymap_names)
             debug("")
             debug(
@@ -477,7 +429,7 @@ def transform_key(key, action, ctx):
         debug("spent modifiers", [_.key for _ in held if _.spent])
         reset_mode = handle_commands(keymap[combo], key, action, combo)
         if reset_mode:
-            _mode_maps = None
+            _active_keymaps = None
         return
 
     # Not found in all KEYMAPS
@@ -487,7 +439,7 @@ def transform_key(key, action, ctx):
         # If it's top-level, pass through keys
         _output.send_key_action(key, action)
 
-    _mode_maps = None
+    _active_keymaps = None
 
 
 # ─── AUTO BIND AND STICKY KEYS SUPPORT ──────────────────────────────────────────
@@ -502,8 +454,8 @@ def simple_sticky(combo, output_combo):
     inkey = inmods[0].get_key()
     outkey = outmods[0].get_key()
 
-    if inkey in _states:
-        ks = _states[inkey]
+    if inkey in _key_states:
+        ks = _key_states[inkey]
         if ks.exerted_on_output:
             key_in_output = any([inkey in mod.keys for mod in outmods])
             if not key_in_output:
@@ -540,9 +492,9 @@ def auto_sticky(combo, input_combo):
 
 def handle_commands(commands, key, action, input_combo = None):
     """
-    returns: reset_mode (True/False) if this is True, _mode_maps will be reset
+    returns: reset_mode (True/False) if this is True, _active_keymaps will be reset
     """
-    global _mode_maps
+    global _active_keymaps
     _next_bind = False
 
     if not isinstance(commands, list):
@@ -571,7 +523,7 @@ def handle_commands(commands, key, action, input_combo = None):
         elif isinstance(command, Key):
             _output.send_key(command)
         elif command is escape_next_key:
-            _mode_maps = escape_next_key
+            _active_keymaps = escape_next_key
             return False
         elif command is ComboHint.BIND:
             _next_bind = True
@@ -583,7 +535,7 @@ def handle_commands(commands, key, action, input_combo = None):
         elif isinstance(command, dict):
             # TODO: we should really handle this at startup so we have a
             # proper name here such as "Firefox (nested)" or something
-            _mode_maps = [Keymap("nested (anon)", command)]
+            _active_keymaps = [Keymap("nested (anon)", command)]
             return False
         else:
             debug("unknown command")
