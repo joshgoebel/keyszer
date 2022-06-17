@@ -1,8 +1,10 @@
 from enum import Enum, unique, IntEnum
+from collections.abc import Iterable
 
 from .key import Key
 from .modifier import Modifier
 from ..lib.logger import *
+from ordered_set import OrderedSet
 
 @unique
 class ComboHint(IntEnum):
@@ -12,29 +14,30 @@ class ComboHint(IntEnum):
 class Combo:
 
     def __init__(self, modifiers, key):
-        ordered_mods = None
+        modifiers = modifiers or []
 
-        if isinstance(modifiers, list):
-            # raise ValueError("modifiers should be a set instead of a list")
-            ordered_mods = modifiers
-            modifiers = set(modifiers)
-        elif modifiers is None:
-            modifiers = set()
+        if isinstance(modifiers, set):
+            raise ValueError(f"modifiers needs to an ordered sequence, not a set")
+        if isinstance(modifiers, Iterable):
+            modifiers = OrderedSet(modifiers)
         elif isinstance(modifiers, Modifier):
-            modifiers = {modifiers}
-        elif not isinstance(modifiers, set):
-            raise ValueError("modifiers should be a set")
+            modifiers = OrderedSet([modifiers])
+        else:
+            raise ValueError(f"modifiers should be Iterable")
 
         if not isinstance(key, Key):
             raise ValueError("key should be a Key")
 
-        self.ordered_mods = ordered_mods or list(modifiers)
-        self.modifiers = modifiers
-        self.key = key
-        if len(self.modifiers) != len(self.ordered_mods):
-            debug('mismatch in', self)
-            debug("mods", self.modifiers)
-            debug("ordered mods", self.ordered_mods)
+        self._modifiers = modifiers
+        self._key = key
+
+    @property
+    def modifiers(self):
+        return self._modifiers
+
+    @property
+    def key(self):
+        return self._key
 
     def __eq__(self, other):
         if isinstance(other, Combo):
@@ -54,5 +57,4 @@ class Combo:
     def with_modifier(self, modifiers):
         if isinstance(modifiers, Modifier):
             modifiers = {modifiers}
-        # TODO: preserve order of ordered_mods
         return Combo(self.modifiers | modifiers, self.key)

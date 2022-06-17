@@ -96,7 +96,7 @@ class Output:
         released_modifiers_keys = []
 
         extra_modifier_keys = self._pressed_modifier_keys.copy()
-        missing_modifiers = combo.ordered_mods.copy()
+        missing_modifiers = combo.modifiers.copy()
         for pressed_key in self._pressed_modifier_keys:
             for modifier in combo.modifiers:
                 if pressed_key in modifier.get_keys():

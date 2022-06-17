@@ -447,8 +447,8 @@ def transform_key(key, action, ctx):
 
 # binds the first input modifier to the first output modifier
 def simple_sticky(combo, output_combo):
-    inmods = combo.ordered_mods
-    outmods = output_combo.ordered_mods
+    inmods = combo.modifiers
+    outmods = output_combo.modifiers
     if len(inmods) == 0 or len(outmods) == 0:
         return {}
     inkey = inmods[0].get_key()

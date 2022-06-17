@@ -4,6 +4,7 @@ import re
 import time
 from inspect import signature
 from subprocess import Popen
+from ordered_set import OrderedSet
 
 from .models.key import Key
 from .models.action import Action
@@ -303,7 +304,7 @@ def keymap(name, mappings, when = None):
                 expanded_modifier_lists = itertools.product(*expanded_modifiers)
                 # Create expanded mappings
                 for modifiers in expanded_modifier_lists:
-                    expanded_mappings[Combo(set(modifiers), k.key)] = v
+                    expanded_mappings[Combo(modifiers, k.key)] = v
                 keys_for_deletion.append(k)
 
         # Delete original mappings whose key was expanded into expanded_mappings
