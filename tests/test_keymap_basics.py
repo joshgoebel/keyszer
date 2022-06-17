@@ -61,10 +61,10 @@ async def test_OLD_API_multiple_keys_at_once():
 @pytest.mark.looptime(False)
 async def test_wm_conditional_as_argument():
 
-    keymap("Firefox",{
+    keymap("Firefox a => b",{
         K("a"): K("b"),
     }, when = wm_class_match("Firefox"))
-    keymap("Firefox",{
+    keymap("Firefox a => c",{
         K("a"): K("c"),
     }, when = not_wm_class_match("Firefox"))
 

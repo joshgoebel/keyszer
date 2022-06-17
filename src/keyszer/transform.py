@@ -532,13 +532,13 @@ def handle_commands(commands, key, action, input_combo = None):
             debug("ignore_key", key)
             return True
         # Go to next keymap
-        elif isinstance(command, dict):
-            # TODO: we should really handle this at startup so we have a
-            # proper name here such as "Firefox (nested)" or something
-            _active_keymaps = [Keymap("nested (anon)", command)]
+        elif isinstance(command, Keymap):
+            _active_keymaps = [command]
             return False
+        elif command is None:
+            pass
         else:
-            debug("unknown command")
+            debug(f"unknown command {command}")
         _next_bind = False
     # Reset keymap in ordinary flow
     return True

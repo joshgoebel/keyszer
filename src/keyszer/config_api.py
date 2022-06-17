@@ -16,8 +16,8 @@ from .lib.logger import *
 
 # GLOBALS
 bind = ComboHint.BIND
-escape_next_key = {}
-ignore_key = {}
+escape_next_key = sys.intern("escape_next_key")
+ignore_key = sys.intern("ignore_key")
 
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
@@ -267,23 +267,24 @@ def multipurpose_modmap(name, mappings, when = None):
 
 def keymap(name, mappings, when = None):
     """define and register a new keymap"""
-    # Expand not L/R-specified modifiers
-    # Suppose a nesting is not so deep
-    # {K("C-a"): Key.A,
-    #  K("C-b"): {
-    #      K("LC-c"): Key.B,
-    #      K("C-d"): Key.C}}
-    # ->
-    # {K("LC-a"): Key.A, K("RC-a"): Key.A,
-    #  K("LC-b"): {
-    #      K("LC-c"): Key.B,
-    #      K("LC-d"): Key.C,
-    #      K("RC-d"): Key.C},
-    #  K("RC-b"): {
-    #      K("LC-c"): Key.B,
-    #      K("LC-d"): Key.C,
-    #      K("RC-d"): Key.C}}
+
     def expand(target):
+        # Expand not L/R-specified modifiers
+        # Suppose a nesting is not so deep
+        # {K("C-a"): Key.A,
+        #  K("C-b"): {
+        #      K("LC-c"): Key.B,
+        #      K("C-d"): Key.C}}
+        # ->
+        # {K("LC-a"): Key.A, K("RC-a"): Key.A,
+        #  K("LC-b"): {
+        #      K("LC-c"): Key.B,
+        #      K("LC-d"): Key.C,
+        #      K("RC-d"): Key.C},
+        #  K("RC-b"): {
+        #      K("LC-c"): Key.B,
+        #      K("LC-d"): Key.C,
+        #      K("RC-d"): Key.C}}
         if not isinstance(target, dict):
             return None
         expanded_mappings = {}
@@ -313,9 +314,19 @@ def keymap(name, mappings, when = None):
         # Merge expanded mappings into original mappings
         target.update(expanded_mappings)
 
+    def wrap_keymap(name, mappings, depth = 0):
+        """convert naked dict objects into proper named keymaps"""
+        if depth > 0:
+            name = f"{name} (" * depth + " nested" + ")" * depth
+        for k,v in mappings.items():
+            if isinstance(v, dict):
+                mappings[k] = wrap_keymap(name, v, depth + 1)
+        return Keymap(name, mappings)
+
     expand(mappings)
 
-    km = Keymap(name, mappings, when = when)
+    km = wrap_keymap(name, mappings)
+    km.conditional = when
     _KEYMAPS.append(km)
     return km
 
