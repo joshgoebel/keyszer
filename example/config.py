@@ -1,5 +1,8 @@
 # define timeout for multipurpose_modmap
-timeout(1)
+timeouts(
+    multipurpose = 1,
+    suspend = 1,
+)
 
 # [Global modemap] Change modifier keys as in xmodmap
 modmap("default", {

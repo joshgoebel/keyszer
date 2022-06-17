@@ -22,17 +22,17 @@ from .output import Output
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, ignore_key
 
-_modmaps = None
-_multi_modmaps = None
-_keymaps = None
-_timeout = None
+_MODMAPS = None
+_MULTI_MODMAPS = None
+_KEYMAPS = None
+_TIMEOUTS = None
 
 def boot_config():
-    global _modmaps
-    global _multi_modmaps
-    global _keymaps
-    global _timeout
-    _modmaps, _multi_modmaps, _keymaps, _timeout = \
+    global _MODMAPS
+    global _MULTI_MODMAPS
+    global _KEYMAPS
+    global _TIMEOUTS
+    _MODMAPS, _MULTI_MODMAPS, _KEYMAPS, _TIMEOUTS = \
             get_configuration()
 
 
@@ -140,6 +140,7 @@ def with_or_set_mark(combo):
 # and send held keys to the output (that haven't been used
 # as part of a combo)
 _suspend_timer = None
+_last_suspend_timeout = 0
 
 def resume_keys():
     global _suspend_timer
@@ -147,6 +148,7 @@ def resume_keys():
         return
 
     _suspend_timer.cancel()
+    _last_suspend_timeout = 0
     _suspend_timer = None
 
     # keys = get_suspended_mods()
@@ -175,34 +177,50 @@ def resume_keys():
             _output.send_key_action(ks.key, Action.PRESS)
 
 
-def resume_state(keystate):
-    resume_keys()
-
 def is_suspended():
     return _suspend_timer != None
 
-def resuspend_keys():
+def resuspend_keys(timeout):
+    # we should not be able to resuspend for a shorter timeout, ie
+    # a multi timeout of 1s should not be overruled by a shorter timeout
+    if is_suspended():
+        if timeout < _last_suspend_timeout:
+            return
+    # TODO: revisit
+    # REF: https://github.com/nolar/looptime/issues/3
+    # if is_suspended():
+    #     loop = asyncio.get_event_loop()
+    #     # log("when", _suspend_timer.when())
+    #     # log("loop time", loop.time())
+    #     until = _suspend_timer.when() - loop.time()
+    #     # log("requesting sleep", timeout)
+    #     # log(until, "until wake")
+
+    #     if timeout < until:
+    #         return
+
     _suspend_timer.cancel()
     debug("resuspending keys")
-    suspend_keys()
+    suspend_keys(timeout)
 
 def pressed_mods_not_exerted_on_output():
     return [key for key in get_pressed_mods() if not _output.is_mod_pressed(key)]
 
-def suspend_or_resuspend_keys():
+def suspend_or_resuspend_keys(timeout):
     if is_suspended():
-        resuspend_keys()
+        resuspend_keys(timeout)
     else:
-        suspend_keys()
+        suspend_keys(timeout)
 
-def suspend_keys():
+def suspend_keys(timeout):
     global _suspend_timer
     debug("suspending keys", pressed_mods_not_exerted_on_output())
     states = [x for x in _states.values() if x.is_pressed()]
     for s in states:
         s.suspended = True
     loop = asyncio.get_event_loop()
-    _suspend_timer = loop.call_later(1, resume_keys)
+    _last_suspend_timeout = timeout
+    _suspend_timer = loop.call_later(timeout, resume_keys)
 
 # --- DUMP DIAGNOTICS ----
 
@@ -278,9 +296,9 @@ def apply_modmap(keystate, context):
     inkey = keystate.inkey
     keystate.key = inkey
     # first modmap is always the default, unconditional
-    active_modmap = _modmaps[0]
+    active_modmap = _MODMAPS[0]
     #debug("active", active_modmap)
-    conditional_modmaps = _modmaps[1:]
+    conditional_modmaps = _MODMAPS[1:]
     #debug("conditionals", conditional_modmaps)
     if conditional_modmaps:
         for modmap in conditional_modmaps:
@@ -294,10 +312,10 @@ def apply_modmap(keystate, context):
 
 
 def apply_multi_modmap(keystate, context):
-    active_multi_modmap = _multi_modmaps[0]
-    conditional_multi_modmaps = _multi_modmaps[1:]
-    if conditional_multi_modmaps:
-        for modmap in conditional_multi_modmaps:
+    active_multi_modmap = _MULTI_MODMAPS[0]
+    conditional_multimaps = _MULTI_MODMAPS[1:]
+    if conditional_multimaps:
+        for modmap in conditional_multimaps:
             if modmap.conditional(context):
                 active_multi_modmap = modmap
                 break
@@ -415,7 +433,7 @@ def on_key(keystate, context):
             keystate.suspended = True
             hold_output = True
             if action.just_pressed():
-                suspend_or_resuspend_keys()
+                suspend_or_resuspend_keys(_TIMEOUTS["suspend"])
 
         if not hold_output:
             _output.send_key_action(key, action)
@@ -426,7 +444,7 @@ def on_key(keystate, context):
         # debug("multi pressed", key)
         keystate.suspended = True
         update_pressed_states(keystate)
-        suspend_keys()
+        suspend_keys(_TIMEOUTS["multipurpose"])
 
     # regular key releases, not modifiers (though possibly a multi-mod)
     elif action.is_released():
@@ -441,7 +459,7 @@ def on_key(keystate, context):
                 keystate.resolve_as_momentary()
             else:
                 keystate.resolve_as_modifier()
-            resume_state(keystate)
+            resume_keys()
             transform_key(key, action, context)
             update_pressed_states(keystate)
     else:
@@ -467,7 +485,7 @@ def transform_key(key, action, ctx):
     # Decide keymap(s)
     if _mode_maps is None:
         is_top_level = True
-        _mode_maps = [km for km in _keymaps if km.matches(ctx)]
+        _mode_maps = [km for km in _KEYMAPS if km.matches(ctx)]
 
     for keymap in _mode_maps:
         if combo not in keymap:
@@ -497,7 +515,7 @@ def transform_key(key, action, ctx):
             _mode_maps = None
         return
 
-    # Not found in all keymaps
+    # Not found in all KEYMAPS
     if is_top_level:
         # need to output any keys we've suspended
         resume_keys()
@@ -571,7 +589,7 @@ def handle_commands(commands, key, action, input_combo = None):
     # resuspend any keys still not exerted on the output, giving
     # them a chance to be lifted or to trigger another macro as-is
     if is_suspended():
-        resuspend_keys()
+        resuspend_keys(_TIMEOUTS["suspend"])
 
     # Execute commands
     for command in commands:

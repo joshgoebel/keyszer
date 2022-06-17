@@ -26,8 +26,15 @@ _MODMAPS = []
 # e.g, {Key.LEFT_CTRL: [Key.ESC, Key.LEFT_CTRL, Action.RELEASE]}
 _MULTI_MODMAPS = []
 
+TIMEOUT_DEFAULTS = {
+    "multipurpose": 1,
+    "suspend": 1,
+    # TODO: not implemented yet
+    "post_combo": 0.5
+}
+
 # multipurpose timeout
-_TIMEOUT = 1
+_TIMEOUTS = TIMEOUT_DEFAULTS
 
 # keymaps
 _KEYMAPS = []
@@ -48,7 +55,7 @@ def reset_configuration():
     _MODMAPS = []
     _MULTI_MODMAPS = []
     _KEYMAPS = []
-    _TIMEOUT = 1
+    _TIMEOUTS = TIMEOUT_DEFAULTS
 
 # how transform hooks into the configuration
 def get_configuration():
@@ -80,7 +87,7 @@ def get_configuration():
         _MODMAPS,
         _MULTI_MODMAPS,
         _KEYMAPS,
-        _TIMEOUT
+        _TIMEOUTS
     )
 
 
@@ -151,12 +158,17 @@ def _create_modifiers_from_strings(modifier_strs):
 
 # ============================================================ #
 
+def timeouts(multipurpose, suspend):
+    _TIMEOUTS = {
+        "multipurpose": multipurpose,
+        "suspend": suspend
+    }
 
 
 def define_timeout(seconds=1):
     """define timeout for suspending keys and resolving multimods"""
-    global _TIMEOUT
-    _TIMEOUT = seconds
+    global _TIMEOUTS
+    _TIMEOUTS["multipurpose"] = seconds
 
 
 def add_modifier(name, aliases, key = None, keys = None):

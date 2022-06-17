@@ -36,13 +36,13 @@ def setup_function(module):
 
 @pytest.mark.looptime
 async def test_suspended():
-    suspend_keys()
+    suspend_keys(1)
     await asyncio.sleep(0.1)
     assert is_suspended()
 
 @pytest.mark.looptime
 async def test_unsuspend_after_second():
-    suspend_keys()
+    suspend_keys(1)
     await asyncio.sleep(2)
     assert not is_suspended()
 
