@@ -16,8 +16,8 @@ from .lib.logger import *
 
 # GLOBALS
 bind = ComboHint.BIND
-escape_next_key = sys.intern("escape_next_key")
-ignore_key = sys.intern("ignore_key")
+escape_next_key = ComboHint.ESCAPE_NEXT
+ignore_key = ComboHint.IGNORE
 
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }

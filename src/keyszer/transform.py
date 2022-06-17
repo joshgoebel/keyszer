@@ -20,7 +20,7 @@ from .lib.logger import *
 from .lib import logger
 from .output import Output
 from .xorg import get_active_window_wm_class
-from .config_api import get_configuration,escape_next_key, ignore_key
+from .config_api import get_configuration, escape_next_key, ignore_key
 
 _MODMAPS = None
 _MULTI_MODMAPS = None

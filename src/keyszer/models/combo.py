@@ -9,6 +9,8 @@ from ordered_set import OrderedSet
 @unique
 class ComboHint(IntEnum):
     BIND = 1
+    ESCAPE_NEXT = 2
+    IGNORE = 3
 
 
 class Combo:
