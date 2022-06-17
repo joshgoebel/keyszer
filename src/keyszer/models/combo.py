@@ -2,7 +2,7 @@ from enum import Enum, unique, IntEnum
 
 from .key import Key
 from .modifier import Modifier
-from ..logger import *
+from ..lib.logger import *
 
 @unique
 class ComboHint(IntEnum):

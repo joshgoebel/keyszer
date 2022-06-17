@@ -19,7 +19,7 @@ from lib.api import *
 
 from evdev.ecodes import EV_KEY, EV_SYN
 from evdev.events import InputEvent
-from keyszer import logger
+from keyszer.lib import logger
 logger.VERBOSE = True
 import asyncio
 import pytest

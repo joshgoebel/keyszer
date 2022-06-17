@@ -5,7 +5,7 @@ from evdev.uinput import UInput
 from .models.action import Action 
 from .models.combo import Combo 
 from .models.modifier import Modifier
-from .logger import debug
+from .lib.logger import debug
 
 VIRT_DEVICE_PREFIX = "Keyszer VIRTUAL"
 

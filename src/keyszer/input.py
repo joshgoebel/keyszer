@@ -9,7 +9,7 @@ from .transform import on_event, boot_config, dump_diagnostics
 from . import transform
 from . import config_api
 from .output import setup_uinput, VIRT_DEVICE_PREFIX
-from .logger import *
+from .lib.logger import *
 import asyncio
 import signal
 

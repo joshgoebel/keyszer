@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .logger import *
-from . import logger
+from .lib.logger import *
+from .lib import logger
 from .version import __version__, __name__, __description__
 
 CONFIG_HEADER = b"""

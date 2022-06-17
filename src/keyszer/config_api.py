@@ -11,7 +11,7 @@ from .models.combo import Combo, ComboHint
 from .models.modifier import Modifier
 from .lib.modmap import Modmap, MultiModmap
 from .lib.keymap import Keymap
-from .logger import *
+from .lib.logger import *
 
 # GLOBALS
 bind = ComboHint.BIND

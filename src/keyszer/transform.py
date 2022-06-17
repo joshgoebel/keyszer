@@ -16,8 +16,8 @@ from .models.modifier import Modifier
 from .models.combo import Combo, ComboHint
 from .models.keystate import Keystate
 from .lib.keymap import Keymap
-from .logger import *
-from . import logger
+from .lib.logger import *
+from .lib import logger
 from .output import Output
 from .xorg import get_active_window_wm_class
 from .config_api import get_configuration,escape_next_key, ignore_key

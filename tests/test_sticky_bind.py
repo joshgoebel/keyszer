@@ -1,7 +1,7 @@
 import pytest_asyncio
 import pytest
 import asyncio
-from keyszer import logger
+from keyszer.lib import logger
 from evdev.events import InputEvent
 from evdev.ecodes import EV_KEY, EV_SYN
 from lib.api import *
