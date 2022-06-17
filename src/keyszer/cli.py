@@ -105,11 +105,10 @@ Please check access permissions for /dev/uinput.""")
         import sys
         sys.exit(1)
 
-    
+    debug(f"CONFIG: {args.config}")
+
     # Load configuration file
     eval_config(args.config)
-
-    debug(f"CONFIG: {args.config}")
 
     if args.watch:
         log("WATCH: Watching for new devices to hot-plug.")
