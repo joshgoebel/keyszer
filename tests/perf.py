@@ -18,7 +18,6 @@ from evdev.ecodes import EV_KEY, EV_REL
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-
 import re
-from keyszer.transform import with_mark, set_mark, with_or_set_mark
 #from keyszer.config_api import *
 """
 
@@ -98,7 +97,7 @@ def main():
 
     eval_config("./kinto.py")
     boot_config()
-    print("keymaps", len(transform._keymaps))
+    print("keymaps", len(transform._KEYMAPS))
 
     test_non_keys()
     test_typing()

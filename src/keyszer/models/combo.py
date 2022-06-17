@@ -43,7 +43,7 @@ class Combo:
 
     def __eq__(self, other):
         if isinstance(other, Combo):
-            return self.modifiers == other.modifiers and self.key == other.key
+            return set(self.modifiers) == set(other.modifiers) and self.key == other.key
         else:
             return NotImplemented
 
