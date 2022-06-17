@@ -15,7 +15,7 @@ from .models.action import Action
 from .models.modifier import Modifier
 from .models.combo import Combo, ComboHint
 from .models.keystate import Keystate
-from .lib.keymap import Keymap
+from .models.keymap import Keymap
 from .lib.logger import *
 from .lib import logger
 from .output import Output

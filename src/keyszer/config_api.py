@@ -9,8 +9,8 @@ from .models.key import Key
 from .models.action import Action
 from .models.combo import Combo, ComboHint
 from .models.modifier import Modifier
-from .lib.modmap import Modmap, MultiModmap
-from .lib.keymap import Keymap
+from .models.modmap import Modmap, MultiModmap
+from .models.keymap import Keymap
 from .lib.logger import *
 
 # GLOBALS
