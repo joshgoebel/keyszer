@@ -156,19 +156,49 @@ def _create_modifiers_from_strings(modifier_strs):
     return modifiers
 
 
-# ============================================================ #
+# ─── MARKS ──────────────────────────────────────────────────────────────────────
+
+
+_mark_set = False
+
+
+def with_mark(combo):
+    if isinstance(combo, Key):
+        combo = Combo(None, combo)
+
+    def _with_mark():
+        return combo.with_modifier(Modifier.SHIFT) if _mark_set else combo
+
+    return _with_mark
+
+
+def set_mark(mark_set):
+    def _set_mark():
+        global _mark_set
+        _mark_set = mark_set
+    return _set_mark
+
+
+def with_or_set_mark(combo):
+    if isinstance(combo, Key):
+        combo = Combo(None, combo)
+
+    def _with_or_set_mark():
+        global _mark_set
+        _mark_set = True
+        return combo.with_modifier(Modifier.SHIFT)
+
+    return _with_or_set_mark
+
+
+# ─── STANDARD API ─────────────────────────────────────────────────────────────
+
 
 def timeouts(multipurpose, suspend):
     _TIMEOUTS = {
         "multipurpose": multipurpose,
         "suspend": suspend
     }
-
-
-def define_timeout(seconds=1):
-    """define timeout for suspending keys and resolving multimods"""
-    global _TIMEOUTS
-    _TIMEOUTS["multipurpose"] = seconds
 
 
 def add_modifier(name, aliases, key = None, keys = None):
@@ -204,11 +234,6 @@ def conditional(fn, what):
     return what
 
 
-# old API, takes name as an optional param
-def define_modmap(mappings, name = "unnamed"):
-    """old style API for defining modmaps"""
-    return modmap(name, mappings)
-
 
 # new API, requires name
 def modmap(name, mappings, when = None):
@@ -225,54 +250,6 @@ def modmap(name, mappings, when = None):
     return mm
 
 
-def old_style_condition_to_fn(condition):
-    """converts an old API style condition into a new style conditional function"""
-    condition_fn = None
-    def re_search(regex):
-        def fn(ctx):
-            return regex.search(ctx.wm_class)
-        return fn
-
-    def wm_class(wm_class_fn):
-        def fn(ctx):
-            return wm_class_fn(ctx.wm_class)
-        return fn
-
-    def wm_class_and_device(cond_fn):
-        def fn(ctx):
-            return cond_fn(ctx.wm_class, ctx.device_name)
-        return fn
-
-    if hasattr(condition, 'search'):
-        condition_fn = re_search(condition)
-    elif callable(condition):
-        if len(signature(condition).parameters) == 1:
-            condition_fn = wm_class(condition)
-        elif len(signature(condition).parameters) == 2:
-            condition_fn = wm_class_and_device(condition)
-
-    return condition_fn
-
-
-def define_conditional_modmap(condition, mappings):
-    """Defines conditional modmap (keycode translation)
-
-    Example:
-
-    define_conditional_modmap(re.compile(r'Emacs'), {
-        Key.CAPSLOCK: Key.LEFT_CTRL
-    })
-    """
-
-    condition_fn = old_style_condition_to_fn(condition)
-    name = "define_conditional_modmap (old API)"
-
-    if not callable(condition_fn):
-        raise ValueError('condition must be a function or compiled regexp')
-
-    return conditional(condition_fn, modmap(name, mappings))
-    # _conditional_mod_map.append((condition, mod_remappings))
-
 
 def multipurpose_modmap(name, mappings, when = None):
     """new API for declaring multipurpose modmaps"""
@@ -283,42 +260,9 @@ def multipurpose_modmap(name, mappings, when = None):
     _MULTI_MODMAPS.append(mmm)
     return mmm
 
-def define_multipurpose_modmap(mappings):
-    """Defines multipurpose modmap (multi-key translations)
 
-    Give a key two different meanings. One when pressed and released alone and
-    one when it's held down together with another key (making it a modifier
-    key).
+# ─── KEYMAPS ──────────────────────────────────────────────────────────────────
 
-    Example:
-
-    define_multipurpose_modmap(
-        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
-    })
-    """
-    return multipurpose_modmap("default", mappings)
-
-
-def define_conditional_multipurpose_modmap(condition, mappings):
-    """Defines conditional multipurpose modmap (multi-key translation)
-
-    Example:
-
-    define_conditional_multipurpose_modmap(
-        lambda wm_class, device_name: device_name.startswith("Microsoft"
-    ), {
-        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
-    })
-    """
-    condition_fn = old_style_condition_to_fn(condition)
-    if not callable(condition_fn):
-        raise ValueError('condition must be a function or compiled regexp')
-
-    name = "anonymous multipurpose map (old API)"
-    return conditional(condition_fn, multipurpose_modmap(name, mappings))
-
-
-# ============================================================ #
 
 def keymap(name, mappings, when = None):
     """define and register a new keymap"""
@@ -374,10 +318,107 @@ def keymap(name, mappings, when = None):
     _KEYMAPS.append(km)
     return km
 
-def define_keymap(condition, mappings, name="Anonymous keymap"):
+
+# ─── OLD DEPRECATED API ───────────────────────────────────────────────────────
+
+
+def define_timeout(seconds=1):
+    """define timeout for suspending keys and resolving multimods"""
+    global _TIMEOUTS
+    _TIMEOUTS["multipurpose"] = seconds
+
+
+# old API, takes name as an optional param
+def define_modmap(mappings, name = "anonymous modmap"):
+    """old style API for defining modmaps"""
+    return modmap(name, mappings)
+
+
+def define_keymap(condition, mappings, name="anonymous keymap"):
     """old API for defining keymaps"""
     condition_fn = old_style_condition_to_fn(condition)
     return conditional(condition_fn, keymap(name, mappings))
 
-# aliases
-timeout = define_timeout
+
+def define_multipurpose_modmap(mappings):
+    """Defines multipurpose modmap (multi-key translations)
+
+    Give a key two different meanings. One when pressed and released alone and
+    one when it's held down together with another key (making it a modifier
+    key).
+
+    Example:
+
+    define_multipurpose_modmap(
+        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
+    })
+    """
+    return multipurpose_modmap("default", mappings)
+
+
+def define_conditional_multipurpose_modmap(condition, mappings):
+    """Defines conditional multipurpose modmap (multi-key translation)
+
+    Example:
+
+    define_conditional_multipurpose_modmap(
+        lambda wm_class, device_name: device_name.startswith("Microsoft"
+    ), {
+        {Key.CAPSLOCK: [Key.ESC, Key.LEFT_CTRL]
+    })
+    """
+    condition_fn = old_style_condition_to_fn(condition)
+    if not callable(condition_fn):
+        raise ValueError('condition must be a function or compiled regexp')
+
+    name = "anonymous multipurpose map (old API)"
+    return conditional(condition_fn, multipurpose_modmap(name, mappings))
+
+
+def old_style_condition_to_fn(condition):
+    """converts an old API style condition into a new style conditional function"""
+    condition_fn = None
+    def re_search(regex):
+        def fn(ctx):
+            return regex.search(ctx.wm_class)
+        return fn
+
+    def wm_class(wm_class_fn):
+        def fn(ctx):
+            return wm_class_fn(ctx.wm_class)
+        return fn
+
+    def wm_class_and_device(cond_fn):
+        def fn(ctx):
+            return cond_fn(ctx.wm_class, ctx.device_name)
+        return fn
+
+    if hasattr(condition, 'search'):
+        condition_fn = re_search(condition)
+    elif callable(condition):
+        if len(signature(condition).parameters) == 1:
+            condition_fn = wm_class(condition)
+        elif len(signature(condition).parameters) == 2:
+            condition_fn = wm_class_and_device(condition)
+
+    return condition_fn
+
+
+def define_conditional_modmap(condition, mappings):
+    """Defines conditional modmap (keycode translation)
+
+    Example:
+
+    define_conditional_modmap(re.compile(r'Emacs'), {
+        Key.CAPSLOCK: Key.LEFT_CTRL
+    })
+    """
+
+    condition_fn = old_style_condition_to_fn(condition)
+    name = "define_conditional_modmap (old API)"
+
+    if not callable(condition_fn):
+        raise ValueError('condition must be a function or compiled regexp')
+
+    return conditional(condition_fn, modmap(name, mappings))
+    # _conditional_mod_map.append((condition, mod_remappings))

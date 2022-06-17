@@ -97,41 +97,6 @@ def update_pressed_states(keystate):
         return
 
 
-# ─── MARK ───────────────────────────────────────────────────────────────────────
-
-
-_mark_set = False
-
-
-def with_mark(combo):
-    if isinstance(combo, Key):
-        combo = Combo(None, combo)
-
-    def _with_mark():
-        return combo.with_modifier(Modifier.SHIFT) if _mark_set else combo
-
-    return _with_mark
-
-
-def set_mark(mark_set):
-    def _set_mark():
-        global _mark_set
-        _mark_set = mark_set
-    return _set_mark
-
-
-def with_or_set_mark(combo):
-    if isinstance(combo, Key):
-        combo = Combo(None, combo)
-
-    def _with_or_set_mark():
-        global _mark_set
-        _mark_set = True
-        return combo.with_modifier(Modifier.SHIFT)
-
-    return _with_or_set_mark
-
-
 # ─── SUSPEND AND RESUME INPUT SIDE ──────────────────────────────────────────────
 
 
