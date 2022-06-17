@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .logger import *
 from . import logger
-from .info import __version__, __name__, __description__
+from .version import __version__, __name__, __description__
 
 CONFIG_HEADER = b"""
 # -*- coding: utf-8 -*-

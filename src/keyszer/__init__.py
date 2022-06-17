@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-from .info import __version__ # , __name__
+from .version import __version__
 
 VERSION = __version__
