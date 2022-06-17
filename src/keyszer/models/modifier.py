@@ -15,9 +15,13 @@ class Modifier:
         if isinstance(keys, Key):
             keys = [keys]
         self.keys = keys
-        # TODO: prevent duplicates
         if len(self.keys) == 1:
-            cls._BY_KEY[self.keys[0]] = self
+            key = self.keys[0]
+            if key in cls._BY_KEY:
+                raise ValueError(f"modifier {name} may not be assigned {key}, already assigned to another modifier")
+            cls._BY_KEY[key] = self
+        if name in cls._MODIFIERS:
+            raise ValueError(f"an existing modifier named {name} already exists")
         cls._MODIFIERS[name] = self
         setattr(Modifier, name, self)
 
