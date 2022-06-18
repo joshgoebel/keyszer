@@ -1,6 +1,6 @@
 import Xlib.display
 from Xlib.display import Display
-from Xlib.error import ConnectionClosedError, DisplayConnectionError
+from Xlib.error import ConnectionClosedError, DisplayConnectionError, DisplayNameError
 
 from .logger import error
 
@@ -43,7 +43,7 @@ def get_xorg_context():
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
     # seen when we don't have permission to the X display
-    except DisplayConnectionError as xerror:
+    except (DisplayConnectionError, DisplayNameError) as xerror:
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
 
