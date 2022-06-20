@@ -42,6 +42,7 @@ def setup_uinput(uinput = None):
     global _uinput
     _uinput = uinput or real_uinput()
 
+
 class Output:
 
     def __init__(self):
@@ -121,7 +122,7 @@ class Output:
         for modifier in reversed(pressed_modifier_keys):
             self.send_key_action(modifier, Action.RELEASE)
 
-        if self.is_suspending(): # sleep the keys
+        if self.__is_suspending(): # sleep the keys
             self._suspended_mod_keys.extend(released_modifiers_keys)
         else: # reassert the keys
             for modifier in reversed(released_modifiers_keys):
@@ -146,17 +147,45 @@ class Output:
     # self._suspended_mod_keys : list
     # self._suspend_depth : int
 
-    def is_suspending(self):
+    def suspend_when_lifting(self):
+        return SuspendWhenLifting(self)
+
+    def __is_suspending(self):
         return self._suspend_depth > 0
 
-    def start_suspend(self):
+    def __reexert(self, key):
+        self.send_key_action(key, Action.PRESS)
+
+    # the function that calls this is re-entrant so we need to make sure
+    # we can suspend/resume to multiple depths without losing track of
+    # where we are, though this SHOULD be more of a theoretical concern
+    def allow_suspend(self):
         self._suspend_depth += 1
 
-    def stop_suspend(self):
+    def disallow_suspend(self):
         self._suspend_depth -= 1
-        assert self._suspend_depth >= 0
 
-        if not self.is_suspending():
+        if not self.__is_suspending():
             for mod in self._suspended_mod_keys:
-                self.send_key_action(mod, Action.PRESS)
+                self.__reexert(mod)
             self._suspended_mod_keys.clear()
+
+
+class SuspendWhenLifting:
+    """
+    wraps the suspending pattern for output
+
+    When output release keys it doesn't need for the current combo instead
+    of re-exerting them immediatley after it will hold them until it is
+    unsuspended (which is currently immediately when a sequence ends)
+    """
+    def __init__(self, output):
+        self._output = output
+
+    def __enter__(self):
+        self._output.allow_suspend()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._output.disallow_suspend()
+        return False

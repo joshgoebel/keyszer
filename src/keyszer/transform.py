@@ -508,8 +508,7 @@ def handle_commands(commands, key, action, input_combo = None):
     if is_suspended():
         resuspend_keys(_TIMEOUTS["suspend"])
 
-    _output.start_suspend()
-    try:
+    with _output.suspend_when_lifting():
         # Execute commands
         for command in commands:
             if callable(command):
@@ -544,5 +543,3 @@ def handle_commands(commands, key, action, input_combo = None):
             _next_bind = False
         # Reset keymap in ordinary flow
         return True
-    finally:
-        _output.stop_suspend()
