@@ -71,6 +71,9 @@ class Output:
         print(self._pressed_modifier_keys)
         print("_pressed_keys")
         print(self._pressed_keys)
+        print("_suspended_mod_keys")
+        print(self._suspended_mod_keys)
+        print("_suspend_depth", self._suspend_depth)
 
     def __send_sync(self ):
         _uinput.syn()
