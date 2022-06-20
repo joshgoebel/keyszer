@@ -20,24 +20,25 @@ Keyszer is a smart key remapper for Linux (and X11) written in Python. It's simi
 
 ### How does it work?
 
-Keyszer works at quite a low-level.  It grabs input directly from the kernel's input devices (`/dev/input/event*`) and then creates an emulated device ([uinput](https://www.kernel.org/doc/html/v4.12/input/uinput.html)) to inject those inputs back into the kernel.  During this process the input stream is transformed on the fly as necessary to remap keys.
+Keyszer works at quite a low-level.  It grabs input directly from the kernel's [`evdev`](https://www.freedesktop.org/wiki/Software/libevdev/) input devices ( `/dev/input/event*`) and then creates an emulated [`uinput`](https://www.kernel.org/doc/html/v4.12/input/uinput.html) device to inject those inputs back into the kernel.  During this process the input stream is transformed on the fly as necessary to remap keys.
 
 
 **Upgrading from xkeysnail**
 
-- Some small config changes will be necessary.
+- Some small configuration changes will be needed.
 - A few command line arguments have changed.
 - For xkeysnail 0.4.0 see [UPGRADING_FROM_XKEYSNAIL.md](https://github.com/joshgoebel/keyszer/blob/main/UPGRADE_FROM_XKEYSNAIL.md).
-- For xkeysnail (Kinto fork) see [USING_WITH_KINTO.md](https://github.com/joshgoebel/keyszer/blob/main/USING_WITH_KINTO.md) and [Using with Kinto v1.2-13](https://github.com/joshgoebel/keyszer/issues/36).
+- For xkeysnail (Kinto variety) see [USING_WITH_KINTO.md](https://github.com/joshgoebel/keyszer/blob/main/USING_WITH_KINTO.md) and [Using with Kinto v1.2-13](https://github.com/joshgoebel/keyszer/issues/36).
 
 
-#### Primary Highlights
+#### Key Highlights
 
 - Low-level library usage (`evdev` and `uinput`) allows remapping to work from the console all the way into X11.
 - High-level and incredibly flexible remapping mechanisms:
     - _per-application keybindings_ - bindings that change depending on the active X11 application or window
     - _multiple stroke keybindings_ - `Ctrl+x Ctrl+c` could map to `Ctrl+q`
-    - _very flexible output_ - `Ctrl-s` could type out `:save`, then hit enter
+    - _very flexible output_ - `Ctrl-s` could type out `:save`, and then hit enter
+    - _stateful key combos_ - build Emacs style combos with shift/mark
     - _multipurpose bindings_ - a regular key can become a modifier when held
     - _arbitrary functions_ - a key combo can run custom Python function
 
@@ -48,18 +49,19 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's i
 - better debugging tools
   - configurable `EMERGENCY EJECT` hotkey
   - configurable `DIAGNOSTIC` hotkey
-- fully supports running as non-privleged user (using `root` is now deprecated)
-- adds `Command` and `Cmd` aliases for Super/Meta
-- supports custom modifiers via `add_modifier`, such as `Hyper`
-- supports `Fn` as a modifier (on hardware where it works)
-- `bind` helper supports persistent holds for Mac OS style Cmd-tab, etc.
-- adds checking config file for issues with --check
-- adds `wm_name` conditionals (open PR)
-- adds `device_name` for all conditionals (including keymaps)
-- (fix) `xmodmap` cannot be used until some keys are pressed on the output
-- (fix) ability to avoid unintentional Alt/Super mis-triggers in many setups
+- fully supports running as semi-privleged user (using `root` is now deprecated)
+- adds `Meta`, Command` and `Cmd` aliases for Super/Meta modifier
+- supports custom modifiers via `add_modifier` (such as `Hyper`)
+- supports `Fn` as a potential modifier (on hardware where it works)
+- adds `bind` helper to support persistent holds across multiple combos
+  - most frequently used for persistent Mac OS style `Cmd-tab` app switcher panels
+- adds `--check` for checking the config file for issues
+- adds `wm_name` context for all conditionals (PR #40)
+- adds `device_name` context for all conditionals (including keymaps)
+- (fix) `xmodmap` cannot be used until some keys are first pressed on the emulated output
+- (fix) ability to avoid unintentional Alt/Super false keypresses in many setups
 - (fix) fixes multi-combo nested keymaps (vs Kinto's xkeysnail)
-- (fix) properly cleans up `uinput` pressed keys before termination
+- (fix) properly cleans up pressed keys before termination
 
 
 ---
@@ -67,6 +69,9 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's i
 ## Installation
 
 Requires **Python 3**.
+
+
+_Over time we should add individual instructions for various distros here._
 
 <!--
 ### Ubuntu
@@ -105,7 +110,7 @@ Requires **Python 3**.
 
 ### From source
 
-Just downloading the source and install.
+Just download the source and install.
 
     git clone https://github.com/joshgoebel/keyszer.git
     cd keyszer
@@ -126,15 +131,15 @@ Using a Python `venv` might be the simplest way to get started:
 
 ## System Requirements
 
-keyszer requires read/write access to all of:
+Keyszer requires read/write access to:
 
-- `/dev/input/event*` - to grab input from actual input devices
+- `/dev/input/event*` - to grab input from your `evdev` input devices
 - `/dev/uinput` - to provide an emulated keyboard to the kernel
 
 
 ### Running as a semi-privleged user
 
-It's best to create an entirely isolated user to run the keymapper.  Group or ACL based permissions can be used to give this user access to the necessary devices.  You'll need only a few `udev` rules to ensure that the input devices are all given correct permissions.
+It's best to create an entirely isolated user to run the keymapper.  Group or ACL based permissions can be used to provide this user access to the necessary devices.  You'll need only a few `udev` rules to ensure that the input devices are all given correct permissions.
 
 
 #### ACL based permissions (narrow, more secure)
@@ -143,7 +148,7 @@ First, lets make a new user:
 
     sudo useradd keymapper
 
-...then ask udev to use ACL to give our new user access to everything:
+...then use udev and ACL to grant our new user access:
 
 */etc/udev/rules.d/90-keymapper-acl.rules*
 
@@ -151,13 +156,14 @@ First, lets make a new user:
     KERNEL=="uinput", SUBSYSTEM=="misc", RUN+="/usr/bin/setfacl -m user:keymapper:rw /dev/uinput"
 
 
-#### Group based permissions (wider, less secure)
+#### Group based permissions (slightly wider, less secure)
 
-Some distros already have an input group; if not, you can create one.  Next, add a new user that's a member of said group:
+Many distros already have an input group; if not, you can create one.  Next, add a new user that's a member of that group:
 
     sudo useradd keymapper -G input
 
-...then ask udev to make sure our user has access to everything (via the input group):
+
+...then use udev to grant our new user access (via the `input` group):
 
 */etc/udev/rules.d/90-keymapper-input.rules*
 
@@ -167,51 +173,19 @@ Some distros already have an input group; if not, you can create one.  Next, add
 
 #### systemd
 
-For a sample systemd service file for running keyszer as a service please see [keyszer.service](https://github.com/joshgoebel/keyszer/blob/main/keyszer.service).
+For a sample systemd service file for running Keyszer as a service please see [keyszer.service](https://github.com/joshgoebel/keyszer/blob/main/keyszer.service).
 
 
-### Running as the Logged in User
+### Running as the Active Logged in User
 
-_TODO: remove this section entirely?_
+This may be appropriate in some limited development scenarios, but is not recommended.  Giving the active, logged in user access to `evdev` and `uinput` potentially allows all keystrokes to be logged and could allow a malicious program to take over (or destroy) your machine by injecting input into a Terminal session or other application.
 
-
-#### Caveats / Security Concerns
-
-- running programs could potentially log all your keystrokes (including your passwords!) simply by monitoring the input devices (that you must give yourself access to for this to work)
-
-Add your yourself to the input group:
-
-    usermod -a -G input [username]
-
-#### udev rules:
-
-`/etc/udev/rules.d/90-custom-input.rules`:
-
-```
-SUBSYSTEM=="input", GROUP="input"
-KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"
-```
+It would be better to open a terminal, `su` to a dedicated `keymapper` user and then run Keyszer inside that context, as shown earlier.
 
 
+### Running as `root`
 
-#### With a graphical display manager?
-
-_HOW? Shouldn't systemd cover this already?_
-
-
-#### With `.xinitrc`
-
-When using a very minimal setup you can simply add us to your `.xinitrc`. For example to start us up and then start Awesome WM.
-
-```
-keyszer --watch &
-exec awesome
-```
-
-
-### Running as root (most insecure)
-
-_Don't do this, it's bad, dangerous, and wholly unnecessary._  A semi-priveleged user is always better.
+_Don't do this, it's dangerous, and not unnecessary._  A semi-priveleged user with access to only the necessary input devices is a far better choice.
 
 
 ## Usage
@@ -232,14 +206,14 @@ Limit remapping to specify devices with `--devices`:
 
     keyszer --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
-The full path or completee device name may be used.
+The full path or complete device name may be used.  Device name is usually better to avoid USB device numbering jumping around after a reboot, etc...
 
 **Other Options:**
 
 - `-c`, `--config` - location of the configuration file 
 - `-w`, `--watch` - watch for new keyboard devices to hot-plug 
 - `-v` - increase verbosity greatly (to help with debugging)
-- `--list-devices` - list all available input devices
+- `--list-devices` - list out all available input devices
 
 
 ## Configuration
@@ -270,14 +244,31 @@ Configures the timing behavior of various aspects of the keymapper.
 - `suspend` - The number of seconds modifiers are "suspended" and withheld from the output waiting to see whether if they are part of a combo or if they may be the actual intended output.
 
 
+Defaults:
+
+```py
+timeouts(
+    multipurpose = 1,
+    suspend = 1,
+)
+```
+
 ### `dump_diagnostics_key(key)`
 
 Configures a key that when hit will dump additional diagnostic information to STDOUT.
 
+```py
+dump_diagnostics_key(Key.F15)  # default
+```
 
 ### `emergency_eject_key(key)`
 
 Configures a key that when hit will immediately terminate keyszer; useful for development, recovering from bugs, or badly broken configurations.
+
+```py
+emergency_eject_key(Key.F16)  # default
+```
+
 
 
 ### `add_modifier(name, aliases, key/keys)`
@@ -288,26 +279,28 @@ Allows you to add custom modifiers and then map them to actual keys.
 add_modifier("HYPER", aliases = ["Hyper"], key = Key.F24)
 ```
 
+_Note:_ Just adding `HYPER` doesn't necessarily make it work with your software, you may still need to configure X11 setup to accept the key you choose as the "Hyper" key.
+
 
 ### `wm_class_match(re_str)`
 
-Helper to make matching conditionals a tiny bit simpler.
+Helper to make matching conditionals (and caching the compiled regex) just a tiny bit simpler.
 
 ```py
 keymap("Firefox",{
     # ... keymap here
-}, when = m_class_match("^Firefox$"))
+}, when = wm_class_match("^Firefox$"))
 ```
 
 
 ### `not_wm_class_match(re_str)`
 
-The opposite of `wm_class_match`, matches only when the regex is NOT a match.
+The negation of `wm_class_match`, matches only when the regex does NOT match.
 
 
 ### `modmap(name, mappings, when_conditional = None)`
 
-Maps a singel physicl key to an entirely different key.  A default modmap will be overruled by any conditional modmaps that apply.  `when_conditional` can be passed to make the modmap conditional.
+Maps a single physical key to a different key.  A default modmap will always be overruled by any conditional modmaps that apply.  `when_conditional` can be passed to make the modmap conditional.
 
 ```py
 modmap("default", {
@@ -316,13 +309,17 @@ modmap("default", {
 })
 ```
 
+If you don't create a default (non-conditional) modmap a blank one is created for you.  For `modmap` sides of the pairing will be `Key` literals (not combos).
+
+
 ### `multipurpose_modmap(name, mappings)`
 
-Used to map a key with multiple-purposes, both for regular usage and use as a modifier (when held down).
+Used to bestow a key with multiple-purposes, both for regular use and for use as a modifier.
 
 ```py
 multipurpose_modmap("default",
-    # Enter is enter when pressed and released. Control when held down.
+    # Enter is enter if pressed and immediately released...
+    # ...but Right Control if held down and paired with other keys.
     {Key.ENTER: [Key.ENTER, Key.RIGHT_CTRL]}
 )
 ```
@@ -330,29 +327,32 @@ multipurpose_modmap("default",
 
 ### `keymap(name, mappings)`
 
-Defines a keymap consisting of `mappings` of the input combos mapped to output equivalents.
+Defines a keymap of input combos mapped to output equivalents.
 
 ```py
 keymap("Firefox", {
-    # when Cmd-S is hit instead send Ctrl-S
+    # when Cmd-S is input instead send Ctrl-S to the ouput
     K("Cmd-s"): K("Ctrl-s"),
 }, when = lambda ctx: ctx.wm_class == "Firefox")
 ```
 
-Argument `mappings` is a dictionary in the form of `{combo: command, combo2:
-command2, ...}` where `combo` and `command` take following forms:
-- `combo`: Combo to map, specified by `K(combo_string)`
+Because of the `when` conditional this keymap will only apply for Firefox.
+
+
+The argument `mappings` is a dictionary in the form of `{ combo: command, ...}` where `combo` and `command` take following forms:
+
+- `combo`: Combo to map, specified by `K(combo_str)`
     - For the syntax of combo specifications, see [Combo Specifications](#combo-specifications).
 - `command`: one of the following
-    - `K("YYY")`: Type a specific key combo to the output.
+    - `K(combo_str)`: Type a specific key combo to the output.
     - `[command1, command2, ...]`: Execute multiple commands sequentially.
-    - `{ ... }`: Sub-keymap. Used to define multiple stroke keybindings. See [Multiple Stroke Keys](#multiple-stroke-keys) for details.
-    - `escape_next_key`: Escape the next key.
-    - `ignore_key`: Ignore the key combo entirely.
-    - `bind`: Bind input and ouput modifier together such that the output is not lifted until the input is.
+    - `{ ... }`: Sub-keymap. Used to define [Multiple Stroke Keys](#multiple-stroke-keys).
+    - `escape_next_key`: Escape the next key pressed.
+    - `ignore_key`: Ignore the key that is pressed next. (often used to disable native combos)
+    - `bind`: Bind an input and ouput modifier together such that the output is not lifted until the input is.
     - arbitrary function: The function is executed and the returned value (if any) is used as a command.
 
-Argument `name` specifies the keymap name. Every keymap should have a name.  `default` is suggested for non-conditional keymaps.
+The argument `name` specifies the keymap name. Every keymap has a name - using `default` is suggested for a non-conditional keymap.
 
 
 ### `conditional(fn, map)`
@@ -374,11 +374,13 @@ The `context` object passed to the `fn` function has several attributes:
 - `wm_name` - the WM_NAME of the [input] focused X11 window
 - `device_name` - name of the device where an input originated
 
+_Note:_ The same conditional `fn` can always be passed directly to `modmap` using the `when` argument.
+
 ---
 
 #### Marks
 
-TODO: need docs (See #8)
+TODO: need docs (See issue #8)
 
 
 #### Combo Specifications
@@ -417,6 +419,17 @@ keymap("multi stroke", {
     }
 })
 ```
+
+#### Finding out the proper `Key.NAME` literal for a key on your keyboard
+
+From a terminal session run `evtest` and select your keyboard's input device.  Now hit the key in question.
+
+```
+Event: time 1655723568.594844, type 1 (EV_KEY), code 69 (KEY_NUMLOCK), value 1
+Event: time 1655723568.594844, -------------- SYN_REPORT ------------
+```
+
+Above I've just pressed "clear" on my numpad and see `code 69 (KEY_NUMLOCK)` in the ouput. For Keyszer this would translate to `Key.NUMLOCK`.  You can also browse the [full list of key names](https://github.com/joshgoebel/keyszer/blob/main/src/keyszer/models/key.py) in the source.
 
 
 #### Finding an Application's `WM_CLASS`  and `WM_NAME` using `xprop`
@@ -469,6 +482,17 @@ Event: time 1654948033.572989, -------------- SYN_REPORT ------------
 Event: time 1654948033.636611, type 1 (EV_KEY), code 464 (KEY_FN), value 0
 Event: time 1654948033.636611, -------------- SYN_REPORT ------------
 ```
+
+
+**Does Keyszer support FreeBSD/NetBSD or other BSDs?**
+
+Not at the moment, perhaps never.  If you're an expert on the BSD kernel's input layers please
+[join the discussion](https://github.com/joshgoebel/keyszer/issues/46).  I'm at the very least open to the discussion to find out if this is possible, a good idea, etc...
+
+
+**Does this work with Wayland?**
+
+[Not yet.](https://github.com/joshgoebel/keyszer/issues/27)  This is desires but seems impossible at the moment until there is a standardized system to *quickly and easily* determine the app/window that has input focus on Wayland, just like we do so easily on X11.
 
 
 **Is keyszer compatible with [Kinto.sh](https://github.com/rbreaves/kinto)?**
