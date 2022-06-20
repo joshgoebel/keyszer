@@ -45,9 +45,7 @@ keymap("Firefox and Chrome", {
     C("C-Alt-j"): C("C-TAB"),
     C("C-Alt-k"): C("C-Shift-TAB"),
     # Type C-j to focus to the content
-    C("C-j"): C("C-f6"),
-    # very naive "Edit in editor" feature (just an example)
-    C("C-o"): [C("C-a"), C("C-c"), launch(["gedit"]), sleep(0.5), C("C-v")]
+    C("C-j"): C("C-f6")
 }, when = wm_class_match(r"Firefox|Google-chrome"))
 
 # Keybindings for Zeal https://github.com/zealdocs/zeal/

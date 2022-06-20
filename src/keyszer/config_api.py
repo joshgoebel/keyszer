@@ -109,14 +109,6 @@ def emergency_eject_key(key):
 # ============================================================ #
 
 
-def launch(command):
-    """Launch command"""
-    def launcher():
-
-        Popen(command)
-    return launcher
-
-
 def sleep(sec):
     """Sleep sec in commands"""
     def sleeper():
