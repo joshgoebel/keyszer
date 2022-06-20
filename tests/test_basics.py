@@ -209,3 +209,50 @@ async def test_sticky_combo_with_sticky_inkey_in_output_combo():
         (RELEASE, Key.LEFT_ALT),
         (RELEASE, Key.LEFT_CTRL),
     ]
+
+
+@pytest.mark.looptime
+async def test_real_inputs_do_not_reexert_during_combo_sequence():
+    keymap("default",{
+        K("C-Alt-j"): [
+            K("C-Alt-X"),
+            K("C-Y"),
+            K("Z"),
+            K("A"),
+        ],
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.LEFT_ALT)
+    # we want to get past suspend so these keys
+    # are actually pushed to the ouput
+    await asyncio.sleep(2)
+    press(Key.J)
+    release(Key.J)
+    release(Key.LEFT_CTRL)
+    release(Key.LEFT_ALT)
+
+    assert _out.keys() == [
+        (PRESS, Key.LEFT_CTRL),
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.X),
+        (RELEASE, Key.X),
+        # next combo - K("C-Y"),
+        (RELEASE, Key.LEFT_ALT), # alt isn't needed, lifted
+        (PRESS, Key.Y),
+        (RELEASE, Key.Y),
+        # last combo - K("Z"),
+        (RELEASE, Key.LEFT_CTRL), # ctrl isn't needed, lifted
+        (PRESS, Key.Z),
+        (RELEASE, Key.Z),
+        (PRESS, Key.A),
+        (RELEASE, Key.A),
+        # done with the sequence output will re-exert
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.LEFT_CTRL),
+        # and finally the releases
+        (RELEASE, Key.LEFT_CTRL),
+        (RELEASE, Key.LEFT_ALT),
+    ]
