@@ -57,16 +57,16 @@ Key things to remember:
 - Lose the verbose `define_` prefix
 - Every modmap and keymap must now be named
 - Conditions are optional and passed using the `when` named argument
-- Contitions are all passed a context object (see the `README`)
+- Contitions are now all passed a context object (see the `README`)
 
 **timeout**
 
 ```py
 # before
-define_timeout(1)
+define_timeout(1) # multipurpose timeout
 
 # after
-timeout(1)
+timeouts(multipurpose = 1)
 ```
 
 **modmaps**

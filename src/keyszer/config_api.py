@@ -190,7 +190,7 @@ def with_or_set_mark(combo):
 # ─── STANDARD API ─────────────────────────────────────────────────────────────
 
 
-def timeouts(multipurpose, suspend):
+def timeouts(multipurpose = 1, suspend = 1):
     _TIMEOUTS = {
         "multipurpose": multipurpose,
         "suspend": suspend
