@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field, replace
 from .key import Key
 from .action import Action
-import time
+import time as _time
+
 
 @dataclass
 class Keystate:
@@ -9,20 +10,20 @@ class Keystate:
     inkey: Key
     action: Action
     prior: "Keystate" = None
-    time: float = field(default_factory=time.time)
+    time: float = field(default_factory=_time.time)
     # the key we modmapped to
     key: Key = None
     # the modifier we may modmap to (multi-key) if used
     # as part of a combo or held for a certain time period
     multikey: Key = None
-    # whether this key is currently suspended inside the 
-    # transform engine waiting for other input  
+    # whether this key is currently suspended inside the
+    # transform engine waiting for other input
     suspended: bool = False
     is_multi: bool = False
     exerted_on_output: bool = False
     # if this keystate was spent by executing a combo
     spent: bool = False
-    
+
     def copy(self):
         return replace(self)
 

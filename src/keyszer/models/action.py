@@ -1,4 +1,5 @@
-from enum import Enum, unique, IntEnum
+from enum import unique, IntEnum
+
 
 @unique
 class Action(IntEnum):
@@ -16,4 +17,3 @@ class Action(IntEnum):
 
     def __str__(self):
         return self.name.lower()
-

@@ -1,5 +1,6 @@
 from ..xorg import get_active_window_wm_class
 
+
 class KeyContext:
     def __init__(self, device_name):
         self._device_name = device_name

@@ -1,5 +1,5 @@
 class Modmap:
-    def __init__(self, name, mappings, when = None):
+    def __init__(self, name, mappings, when=None):
         self.name = name
         self.mappings = mappings
         self.conditional = when
@@ -9,9 +9,10 @@ class Modmap:
 
     def __getitem__(self, item):
         return self.mappings[item]
-    
+
+
 class MultiModmap:
-    def __init__(self, name, mappings, when = None):
+    def __init__(self, name, mappings, when=None):
         self.name = name
         self.mappings = mappings
         self.conditional = when
@@ -24,4 +25,3 @@ class MultiModmap:
 
     def items(self):
         return self.mappings.items()
-    

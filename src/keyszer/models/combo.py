@@ -1,10 +1,10 @@
-from enum import Enum, unique, IntEnum
+from enum import unique, IntEnum
 from collections.abc import Iterable
 
 from .key import Key
 from .modifier import Modifier
-from ..lib.logger import *
 from ordered_set import OrderedSet
+
 
 @unique
 class ComboHint(IntEnum):
@@ -19,13 +19,13 @@ class Combo:
         modifiers = modifiers or []
 
         if isinstance(modifiers, set):
-            raise ValueError(f"modifiers needs to an ordered sequence, not a set")
+            raise ValueError("modifiers needs ordered sequence, not a set")
         if isinstance(modifiers, Iterable):
             modifiers = OrderedSet(modifiers)
         elif isinstance(modifiers, Modifier):
             modifiers = OrderedSet([modifiers])
         else:
-            raise ValueError(f"modifiers should be Iterable")
+            raise ValueError("modifiers should be Iterable")
 
         if not isinstance(key, Key):
             raise ValueError("key should be a Key")
@@ -43,7 +43,8 @@ class Combo:
 
     def __eq__(self, other):
         if isinstance(other, Combo):
-            return set(self.modifiers) == set(other.modifiers) and self.key == other.key
+            return set(self.modifiers) == set(other.modifiers) and \
+                self.key == other.key
         else:
             return NotImplemented
 

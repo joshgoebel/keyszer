@@ -1,11 +1,6 @@
-import itertools
 import time
-from inspect import signature
 from evdev import ecodes
-from ordered_set import OrderedSet
 import asyncio
-
-import evdev
 
 from .lib.key_context import KeyContext
 from .models.key import Key
@@ -14,10 +9,9 @@ from .models.modifier import Modifier
 from .models.combo import Combo, ComboHint
 from .models.keystate import Keystate
 from .models.keymap import Keymap
-from .lib.logger import *
+from .lib.logger import debug
 from .lib import logger
 from .output import Output
-from .xorg import get_active_window_wm_class
 from .config_api import get_configuration, escape_next_key, ignore_key
 
 _MODMAPS = None
@@ -25,13 +19,14 @@ _MULTI_MODMAPS = None
 _KEYMAPS = None
 _TIMEOUTS = None
 
+
 def boot_config():
     global _MODMAPS
     global _MULTI_MODMAPS
     global _KEYMAPS
     global _TIMEOUTS
     _MODMAPS, _MULTI_MODMAPS, _KEYMAPS, _TIMEOUTS = \
-            get_configuration()
+        get_configuration()
 
 
 # ============================================================ #
@@ -41,6 +36,7 @@ _active_keymaps = None
 _output = Output()
 _key_states = {}
 _sticky = {}
+
 
 def reset_transform():
     global _active_keymaps
@@ -57,6 +53,7 @@ def shutdown():
     _output.shutdown()
 
 # ============================================================ #
+
 
 def none_pressed():
     return len(_key_states) == 0
@@ -85,7 +82,7 @@ def update_pressed_states(keystate):
         del _key_states[keystate.inkey]
 
     # press / add
-    if not keystate.inkey in _key_states:
+    if keystate.inkey not in _key_states:
         # add state
         if keystate.action == Action.PRESS:
             _key_states[keystate.inkey] = keystate
@@ -101,7 +98,9 @@ def update_pressed_states(keystate):
 _suspend_timer = None
 _last_suspend_timeout = 0
 
+
 def resume_keys():
+    global _last_suspend_timeout
     global _suspend_timer
     if not is_suspended():
         return
@@ -127,9 +126,9 @@ def resume_keys():
         # if some other key is waking us up then we must be a modifier (we know
         # because if we were waking ourself it would happen in on_key)
         if ks.is_multi:
-            ks.key=ks.multikey
-            ks.multikey=False
-            ks.is_multi=False
+            ks.key = ks.multikey
+            ks.multikey = False
+            ks.is_multi = False
 
         if not ks.exerted_on_output:
             ks.exerted_on_output = True
@@ -137,7 +136,8 @@ def resume_keys():
 
 
 def is_suspended():
-    return _suspend_timer != None
+    return _suspend_timer is not None
+
 
 def resuspend_keys(timeout):
     # we should not be able to resuspend for a shorter timeout, ie
@@ -162,8 +162,10 @@ def resuspend_keys(timeout):
     debug("resuspending keys")
     suspend_keys(timeout)
 
+
 def pressed_mods_not_exerted_on_output():
     return [key for key in get_pressed_mods() if not _output.is_mod_pressed(key)]
+
 
 def suspend_or_resuspend_keys(timeout):
     if is_suspended():
@@ -171,8 +173,10 @@ def suspend_or_resuspend_keys(timeout):
     else:
         suspend_keys(timeout)
 
+
 def suspend_keys(timeout):
     global _suspend_timer
+    global _last_suspend_timeout
     debug("suspending keys", pressed_mods_not_exerted_on_output())
     states = [x for x in _key_states.values() if x.is_pressed()]
     for s in states:
@@ -181,7 +185,8 @@ def suspend_keys(timeout):
     _last_suspend_timeout = timeout
     _suspend_timer = loop.call_later(timeout, resume_keys)
 
-# --- DUMP DIAGNOTICS ----
+# ─── DUMP DIAGNOTICS ────────────────────────────────────────────────────────
+
 
 def dump_diagnostics():
     print("*** TRANSFORM  ***")
@@ -212,18 +217,17 @@ def apply_modmap(keystate, context):
     keystate.key = inkey
     # first modmap is always the default, unconditional
     active_modmap = _MODMAPS[0]
-    #debug("active", active_modmap)
+    # debug("active", active_modmap)
     conditional_modmaps = _MODMAPS[1:]
-    #debug("conditionals", conditional_modmaps)
+    # debug("conditionals", conditional_modmaps)
     if conditional_modmaps:
         for modmap in conditional_modmaps:
             if modmap.conditional(context):
                 active_modmap = modmap
                 break
-    if active_modmap:
-        if inkey in active_modmap:
-            debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
-            keystate.key = active_modmap[inkey]
+    if active_modmap and inkey in active_modmap:
+        debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
+        keystate.key = active_modmap[inkey]
 
 
 def apply_multi_modmap(keystate, context):
@@ -246,11 +250,11 @@ def apply_multi_modmap(keystate, context):
 JUST_KEYS = []
 JUST_KEYS.extend([Key[x] for x in "QWERTYUIOPASDFGHJKLZXCVBNM"])
 
-#from .lib.benchit import *
 
+# from .lib.benchit import *
 def find_keystate_or_new(inkey, action):
-    if not inkey in _key_states:
-        return Keystate(inkey = inkey, action = action)
+    if inkey not in _key_states:
+        return Keystate(inkey=inkey, action=action)
 
     ks = _key_states[inkey]
     ks.prior = ks.copy()
@@ -275,33 +279,24 @@ def find_keystate_or_new(inkey, action):
 #   - process the actual combos, commands
 
 
-
 # @benchit
 def on_event(event, device_name):
-    # we do not attempt to transform non-key events 
-    #debug(evdev.util.categorize(event))
+    # we do not attempt to transform non-key events
     if event.type != ecodes.EV_KEY:
         _output.send_event(event)
         return
-    
-    # if none pressed and not a modifier and not used in any 
-    # modmap or multi-modmaps
-
-    # if len(_pressed_modifier_keys) == 0 and event.code in JUST_KEYS:
-    #     _output.send_event(event)
-    #     return
 
     context = KeyContext(device_name)
     action = Action(event.value)
     key = Key(event.code)
 
     ks = find_keystate_or_new(
-        inkey = key,
-        action = action
+        inkey=key,
+        action=action
     )
 
     debug()
-    debug(f"in {key} ({action})", ctx = "II")
+    debug(f"in {key} ({action})", ctx="II")
 
     # we only do modmap on the PRESS pass, keys may not
     # redefine themselves midstream while repeating or
@@ -418,7 +413,7 @@ def transform_key(key, action, ctx):
 
         held = get_pressed_states()
         for ks in held:
-            # if we are triggering a momentary on the output then we can mark ourselves
+            # if we are triggering a momentary on the output we can mark ourselves
             # spent, but if the key is already asserted on the output then we cannot
             # count it as spent and must hold it so that it's release later will
             # trigger the release on the output
@@ -466,7 +461,7 @@ def simple_sticky(combo, output_combo):
                 # TODO: this state info should likely move into `KeyState`
                 ks.exerted_on_output = False
 
-    stuck = { inkey: outkey }
+    stuck = {inkey: outkey}
     debug("BIND:", stuck)
     return stuck
 
@@ -485,10 +480,10 @@ def auto_sticky(combo, input_combo):
             _output.send_key_action(k, Action.PRESS)
 
 
-# ─── COMMAND PROCESSING ─────────────────────────────────────────────────────────
+# ─── COMMAND PROCESSING ───────────────────────────────────────────────────────
 
 
-def handle_commands(commands, key, action, input_combo = None):
+def handle_commands(commands, key, action, input_combo=None):
     """
     returns: reset_mode (True/False) if this is True, _active_keymaps will be reset
     """
