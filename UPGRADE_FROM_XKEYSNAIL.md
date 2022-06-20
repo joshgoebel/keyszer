@@ -22,6 +22,11 @@ Replace these with the clearler `Alt` equivalents:
 - `RM` => `RAlt`
 - `M` => `Alt`
 
+### Remove any `launch` macros
+
+There are questions of whether this ever worked properly and it needed to be rethought in any case to be far more reliable and secure.
+
+If you need this functionality please see [issue 44](https://github.com/joshgoebel/keyszer/issues/44) for how to implement it.
 
 ### Remove `pass_through_key`
 
