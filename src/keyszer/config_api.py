@@ -133,7 +133,7 @@ def usleep(usec):
 # ============================================================ #
 
 
-def K(exp): # pylint: disable=invalid-name
+def C(exp): # pylint: disable=invalid-name
     "Helper function to specify keymap"
     modifier_strs = []
     while True:
@@ -147,6 +147,9 @@ def K(exp): # pylint: disable=invalid-name
     key_str = exp.upper()
     key = getattr(Key, key_str)
     return Combo(_create_modifiers_from_strings(modifier_strs), key)
+
+# legacy helper name
+K = C
 
 def _create_modifiers_from_strings(modifier_strs):
     modifiers = []

@@ -42,84 +42,84 @@ multipurpose_modmap("Microsoft keyboard", {
 # Keybindings for Firefox/Chrome
 keymap("Firefox and Chrome", {
     # Ctrl+Alt+j/k to switch next/previous tab
-    K("C-Alt-j"): K("C-TAB"),
-    K("C-Alt-k"): K("C-Shift-TAB"),
+    C("C-Alt-j"): C("C-TAB"),
+    C("C-Alt-k"): C("C-Shift-TAB"),
     # Type C-j to focus to the content
-    K("C-j"): K("C-f6"),
+    C("C-j"): C("C-f6"),
     # very naive "Edit in editor" feature (just an example)
-    K("C-o"): [K("C-a"), K("C-c"), launch(["gedit"]), sleep(0.5), K("C-v")]
+    C("C-o"): [C("C-a"), C("C-c"), launch(["gedit"]), sleep(0.5), C("C-v")]
 }, when = wm_class_match(r"Firefox|Google-chrome"))
 
 # Keybindings for Zeal https://github.com/zealdocs/zeal/
 keymap("Zeal", {
     # Ctrl+s to focus search area
-    K("C-s"): K("C-k"),
+    C("C-s"): C("C-k"),
 }, when = wm_class_match(r"Zeal"))
 
 # Emacs-like keybindings in non-Emacs applications
 
 keymap("Emacs-like keys", {
     # Cursor
-    K("C-b"): with_mark(K("left")),
-    K("C-f"): with_mark(K("right")),
-    K("C-p"): with_mark(K("up")),
-    K("C-n"): with_mark(K("down")),
-    K("C-h"): with_mark(K("backspace")),
+    C("C-b"): with_mark(C("left")),
+    C("C-f"): with_mark(C("right")),
+    C("C-p"): with_mark(C("up")),
+    C("C-n"): with_mark(C("down")),
+    C("C-h"): with_mark(C("backspace")),
     # Forward/Backward word
-    K("Alt-b"): with_mark(K("C-left")),
-    K("Alt-f"): with_mark(K("C-right")),
+    C("Alt-b"): with_mark(C("C-left")),
+    C("Alt-f"): with_mark(C("C-right")),
     # Beginning/End of line
-    K("C-a"): with_mark(K("home")),
-    K("C-e"): with_mark(K("end")),
+    C("C-a"): with_mark(C("home")),
+    C("C-e"): with_mark(C("end")),
     # Page up/down
-    K("Alt-v"): with_mark(K("page_up")),
-    K("C-v"): with_mark(K("page_down")),
+    C("Alt-v"): with_mark(C("page_up")),
+    C("C-v"): with_mark(C("page_down")),
     # Beginning/End of file
-    K("Alt-Shift-comma"): with_mark(K("C-home")),
-    K("Alt-Shift-dot"): with_mark(K("C-end")),
+    C("Alt-Shift-comma"): with_mark(C("C-home")),
+    C("Alt-Shift-dot"): with_mark(C("C-end")),
     # Newline
-    K("C-m"): K("enter"),
-    K("C-j"): K("enter"),
-    K("C-o"): [K("enter"), K("left")],
+    C("C-m"): C("enter"),
+    C("C-j"): C("enter"),
+    C("C-o"): [C("enter"), C("left")],
     # Copy
-    K("C-w"): [K("C-x"), set_mark(False)],
-    K("Alt-w"): [K("C-c"), set_mark(False)],
-    K("C-y"): [K("C-v"), set_mark(False)],
+    C("C-w"): [C("C-x"), set_mark(False)],
+    C("Alt-w"): [C("C-c"), set_mark(False)],
+    C("C-y"): [C("C-v"), set_mark(False)],
     # Delete
-    K("C-d"): [K("delete"), set_mark(False)],
-    K("Alt-d"): [K("C-delete"), set_mark(False)],
+    C("C-d"): [C("delete"), set_mark(False)],
+    C("Alt-d"): [C("C-delete"), set_mark(False)],
     # Kill line
-    K("C-k"): [K("Shift-end"), K("C-x"), set_mark(False)],
+    C("C-k"): [C("Shift-end"), C("C-x"), set_mark(False)],
     # Undo
-    K("C-slash"): [K("C-z"), set_mark(False)],
-    K("C-Shift-ro"): K("C-z"),
+    C("C-slash"): [C("C-z"), set_mark(False)],
+    C("C-Shift-ro"): C("C-z"),
     # Mark
-    K("C-space"): set_mark(True),
-    K("C-Alt-space"): with_or_set_mark(K("C-right")),
+    C("C-space"): set_mark(True),
+    C("C-Alt-space"): with_or_set_mark(C("C-right")),
     # Search
-    K("C-s"): K("F3"),
-    K("C-r"): K("Shift-F3"),
-    K("Alt-Shift-key_5"): K("C-h"),
+    C("C-s"): C("F3"),
+    C("C-r"): C("Shift-F3"),
+    C("Alt-Shift-key_5"): C("C-h"),
     # Cancel
-    K("C-g"): [K("esc"), set_mark(False)],
+    C("C-g"): [C("esc"), set_mark(False)],
     # Escape
-    K("C-q"): escape_next_key,
+    C("C-q"): escape_next_key,
     # C-x YYY
-    K("C-x"): {
+    C("C-x"): {
         # C-x h (select all)
-        K("h"): [K("C-home"), K("C-a"), set_mark(True)],
+        C("h"): [C("C-home"), C("C-a"), set_mark(True)],
         # C-x C-f (open)
-        K("C-f"): K("C-o"),
+        C("C-f"): C("C-o"),
         # C-x C-s (save)
-        K("C-s"): K("C-s"),
+        C("C-s"): C("C-s"),
         # C-x k (kill tab)
-        K("k"): K("C-f4"),
+        C("k"): C("C-f4"),
         # C-x C-c (exit)
-        K("C-c"): K("C-q"),
+        C("C-c"): C("C-q"),
         # cancel
-        K("C-g"): ignore_key,
+        C("C-g"): ignore_key,
         # C-x u (undo)
-        K("u"): [K("C-z"), set_mark(False)],
+        C("u"): [C("C-z"), set_mark(False)],
     }
 }, when = lambda ctx: ctx.wm_class not in ("Emacs", "URxvt"))
 

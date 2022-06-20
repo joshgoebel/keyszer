@@ -332,7 +332,7 @@ Defines a keymap of input combos mapped to output equivalents.
 ```py
 keymap("Firefox", {
     # when Cmd-S is input instead send Ctrl-S to the ouput
-    K("Cmd-s"): K("Ctrl-s"),
+    C("Cmd-s"): C("Ctrl-s"),
 }, when = lambda ctx: ctx.wm_class == "Firefox")
 ```
 
@@ -385,7 +385,7 @@ TODO: need docs (See issue #8)
 
 #### Combo Specifications
 
-The Combo specification in a keymap is written in the form of `K("(<Modifier>-)*<Key>")`.
+The Combo specification in a keymap is written in the form of `C("(<Modifier>-)*<Key>")`.
 
 `<Modifier>` is one of the following:
 
@@ -401,10 +401,10 @@ You can specify left/right modifiers by adding the prefixes `L` or `R`.
 
 Some combo examples:
 
-- `K("LC-Alt-j")`: left Control, Alt, `j`
-- `K("Ctrl-m")`: Left or Right Control, `m`
-- `K("Win-o")`: Cmd/Windows,  `o`
-- `K("Alt-Shift-comma")`: Alt, Left or Right Shift, comma
+- `C("LC-Alt-j")`: left Control, Alt, `j`
+- `C("Ctrl-m")`: Left or Right Control, `m`
+- `C("Win-o")`: Cmd/Windows,  `o`
+- `C("Alt-Shift-comma")`: Alt, Left or Right Shift, comma
 
 
 #### Multiple Stroke Keys
@@ -414,8 +414,8 @@ following example remaps `C-x C-c` to `C-q`.
 
 ```python
 keymap("multi stroke", {
-    K("C-x"): {
-      K("C-c"): K("C-q"),
+    C("C-x"): {
+      C("C-c"): C("C-q"),
     }
 })
 ```
