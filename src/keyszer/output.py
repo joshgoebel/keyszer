@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from evdev import ecodes
 from evdev.uinput import UInput
 from .models.action import Action 

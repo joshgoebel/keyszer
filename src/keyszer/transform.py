@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import itertools
 import time
 from inspect import signature

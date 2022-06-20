@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 from .lib.logger import *
 from .lib import logger
 from .version import __version__, __name__, __description__
 
 CONFIG_HEADER = b"""
-# -*- coding: utf-8 -*-
 import re
 from keyszer.config_api import *
 """

@@ -16,7 +16,6 @@ from evdev import InputEvent
 from evdev.ecodes import EV_KEY, EV_REL
 
 CONFIG_HEADER = b"""
-# -*- coding: utf-8 -*-
 import re
 #from keyszer.config_api import *
 """

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from evdev import ecodes, InputDevice, list_devices, InputEvent
 from .models.action import Action
 from .models.key import Key

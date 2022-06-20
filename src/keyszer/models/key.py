@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from enum import IntEnum
 
 # https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __name__ = "keyszer"
 
 __version__ = "0.5.0"
