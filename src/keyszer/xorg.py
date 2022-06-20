@@ -21,17 +21,16 @@ def get_xorg_context():
     """Get window context from Xorg, window name, class, whether there is an X error"""
     try:
         display = Display()
-
         wm_class = ""
         wm_name = ""
 
-        input_focus_window = display.get_input_focus().focus
-        wm_name = input_focus_window.get_wm_name()
-        # (process name, class name)
-        pair = get_class_name(input_focus_window)
-        #TODO: is this sometomes not a pair, but a string???
-        if pair:
-            wm_class = str(pair[1])
+        input_focus = display.get_input_focus().focus
+        window = get_actual_window(input_focus)
+        if window:
+            wm_name = window.get_wm_name()
+            pair = window.get_wm_class()
+            if pair:
+                wm_class = str(pair[1])
 
         return {
             "wm_class": wm_class,
@@ -42,14 +41,16 @@ def get_xorg_context():
     except ConnectionClosedError as xerror:
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
+    # most likely DISPLAY env isn't even set
+    except DisplayNameError as xerror:
+        error(xerror)
+        return NO_CONTEXT_WAS_ERROR
     # seen when we don't have permission to the X display
-    except (DisplayConnectionError, DisplayNameError) as xerror:
+    except DisplayConnectionError as xerror:
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
 
-
-def get_class_name(window):
-    """Get window's class name (recursively checks parents)"""
+def get_actual_window(window):
     try:
         wmname = window.get_wm_name()
         wmclass = window.get_wm_class()
@@ -58,8 +59,9 @@ def get_class_name(window):
         if (wmclass is None and wmname is None) or "FocusProxy" in wmclass:
             parent_window = window.query_tree().parent
             if parent_window:
-                return get_class_name(parent_window)
+                return get_actual_window(parent_window)
             return None
-        return wmclass
+
+        return window
     except:
         return None
