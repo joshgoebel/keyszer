@@ -40,13 +40,15 @@ def setup_uinput(uinput = None):
     global _uinput
     _uinput = uinput or real_uinput()
 
+
 class Output:
 
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
+        self._suspended_mod_keys = []
+        self._suspend_depth = 0
         return
-
 
     def __update_modifier_key_pressed(self, key, action):
         if Modifier.is_key_modifier(key):
@@ -67,6 +69,9 @@ class Output:
         print(self._pressed_modifier_keys)
         print("_pressed_keys")
         print(self._pressed_keys)
+        print("_suspended_mod_keys")
+        print(self._suspended_mod_keys)
+        print("_suspend_depth", self._suspend_depth)
 
     def __send_sync(self ):
         _uinput.syn()
@@ -118,8 +123,11 @@ class Output:
         for modifier in reversed(pressed_modifier_keys):
             self.send_key_action(modifier, Action.RELEASE)
 
-        for modifier in reversed(released_modifiers_keys):
-            self.send_key_action(modifier, Action.PRESS)
+        if self.__is_suspending(): # sleep the keys
+            self._suspended_mod_keys.extend(released_modifiers_keys)
+        else: # reassert the keys
+            for modifier in reversed(released_modifiers_keys):
+                self.send_key_action(modifier, Action.PRESS)
 
 
     def send_key(self,key):
@@ -134,3 +142,51 @@ class Output:
         for key in self._pressed_modifier_keys.copy():
             self.send_key_action(key, Action.RELEASE)
         _uinput.close()
+
+    # ─── SUSPEND ──────────────────────────────────────────────────────────────────
+
+    # self._suspended_mod_keys : list
+    # self._suspend_depth : int
+
+    def suspend_when_lifting(self):
+        return SuspendWhenLifting(self)
+
+    def __is_suspending(self):
+        return self._suspend_depth > 0
+
+    def __reexert(self, key):
+        self.send_key_action(key, Action.PRESS)
+
+    # the function that calls this is re-entrant so we need to make sure
+    # we can suspend/resume to multiple depths without losing track of
+    # where we are, though this SHOULD be more of a theoretical concern
+    def allow_suspend(self):
+        self._suspend_depth += 1
+
+    def disallow_suspend(self):
+        self._suspend_depth -= 1
+
+        if not self.__is_suspending():
+            for mod in self._suspended_mod_keys:
+                self.__reexert(mod)
+            self._suspended_mod_keys.clear()
+
+
+class SuspendWhenLifting:
+    """
+    wraps the suspending pattern for output
+
+    When output release keys it doesn't need for the current combo instead
+    of re-exerting them immediatley after it will hold them until it is
+    unsuspended (which is currently immediately when a sequence ends)
+    """
+    def __init__(self, output):
+        self._output = output
+
+    def __enter__(self):
+        self._output.allow_suspend()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._output.disallow_suspend()
+        return False
