@@ -508,37 +508,41 @@ def handle_commands(commands, key, action, input_combo = None):
     if is_suspended():
         resuspend_keys(_TIMEOUTS["suspend"])
 
-    # Execute commands
-    for command in commands:
-        if callable(command):
-            # very likely we're just passing None forwards here but that OK
-            reset_mode = handle_commands(command(), key, action)
-            # if the command wants to disable reset, lets propogate that
-            if reset_mode is False:
+    _output.start_suspend()
+    try:
+        # Execute commands
+        for command in commands:
+            if callable(command):
+                # very likely we're just passing None forwards here but that OK
+                reset_mode = handle_commands(command(), key, action)
+                # if the command wants to disable reset, lets propogate that
+                if reset_mode is False:
+                    return False
+            elif isinstance(command, Combo):
+                if _next_bind:
+                    auto_sticky(command, input_combo)
+                _output.send_combo(command)
+            elif isinstance(command, Key):
+                _output.send_key(command)
+            elif command is escape_next_key:
+                _active_keymaps = escape_next_key
                 return False
-        elif isinstance(command, Combo):
-            if _next_bind:
-                auto_sticky(command, input_combo)
-            _output.send_combo(command)
-        elif isinstance(command, Key):
-            _output.send_key(command)
-        elif command is escape_next_key:
-            _active_keymaps = escape_next_key
-            return False
-        elif command is ComboHint.BIND:
-            _next_bind = True
-            continue
-        elif command is ignore_key:
-            debug("ignore_key", key)
-            return True
-        # Go to next keymap
-        elif isinstance(command, Keymap):
-            _active_keymaps = [command]
-            return False
-        elif command is None:
-            pass
-        else:
-            debug(f"unknown command {command}")
-        _next_bind = False
-    # Reset keymap in ordinary flow
-    return True
+            elif command is ComboHint.BIND:
+                _next_bind = True
+                continue
+            elif command is ignore_key:
+                debug("ignore_key", key)
+                return True
+            # Go to next keymap
+            elif isinstance(command, Keymap):
+                _active_keymaps = [command]
+                return False
+            elif command is None:
+                pass
+            else:
+                debug(f"unknown command {command}")
+            _next_bind = False
+        # Reset keymap in ordinary flow
+        return True
+    finally:
+        _output.stop_suspend()

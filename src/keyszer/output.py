@@ -47,8 +47,9 @@ class Output:
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
+        self._suspended_mod_keys = []
+        self._suspend_depth = 0
         return
-
 
     def __update_modifier_key_pressed(self, key, action):
         if Modifier.is_key_modifier(key):
@@ -120,8 +121,11 @@ class Output:
         for modifier in reversed(pressed_modifier_keys):
             self.send_key_action(modifier, Action.RELEASE)
 
-        for modifier in reversed(released_modifiers_keys):
-            self.send_key_action(modifier, Action.PRESS)
+        if self.is_suspending(): # sleep the keys
+            self._suspended_mod_keys.extend(released_modifiers_keys)
+        else: # reassert the keys
+            for modifier in reversed(released_modifiers_keys):
+                self.send_key_action(modifier, Action.PRESS)
 
 
     def send_key(self,key):
@@ -136,3 +140,23 @@ class Output:
         for key in self._pressed_modifier_keys.copy():
             self.send_key_action(key, Action.RELEASE)
         _uinput.close()
+
+    # ─── SUSPEND ──────────────────────────────────────────────────────────────────
+
+    # self._suspended_mod_keys : list
+    # self._suspend_depth : int
+
+    def is_suspending(self):
+        return self._suspend_depth > 0
+
+    def start_suspend(self):
+        self._suspend_depth += 1
+
+    def stop_suspend(self):
+        self._suspend_depth -= 1
+        assert self._suspend_depth >= 0
+
+        if not self.is_suspending():
+            for mod in self._suspended_mod_keys:
+                self.send_key_action(mod, Action.PRESS)
+            self._suspended_mod_keys.clear()
