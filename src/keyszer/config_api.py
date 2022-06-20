@@ -191,6 +191,7 @@ def with_or_set_mark(combo):
 
 
 def timeouts(multipurpose = 1, suspend = 1):
+    global _TIMEOUTS
     _TIMEOUTS = {
         "multipurpose": multipurpose,
         "suspend": suspend
