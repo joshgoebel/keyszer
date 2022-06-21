@@ -2,7 +2,7 @@ import Xlib.display
 from Xlib.display import Display
 from Xlib.error import ConnectionClosedError, DisplayConnectionError, DisplayNameError
 
-from .logger import error
+from .lib.logger import error
 
 # https://github.com/python-xlib/python-xlib/blob/master/Xlib/display.py#L153
 # https://stackoverflow.com/questions/23786289/how-to-correctly-detect-application-name-when-changing-focus-event-occurs-with
