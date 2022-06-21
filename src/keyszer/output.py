@@ -8,31 +8,31 @@ from .lib.logger import debug
 VIRT_DEVICE_PREFIX = "Keyszer VIRTUAL"
 
 # Remove all buttons so udev doesn't think keyszer is a joystick
-_keyboard_codes = ecodes.keys.keys() - ecodes.BTN
+_KEYBOARD_KEYS = ecodes.keys.keys() - ecodes.BTN
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
-mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
-              257: 'BTN_1',
-              258: 'BTN_2',
-              259: 'BTN_3',
-              260: 'BTN_4',
-              261: 'BTN_5',
-              262: 'BTN_6',
-              263: 'BTN_7',
-              264: 'BTN_8',
-              265: 'BTN_9',
-              272: ['BTN_LEFT', 'BTN_MOUSE'],
-              274: 'BTN_MIDDLE',
-              273: 'BTN_RIGHT'}
-_keyboard_codes.update(mouse_btns)
+_MOUSE_BUTTONS = {256: ['BTN_0', 'BTN_MISC'],
+                  257: 'BTN_1',
+                  258: 'BTN_2',
+                  259: 'BTN_3',
+                  260: 'BTN_4',
+                  261: 'BTN_5',
+                  262: 'BTN_6',
+                  263: 'BTN_7',
+                  264: 'BTN_8',
+                  265: 'BTN_9',
+                  272: ['BTN_LEFT', 'BTN_MOUSE'],
+                  274: 'BTN_MIDDLE',
+                  273: 'BTN_RIGHT'}
+_KEYBOARD_KEYS.update(_MOUSE_BUTTONS)
 
 _uinput = None
 
 
 def real_uinput():
     return UInput(name=f"{VIRT_DEVICE_PREFIX} Keyboard",
-                  events={ecodes.EV_KEY: _keyboard_codes,
+                  events={ecodes.EV_KEY: _KEYBOARD_KEYS,
                           ecodes.EV_REL: set([0, 1, 6, 8, 9])})
 
 
@@ -49,14 +49,15 @@ class Output:
         self._pressed_keys = set()
         self._suspended_mod_keys = []
         self._suspend_depth = 0
-        return
 
-    def __update_modifier_key_pressed(self, key, action):
-        if Modifier.is_key_modifier(key):
-            if action.is_pressed():
-                self._pressed_modifier_keys.add(key)
-            else:
-                self._pressed_modifier_keys.discard(key)
+    def __update_pressed_modifier_keys(self, key, action):
+        if not Modifier.is_key_modifier(key):
+            return
+
+        if action.is_pressed():
+            self._pressed_modifier_keys.add(key)
+        else:
+            self._pressed_modifier_keys.discard(key)
 
     def __update_pressed_keys(self, key, action):
         if action.is_pressed():
@@ -89,7 +90,7 @@ class Output:
         # self.__send_sync()
 
     def send_key_action(self, key, action):
-        self.__update_modifier_key_pressed(key, action)
+        self.__update_pressed_modifier_keys(key, action)
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
         debug(action, key, ctx="OO")
