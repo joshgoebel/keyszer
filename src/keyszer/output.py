@@ -1,42 +1,43 @@
 from evdev import ecodes
 from evdev.uinput import UInput
-from .models.action import Action 
-from .models.combo import Combo 
+from .models.action import Action
+from .models.combo import Combo
 from .models.modifier import Modifier
 from .lib.logger import debug
 
 VIRT_DEVICE_PREFIX = "Keyszer VIRTUAL"
 
 # Remove all buttons so udev doesn't think keyszer is a joystick
-_keyboard_codes = ecodes.keys.keys() - ecodes.BTN
+_KEYBOARD_KEYS = ecodes.keys.keys() - ecodes.BTN
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
-mouse_btns = {256: ['BTN_0', 'BTN_MISC'],
-              257: 'BTN_1',
-              258: 'BTN_2',
-              259: 'BTN_3',
-              260: 'BTN_4',
-              261: 'BTN_5',
-              262: 'BTN_6',
-              263: 'BTN_7',
-              264: 'BTN_8',
-              265: 'BTN_9',
-              272: ['BTN_LEFT', 'BTN_MOUSE'],
-              274: 'BTN_MIDDLE',
-              273: 'BTN_RIGHT'}
-_keyboard_codes.update(mouse_btns)
+_MOUSE_BUTTONS = {256: ['BTN_0', 'BTN_MISC'],
+                  257: 'BTN_1',
+                  258: 'BTN_2',
+                  259: 'BTN_3',
+                  260: 'BTN_4',
+                  261: 'BTN_5',
+                  262: 'BTN_6',
+                  263: 'BTN_7',
+                  264: 'BTN_8',
+                  265: 'BTN_9',
+                  272: ['BTN_LEFT', 'BTN_MOUSE'],
+                  274: 'BTN_MIDDLE',
+                  273: 'BTN_RIGHT'}
+_KEYBOARD_KEYS.update(_MOUSE_BUTTONS)
 
 _uinput = None
 
+
 def real_uinput():
     return UInput(name=f"{VIRT_DEVICE_PREFIX} Keyboard",
-        events={ecodes.EV_KEY: _keyboard_codes,
-        ecodes.EV_REL: set([0,1,6,8,9]),
-        })
+                  events={ecodes.EV_KEY: _KEYBOARD_KEYS,
+                          ecodes.EV_REL: set([0, 1, 6, 8, 9])})
+
 
 # TODO: improve injection?
-def setup_uinput(uinput = None):
+def setup_uinput(uinput=None):
     global _uinput
     _uinput = uinput or real_uinput()
 
@@ -48,14 +49,15 @@ class Output:
         self._pressed_keys = set()
         self._suspended_mod_keys = []
         self._suspend_depth = 0
-        return
 
-    def __update_modifier_key_pressed(self, key, action):
-        if Modifier.is_key_modifier(key):
-            if action.is_pressed():
-                self._pressed_modifier_keys.add(key)
-            else:
-                self._pressed_modifier_keys.discard(key)
+    def __update_pressed_modifier_keys(self, key, action):
+        if not Modifier.is_key_modifier(key):
+            return
+
+        if action.is_pressed():
+            self._pressed_modifier_keys.add(key)
+        else:
+            self._pressed_modifier_keys.discard(key)
 
     def __update_pressed_keys(self, key, action):
         if action.is_pressed():
@@ -73,29 +75,28 @@ class Output:
         print(self._suspended_mod_keys)
         print("_suspend_depth", self._suspend_depth)
 
-    def __send_sync(self ):
+    def __send_sync(self):
         _uinput.syn()
 
     def is_mod_pressed(self, key):
         return key in self._pressed_modifier_keys
 
-    def is_pressed(self,key):
+    def is_pressed(self, key):
         return key in self._pressed_keys
 
     def send_event(self, event):
         _uinput.write_event(event)
         # TODO: do we need this? I think not.
-        #self.__send_sync()
+        # self.__send_sync()
 
     def send_key_action(self, key, action):
-        self.__update_modifier_key_pressed(key, action)
+        self.__update_pressed_modifier_keys(key, action)
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
         debug(action, key, ctx="OO")
         self.__send_sync()
 
-
-    def send_combo(self,combo):
+    def send_combo(self, combo):
         released_modifiers_keys = []
 
         extra_modifier_keys = self._pressed_modifier_keys.copy()
@@ -123,16 +124,14 @@ class Output:
         for modifier in reversed(pressed_modifier_keys):
             self.send_key_action(modifier, Action.RELEASE)
 
-        if self.__is_suspending(): # sleep the keys
+        if self.__is_suspending():  # sleep the keys
             self._suspended_mod_keys.extend(released_modifiers_keys)
-        else: # reassert the keys
+        else:  # reassert the keys
             for modifier in reversed(released_modifiers_keys):
                 self.send_key_action(modifier, Action.PRESS)
 
-
-    def send_key(self,key):
+    def send_key(self, key):
         self.send_combo(Combo(None, key))
-
 
     def shutdown(self):
         # raise all keys for shutdown so that we have a clean state

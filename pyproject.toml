@@ -55,7 +55,7 @@ build-backend = "hatchling.build"
 [tool]
 
 [tool.hatch.version]
-path = "src/keyszer/info.py"
+path = "src/keyszer/version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [

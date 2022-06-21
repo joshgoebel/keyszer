@@ -3,8 +3,6 @@ import sys
 import re
 import time
 from inspect import signature
-from subprocess import Popen
-from ordered_set import OrderedSet
 
 from .models.key import Key
 from .models.action import Action
@@ -12,7 +10,7 @@ from .models.combo import Combo, ComboHint
 from .models.modifier import Modifier
 from .models.modmap import Modmap, MultiModmap
 from .models.keymap import Keymap
-from .lib.logger import *
+from .lib.logger import error
 
 # GLOBALS
 bind = ComboHint.BIND
@@ -51,12 +49,13 @@ def reset_configuration():
     global _MODMAPS
     global _MULTI_MODMAPS
     global _KEYMAPS
-    global _TIMEOUT
+    global _TIMEOUTS
 
     _MODMAPS = []
     _MULTI_MODMAPS = []
     _KEYMAPS = []
     _TIMEOUTS = TIMEOUT_DEFAULTS
+
 
 # how transform hooks into the configuration
 def get_configuration():
@@ -66,7 +65,8 @@ def get_configuration():
 
     # setup modmaps
     conditionals = [mm for mm in _MODMAPS if mm.conditional]
-    default = [mm for mm in _MODMAPS if not mm.conditional] or [Modmap("default", {})]
+    default = [mm for mm in _MODMAPS if not mm.conditional] or \
+        [Modmap("default", {})]
     if len(default) > 1:
         error(
             "You may only have a single default (non-conditional modmap),"
@@ -76,7 +76,8 @@ def get_configuration():
 
     # setup multi-modmaps
     conditionals = [mm for mm in _MULTI_MODMAPS if mm.conditional]
-    default = [mm for mm in _MULTI_MODMAPS if not mm.conditional] or [MultiModmap("default", {})]
+    default = [mm for mm in _MULTI_MODMAPS if not mm.conditional] or \
+        [MultiModmap("default", {})]
     if len(default) > 1:
         error(
             "You may only have a single default (non-conditional multi-modmap),"
@@ -92,12 +93,13 @@ def get_configuration():
     )
 
 
-# ─── HOTKEYS ──────────────────────────────────────────────────────────────────
+# ─── HOTKEYS ─────────────────────────────────────────────────────────────────
 
 def dump_diagnostics_key(key):
     global DUMP_DIAGNOSTICS_KEY
     if isinstance(key, Key):
         DUMP_DIAGNOSTICS_KEY = key
+
 
 def emergency_eject_key(key):
     global EMERGENCY_EJECT_KEY
@@ -119,13 +121,13 @@ def sleep(sec):
 def usleep(usec):
     """Sleep usec in commands"""
     def sleeper():
-        time.sleep(usec/1000)
+        time.sleep(usec / 1000)
     return sleeper
 
 # ============================================================ #
 
 
-def C(exp): # pylint: disable=invalid-name
+def C(exp):  # pylint: disable=invalid-name
     "Helper function to specify keymap"
     modifier_strs = []
     while True:
@@ -140,19 +142,21 @@ def C(exp): # pylint: disable=invalid-name
     key = getattr(Key, key_str)
     return Combo(_create_modifiers_from_strings(modifier_strs), key)
 
+
 # legacy helper name
 K = C
+
 
 def _create_modifiers_from_strings(modifier_strs):
     modifiers = []
     for modifier_str in modifier_strs:
         key = Modifier.from_alias(modifier_str)
-        if not key in modifiers:
+        if key not in modifiers:
             modifiers.append(key)
     return modifiers
 
 
-# ─── MARKS ──────────────────────────────────────────────────────────────────────
+# ─── MARKS ──────────────────────────────────────────────────────────────────
 
 
 _mark_set = False
@@ -187,10 +191,10 @@ def with_or_set_mark(combo):
     return _with_or_set_mark
 
 
-# ─── STANDARD API ─────────────────────────────────────────────────────────────
+# ─── STANDARD API ───────────────────────────────────────────────────────────
 
 
-def timeouts(multipurpose = 1, suspend = 1):
+def timeouts(multipurpose=1, suspend=1):
     global _TIMEOUTS
     _TIMEOUTS = {
         "multipurpose": multipurpose,
@@ -198,7 +202,7 @@ def timeouts(multipurpose = 1, suspend = 1):
     }
 
 
-def add_modifier(name, aliases, key = None, keys = None):
+def add_modifier(name, aliases, key=None, keys=None):
     """
     Creates a new modifier and binds it to a key (or keys)
 
@@ -207,11 +211,12 @@ def add_modifier(name, aliases, key = None, keys = None):
 
     add_modifier("HYPER", aliases = ["Hyper"], key = Key.F24)
     """
-    return Modifier(name, aliases, key = key, keys = keys)
+    return Modifier(name, aliases, key=key, keys=keys)
 
 
 def wm_class_match(re_str):
     rgx = re.compile(re_str)
+
     def cond(ctx):
         return rgx.search(ctx.wm_class)
     return cond
@@ -219,6 +224,7 @@ def wm_class_match(re_str):
 
 def not_wm_class_match(re_str):
     rgx = re.compile(re_str)
+
     def cond(ctx):
         return not rgx.search(ctx.wm_class)
     return cond
@@ -231,9 +237,8 @@ def conditional(fn, what):
     return what
 
 
-
 # new API, requires name
-def modmap(name, mappings, when = None):
+def modmap(name, mappings, when=None):
     """Defines modmap (keycode translation)
 
     Example:
@@ -242,26 +247,25 @@ def modmap(name, mappings, when = None):
         Key.CAPSLOCK: Key.LEFT_CTRL
     })
     """
-    mm = Modmap(name, mappings, when = when)
+    mm = Modmap(name, mappings, when=when)
     _MODMAPS.append(mm)
     return mm
 
 
-
-def multipurpose_modmap(name, mappings, when = None):
+def multipurpose_modmap(name, mappings, when=None):
     """new API for declaring multipurpose modmaps"""
     for _, value in mappings.items():
         # TODO: why, we don't use this anywhere???
         value.append(Action.RELEASE)
-    mmm = MultiModmap(name, mappings, when = when)
+    mmm = MultiModmap(name, mappings, when=when)
     _MULTI_MODMAPS.append(mmm)
     return mmm
 
 
-# ─── KEYMAPS ──────────────────────────────────────────────────────────────────
+# ─── KEYMAPS ────────────────────────────────────────────────────────────────
 
 
-def keymap(name, mappings, when = None):
+def keymap(name, mappings, when=None):
     """define and register a new keymap"""
 
     def expand(target):
@@ -293,7 +297,8 @@ def keymap(name, mappings, when = None):
                 expanded_modifiers = []
                 for modifier in k.modifiers:
                     if not modifier.is_specific():
-                        expanded_modifiers.append([modifier.to_left(), modifier.to_right()])
+                        variants = [modifier.to_left(), modifier.to_right()]
+                        expanded_modifiers.append(variants)
                     else:
                         expanded_modifiers.append([modifier])
 
@@ -304,17 +309,17 @@ def keymap(name, mappings, when = None):
                     expanded_mappings[Combo(modifiers, k.key)] = v
                 keys_for_deletion.append(k)
 
-        # Delete original mappings whose key was expanded into expanded_mappings
+        # Delete original keys that were expanded into expanded_mappings
         for key in keys_for_deletion:
             del target[key]
         # Merge expanded mappings into original mappings
         target.update(expanded_mappings)
 
-    def wrap_keymap(name, mappings, depth = 0):
+    def wrap_keymap(name, mappings, depth=0):
         """convert naked dict objects into proper named keymaps"""
         if depth > 0:
             name = f"{name} (" * depth + " nested" + ")" * depth
-        for k,v in mappings.items():
+        for k, v in mappings.items():
             if isinstance(v, dict):
                 mappings[k] = wrap_keymap(name, v, depth + 1)
         return Keymap(name, mappings)
@@ -327,7 +332,7 @@ def keymap(name, mappings, when = None):
     return km
 
 
-# ─── OLD DEPRECATED API ───────────────────────────────────────────────────────
+# ─── OLD DEPRECATED API ─────────────────────────────────────────────────────
 
 
 def define_timeout(seconds=1):
@@ -337,7 +342,7 @@ def define_timeout(seconds=1):
 
 
 # old API, takes name as an optional param
-def define_modmap(mappings, name = "anonymous modmap"):
+def define_modmap(mappings, name="anonymous modmap"):
     """old style API for defining modmaps"""
     return modmap(name, mappings)
 
@@ -384,8 +389,9 @@ def define_conditional_multipurpose_modmap(condition, mappings):
 
 
 def old_style_condition_to_fn(condition):
-    """converts an old API style condition into a new style conditional function"""
+    """converts old API style condition into a new style conditional"""
     condition_fn = None
+
     def re_search(regex):
         def fn(ctx):
             return regex.search(ctx.wm_class)
