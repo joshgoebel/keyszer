@@ -80,7 +80,7 @@ def main():
             log("ROOT: Yes, I am.  --very-bad-idea acknowledged.")
 
     if args.list_devices:
-        from .input import Devices
+        from .devices import Devices
         Devices.print_list()
         exit(0)
 
