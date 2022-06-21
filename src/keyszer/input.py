@@ -17,48 +17,52 @@ A_Z_SPACE = [Key.SPACE, Key.A, Key.Z]
 CONFIG = config_api
 
 
-def is_keyboard_device(device):
-    """Guess the device is a keyboard or not"""
-    capabilities = device.capabilities(verbose=False)
-    if 1 not in capabilities:
+class Devices:
+
+    @staticmethod
+    def is_keyboard(device):
+        """Guess the device is a keyboard or not"""
+        capabilities = device.capabilities(verbose=False)
+        if 1 not in capabilities:
+            return False
+        supported_keys = capabilities[1]
+
+        qwerty = all(k in supported_keys for k in QWERTY)
+        az = all(k in supported_keys for k in A_Z_SPACE)
+        if qwerty and az:
+            return True
+        # Otherwise, its not a keyboard!
         return False
-    supported_keys = capabilities[1]
 
-    qwerty = all(k in supported_keys for k in QWERTY)
-    az = all(k in supported_keys for k in A_Z_SPACE)
-    if qwerty and az:
-        return True
-    # Otherwise, its not a keyboard!
-    return False
+    @staticmethod
+    def all():
+        return [InputDevice(path) for path in reversed(list_devices())]
 
-
-def print_device_list(devices):
-    device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
-    device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
-    header_len = max([20 + 35 + 3 + len(x.phys) for x in devices])
-    print('-' * header_len)
-    print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
-    print('-' * header_len)
-    for i, line in enumerate(device_lines):
-        dev = devices[i]
-        if (len(dev.name) > 35):
-            fmt = '{1.fn:<20} {1.name:<35}'
-            print(fmt.format(None, dev))
-            print(" " * 57 + dev.phys)
-        else:
-            print(line)
-    print('')
+    @staticmethod
+    def print_list():
+        devices = Devices.all()
+        device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
+        device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
+        header_len = max([20 + 35 + 3 + len(x.phys) for x in devices])
+        print('-' * header_len)
+        print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
+        print('-' * header_len)
+        for i, line in enumerate(device_lines):
+            dev = devices[i]
+            if (len(dev.name) > 35):
+                fmt = '{1.fn:<20} {1.name:<35}'
+                print(fmt.format(None, dev))
+                print(" " * 57 + dev.phys)
+            else:
+                print(line)
+        print('')
 
 
-def get_devices_list():
-    return [InputDevice(device_fn) for device_fn in reversed(list_devices())]
-
-
-class DeviceFilter(object):
+class DeviceFilter():
     def __init__(self, matches):
         self.matches = matches
 
-    def __call__(self, device):
+    def filter(self, device):
         # Match by device path or name, if no keyboard devices specified,
         # picks up keyboard-ish devices.
         if self.matches:
@@ -66,22 +70,30 @@ class DeviceFilter(object):
                 if device.fn == match or device.name == match:
                     return True
             return False
+
         # Exclude evdev device, we use for output emulation,
         # from input monitoring list
         if VIRT_DEVICE_PREFIX in device.name:
             return False
+
+        # from .output import _uinput
+        # if _uinput.device == device:
+        #     return False
+
         # Exclude none keyboard devices
-        return is_keyboard_device(device)
+        return Devices.is_keyboard(device)
 
 
-def select_devices(device_filter=None):
+def select_devices(arg_devices):
     """Select a device from the list of accessible input devices."""
-    devices = get_devices_list()
+    devices = Devices.all()
 
-    if not device_filter:
-        info("(--) Autodetecting keyboards (--device not specified)")
+    device_filter = DeviceFilter(arg_devices)
 
-    devices = list(filter(device_filter, devices))
+    if not arg_devices:
+        info("Autodetecting keyboards (--device not specified)")
+
+    devices = list(filter(device_filter.filter, devices))
 
     if not devices:
         info(
@@ -131,15 +143,14 @@ def wakeup_output():
         on_event(ev, "")
 
 
-def main_loop(device_matches, device_watch):
+def main_loop(arg_devices, device_watch):
     devices = []
     inotify = None
 
     boot_config()
     wakeup_output()
 
-    device_filter = DeviceFilter(device_matches)
-    selected_devices = select_devices(device_filter)
+    selected_devices = select_devices(arg_devices)
 
     if device_watch:
         inotify = watch_dev_input()
