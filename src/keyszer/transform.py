@@ -298,6 +298,13 @@ def on_event(event, device_name):
     debug()
     debug(f"in {key} ({action})", ctx="II")
 
+
+    # if there is an X error (we don't have any window context)
+    # then we turn off all mappings until it's resolved and act
+    # more or less as a pass thru for all input => output
+    if context.x_error:
+        ks.key = ks.key or ks.inkey
+
     # we only do modmap on the PRESS pass, keys may not
     # redefine themselves midstream while repeating or
     # as they are lifted
@@ -383,6 +390,14 @@ def on_key(keystate, context):
 def transform_key(key, action, ctx):
     global _active_keymaps
     is_top_level = False
+
+    # if we do have window context information we essentially short-circuit
+    # the keymapper, acting in essentially a pass thru mode sending what is
+    # typed straight thru from input to output
+    if ctx.x_error:
+        resume_keys()
+        _output.send_key_action(key, action)
+        return
 
     combo = Combo(get_pressed_mods(), key)
 
