@@ -1,4 +1,3 @@
-import Xlib.display
 from Xlib.display import Display
 from Xlib.error import ConnectionClosedError, DisplayConnectionError, DisplayNameError
 
