@@ -51,6 +51,7 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
   - configurable `DIAGNOSTIC` hotkey
 - fully supports running as semi-privleged user (using `root` is now deprecated)
 - adds `Meta`, Command` and `Cmd` aliases for Super/Meta modifier
+- add `C` combo helper (eventually to replace `K`)
 - supports custom modifiers via `add_modifier` (such as `Hyper`)
 - supports `Fn` as a potential modifier (on hardware where it works)
 - adds `bind` helper to support persistent holds across multiple combos
@@ -62,6 +63,11 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
 - (fix) ability to avoid unintentional Alt/Super false keypresses in many setups
 - (fix) fixes multi-combo nested keymaps (vs Kinto's xkeysnail)
 - (fix) properly cleans up pressed keys before termination
+- individually configurable timeouts (`multipurpose` and `suspend`)
+- (fix) removed problematic `launch` macro
+- (fix) suspend extra keys during sequential sequences to create less key "noise"
+- (fix) handle X Display errors without crashing or bugging out
+
 
 
 ---
@@ -78,7 +84,7 @@ _Over time we should add individual instructions for various distros here._
 
     sudo apt install python3-pip
     sudo pip3 install keyszer
-    
+
     # If you plan to compile from source
     sudo apt install python3-dev
 
@@ -89,20 +95,20 @@ _Over time we should add individual instructions for various distros here._
     # Add your user to input group if you don't want to run keyszer
     # with sudo (log out and log in again to apply group change)
     sudo usermod -a -G input $USER
-    
+
     # If you plan to compile from source
     sudo dnf install python3-devel
-    
+
 ### Manjaro/Arch
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo pacman -Syy
     sudo pacman -S gcc
-    
+
 ### Solus
 
-    # Some distros will need to compile evdev components 
+    # Some distros will need to compile evdev components
     # and may fail to do so if gcc is not installed.
     sudo eopkg install gcc
     sudo eopkg install -c system.devel
@@ -190,7 +196,7 @@ _Don't do this, it's dangerous, and not unnecessary._  A semi-priveleged user wi
 
 ## Usage
 
-    keyszer 
+    keyszer
 
 
 A successful startup should resemble:
@@ -210,8 +216,8 @@ The full path or complete device name may be used.  Device name is usually bette
 
 **Other Options:**
 
-- `-c`, `--config` - location of the configuration file 
-- `-w`, `--watch` - watch for new keyboard devices to hot-plug 
+- `-c`, `--config` - location of the configuration file
+- `-w`, `--watch` - watch for new keyboard devices to hot-plug
 - `-v` - increase verbosity greatly (to help with debugging)
 - `--list-devices` - list out all available input devices
 
@@ -516,4 +522,4 @@ Please open an issue to discuss how you'd like to get involved or respond on one
 
 `keyszer` is distributed under GPL3.  See [LICENSE](https://github.com/joshgoebel/keyszer/blob/main/LICENSE).
 
-    
+
