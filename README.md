@@ -3,12 +3,11 @@
 [![latest version](https://badgen.net/pypi/v/keyszer?label=latest)](https://github.com/joshgoebel/keyszer/releases)
 [![](https://badgen.net/badge/python/3.10/blue)]()
 [![license](https://badgen.net/badge/license/GPL3/keyszer?color=cyan)](https://github.com/joshgoebel/keyszer/blob/main/LICENSE)
+[![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/keyszer/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/keyszer/?mode=list)
 [![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink)](https://discord.gg/nX6qSC8mer)
 
 <!-- ![build and CI status](https://badgen.net/github/checks/joshgoebel/keyszer/main?label=build) -->
-<!-- [![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/keyszer/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/keyszer/?mode=list) -->
 <!-- [![vulnerabilities](https://badgen.net/snyk/joshgoebel/keyszer)](https://snyk.io/test/github/joshgoebel/keyszer?targetFile=package.json) -->
-
 
 [![open issues](https://badgen.net/github/open-issues/joshgoebel/keyszer?label=issues)](https://github.com/joshgoebel/keyszer/issues)
 [![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/keyszer/help%20welcome/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
