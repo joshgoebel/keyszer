@@ -90,7 +90,7 @@ def main():
             eval_config(args.config)
             log("CONFIG: Looks good to me.")
             config_good = True
-        except:  # noqa: E722
+        except Exception:
             import traceback
             error("CONFIG: No bueno, we have a problem...")
             traceback.print_exc()
