@@ -3,6 +3,7 @@ from .key import Key
 
 class Modifier:
     """represents a keyboard combo modifier, such as Shift or Cmd"""
+
     _BY_KEY = {}
     _MODIFIERS = {}
     _IDS = iter(range(100))
@@ -21,7 +22,8 @@ class Modifier:
             if key in cls._BY_KEY:
                 raise ValueError(
                     f"modifier {name} may not be assigned {key},"
-                    " already assigned to another modifier")
+                    " already assigned to another modifier"
+                )
             cls._BY_KEY[key] = self
         if name in cls._MODIFIERS:
             raise ValueError(f"existing modifier named {name} already exists")
@@ -85,8 +87,7 @@ class Modifier:
 # create all the default modifiers we ship with
 Modifier("R_CONTROL", aliases=["RCtrl", "RC"], key=Key.RIGHT_CTRL)
 Modifier("L_CONTROL", aliases=["LCtrl", "LC"], key=Key.LEFT_CTRL)
-Modifier("CONTROL", aliases=["Ctrl", "C"],
-         keys=[Key.LEFT_CTRL, Key.RIGHT_CTRL])
+Modifier("CONTROL", aliases=["Ctrl", "C"], keys=[Key.LEFT_CTRL, Key.RIGHT_CTRL])
 Modifier("R_ALT", aliases=["RAlt", "RA"], key=Key.RIGHT_ALT)
 Modifier("L_ALT", aliases=["LAlt", "LA"], key=Key.LEFT_ALT)
 Modifier("ALT", aliases=["Alt", "A"], keys=[Key.LEFT_ALT, Key.RIGHT_ALT])
@@ -96,12 +97,21 @@ Modifier("SHIFT", aliases=["Shift"], keys=[Key.LEFT_SHIFT, Key.RIGHT_SHIFT])
 # purposely we do not have M, MA, or ML to give some distance from the fact
 # that these use to be aliases for Alt, not Meta... they may come back in
 # the future
-Modifier("R_META", aliases=["RSuper", "RWin", "RCommand", "RCmd", "RMeta"],
-         key=Key.RIGHT_META)
-Modifier("L_META", aliases=["LSuper", "LWin", "LCommand", "LCmd", "LMeta"],
-         key=Key.LEFT_META)
-Modifier("META", aliases=["Super", "Win", "Command", "Cmd", "Meta"],
-         keys=[Key.LEFT_META, Key.RIGHT_META])
+Modifier(
+    "R_META",
+    aliases=["RSuper", "RWin", "RCommand", "RCmd", "RMeta"],
+    key=Key.RIGHT_META,
+)
+Modifier(
+    "L_META",
+    aliases=["LSuper", "LWin", "LCommand", "LCmd", "LMeta"],
+    key=Key.LEFT_META,
+)
+Modifier(
+    "META",
+    aliases=["Super", "Win", "Command", "Cmd", "Meta"],
+    keys=[Key.LEFT_META, Key.RIGHT_META],
+)
 
 # Fn is either invisible to the OS (on some laptop hardware) or it's just a
 # normal key, but as a normal key it likely should be flagged as a modifier

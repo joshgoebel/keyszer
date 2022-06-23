@@ -54,6 +54,9 @@ build-backend = "hatchling.build"
 
 [tool]
 
+[tool.black]
+line-length = 80
+
 [tool.hatch.version]
 path = "src/keyszer/version.py"
 

@@ -1,5 +1,7 @@
 from enum import IntEnum
 
+# fmt: off
+
 
 # https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
 class Key(IntEnum):

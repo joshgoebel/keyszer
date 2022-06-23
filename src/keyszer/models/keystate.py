@@ -28,8 +28,7 @@ class Keystate:
         return replace(self)
 
     def is_pressed(self):
-        return self.action == Action.PRESS \
-            or self.action == Action.REPEAT
+        return self.action == Action.PRESS or self.action == Action.REPEAT
 
     def resolve_as_momentary(self):
         # self.key = self.key # NOP

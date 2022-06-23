@@ -34,6 +34,7 @@ def sig_int():
 
 def watch_dev_input():
     from inotify_simple import INotify, flags
+
     inotify = INotify()
     inotify.add_watch("/dev/input", flags.CREATE | flags.ATTRIB | flags.DELETE)
     return inotify
@@ -60,14 +61,13 @@ def main_loop(arg_devices, device_watch):
 
     try:
         loop = asyncio.get_event_loop()
-        registry = DeviceRegistry(loop,
-                                  input_cb=receive_input,
-                                  filterer=DeviceFilter(arg_devices))
+        registry = DeviceRegistry(
+            loop, input_cb=receive_input, filterer=DeviceFilter(arg_devices)
+        )
         registry.autodetect()
 
         if device_watch:
-            loop.add_reader(inotify.fd, _inotify_handler,
-                            registry, inotify)
+            loop.add_reader(inotify.fd, _inotify_handler, registry, inotify)
 
         _sup = loop.create_task(supervisor())  # noqa: F841
         loop.add_signal_handler(signal.SIGINT, sig_int)
@@ -94,6 +94,7 @@ async def supervisor():
             if task.done():
                 if task.exception():
                     import traceback
+
                     traceback.print_exception(task.exception())
                 _tasks.remove(task)
 
@@ -129,8 +130,7 @@ def _inotify_handler(registry, inotify):
         _add_timer.cancel()
 
     def device_change_task():
-        task = loop.create_task(
-            device_change(registry, _notify_events))
+        task = loop.create_task(device_change(registry, _notify_events))
         _tasks.append(task)
 
     loop = asyncio.get_running_loop()
@@ -150,7 +150,8 @@ async def device_change(registry, events):
 
         # unplugging
         from inotify_simple import flags
-        if (event.mask == flags.DELETE):
+
+        if event.mask == flags.DELETE:
             if device in registry:
                 registry.ungrab(device)
             continue
