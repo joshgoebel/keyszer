@@ -11,7 +11,10 @@ from keyszer.config_api import *
 def eval_config(path):
     with open(path, "rb") as file:
         config_code = CONFIG_HEADER + file.read()
-        exec(compile(config_code, path, 'exec'), globals())
+        # WARN: yes, this is potentially a security risk, but our config is
+        # - python code so we're sort of stuck with this AFAIK
+        # TODO: some sort of sandboxing maybe?
+        exec(compile(config_code, path, 'exec'), globals())  # nosec
 
 
 def uinput_device_exists():

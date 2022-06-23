@@ -45,7 +45,7 @@ class UInputStub:
 def eval_config(path):
     with open(path, "rb") as file:
         config_code = CONFIG_HEADER + file.read()
-        exec(compile(config_code, path, 'exec'), globals())
+        exec(compile(config_code, path, 'exec'), globals())  # nosec
 
 def setup():
     global _out
