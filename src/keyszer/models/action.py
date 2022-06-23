@@ -17,3 +17,7 @@ class Action(IntEnum):
 
     def __str__(self):
         return self.name.lower()
+
+
+PRESS = Action.PRESS
+RELEASE = Action.RELEASE

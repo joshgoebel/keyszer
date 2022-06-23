@@ -67,5 +67,8 @@ def get_actual_window(window):
             return None
 
         return window
+    # TODO: more specific rescue here
     except Exception:
         return None
+
+    return window
