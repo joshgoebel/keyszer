@@ -1,6 +1,6 @@
 ---
 name: Request a new feature
-about: Have a great idea for a new feature or improvement?
+about: Have a big idea for a new feature or even a small improvement?
 title: "One-liner summary of the new feature..."
 labels: enhancement, request
 assignees: ''

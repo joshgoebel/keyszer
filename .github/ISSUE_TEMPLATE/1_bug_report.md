@@ -1,17 +1,17 @@
 ---
 name: Report a bug or unexpected behavior
-about: You are seeing other incorrect, unexpected or unexplained behavior.
+about: Are you seeing a clear bug or other unexpected behavior?
 title: "...summary of bug or weird behavior..."
 labels: bug, help welcome
 assignees: ''
 
 ---
 
-**Describe the issue/behavior that seems buggy**
+**Describe the bug or unexpected behavior**
 <!-- A clear and concise description of the bug or incorrect behavior. -->
 
 
-**Sample Code or Instructions to Reproduce**
+**Sample Config or Instructions to Reproduce**
 <!--
 Please include step-by-step instructions when possible to reproduce the bug you are seeing.  If you're using a custom configuration file please attach that; or at lest the relevant part if your struggling with a particular mapping or conditional, etc.  Often a verbose log (`keyszer -v`) of output can help for really complex stucky key or incorrect keypress situations. -->
 
@@ -20,7 +20,7 @@ Please include step-by-step instructions when possible to reproduce the bug you 
 - Python version:
 - Keyszer version:
 - Kinto version (if applicable):
-- Devices `(+K)` we're acceping input from:
+- Devices `(+K)` we're handling input from:
 
 <!--
 The (+K) lines from a verbose log look like:
