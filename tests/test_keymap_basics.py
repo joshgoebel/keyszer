@@ -1,26 +1,30 @@
 
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import sys
+
 sys.modules["keyszer.xorg"] = __import__('lib.xorg_mock',
     None, None, ["get_active_window_wm_class"])
-from keyszer.output import setup_uinput
-from keyszer.models.key import Key
-from keyszer.models.action import Action
-from keyszer.config_api import *
-from keyszer.transform import boot_config, on_event, reset_transform
-from lib.uinput_stub import UInputStub
 from lib.api import *
+from lib.uinput_stub import UInputStub
+
+from keyszer.config_api import *
 from keyszer.lib import logger
+from keyszer.models.action import Action
+from keyszer.models.key import Key
+from keyszer.output import setup_uinput
+from keyszer.transform import boot_config, on_event, reset_transform
+
 logger.VERBOSE = True
-from evdev.ecodes import EV_KEY, EV_SYN
-from evdev.events import InputEvent
 import asyncio
-import pytest
-import pytest_asyncio
 import re
 
+import pytest
+import pytest_asyncio
+from evdev.ecodes import EV_KEY, EV_SYN
+from evdev.events import InputEvent
 
 _out = None
 

@@ -1,9 +1,9 @@
 from evdev.ecodes import EV_KEY
 from evdev.events import InputEvent
-from keyszer.models.action import PRESS, RELEASE
-from keyszer.transform import on_event
 from lib.xorg_mock import set_window
 
+from keyszer.models.action import PRESS, RELEASE
+from keyszer.transform import on_event
 
 _kb = "generic keyboard"
 

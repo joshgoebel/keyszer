@@ -1,23 +1,28 @@
-import pytest_asyncio
-import pytest
 import asyncio
-from keyszer.lib import logger
-from evdev.events import InputEvent
+import warnings
+
+import pytest
+import pytest_asyncio
 from evdev.ecodes import EV_KEY, EV_SYN
+from evdev.events import InputEvent
 from lib.api import *
 from lib.uinput_stub import UInputStub
-from keyszer.transform import suspend_keys, \
-    resume_keys, \
-    boot_config, \
-    on_event, \
-    is_suspended, \
-    reset_transform
-from keyszer.config_api import *
+
 from keyszer import input
+from keyszer.config_api import *
+from keyszer.lib import logger
 from keyszer.models.action import Action
 from keyszer.models.key import Key
 from keyszer.output import setup_uinput
-import warnings
+from keyszer.transform import (
+    boot_config,
+    is_suspended,
+    on_event,
+    reset_transform,
+    resume_keys,
+    suspend_keys,
+)
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 

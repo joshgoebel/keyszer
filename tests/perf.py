@@ -1,19 +1,23 @@
 import sys
+
 sys.path.append("..")
 sys.modules["keyszer.xorg"] = __import__('lib.xorg_mock',
     None, None, ["get_active_window_wm_class"])
 
-# from lib.uinput_stub import UInputStub
-from keyszer.output import setup_uinput
-from keyszer.models.key import Key
-from keyszer.models.action import Action
-from lib.xorg_mock import set_window
-from keyszer.transform import boot_config, on_event, reset_transform
-from keyszer import transform
-from keyszer.config_api import *
 import time
+
 from evdev import InputEvent
 from evdev.ecodes import EV_KEY, EV_REL
+from lib.xorg_mock import set_window
+
+from keyszer import transform
+from keyszer.config_api import *
+from keyszer.models.action import Action
+from keyszer.models.key import Key
+
+# from lib.uinput_stub import UInputStub
+from keyszer.output import setup_uinput
+from keyszer.transform import boot_config, on_event, reset_transform
 
 CONFIG_HEADER = b"""
 import re

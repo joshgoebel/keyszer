@@ -1,16 +1,17 @@
-import warnings
-import sys
 import asyncio
+import sys
+import warnings
+
 import pytest
 import pytest_asyncio
-
-from keyszer.output import setup_uinput
-from keyszer.models.key import Key
-from keyszer.config_api import modmap, multipurpose_modmap, reset_configuration
-from keyszer.transform import boot_config, reset_transform
+from lib.api import PRESS, RELEASE, hit, press, release
 from lib.uinput_stub import UInputStub
-from lib.api import press, release, hit, PRESS, RELEASE
+
+from keyszer.config_api import modmap, multipurpose_modmap, reset_configuration
 from keyszer.lib import logger
+from keyszer.models.key import Key
+from keyszer.output import setup_uinput
+from keyszer.transform import boot_config, reset_transform
 
 logger.VERBOSE = True
 

@@ -497,7 +497,7 @@ Here is the command I use:
 
     xset r rate 200 20
 
-For best results your real keyboard and Keyszer [virtual] keyboard should have matching repeat rates. That seems to work best for me. Anytime you restart keyszer you'll need to reconfigure the repeat rate because each time a new virtual keyboard device is created... or maybe it's that there is only a single repeat rate and everytime you "plug in" a new keyboard it changes?
+For best results your real keyboard and Keyszer [virtual] keyboard should have matching repeat rates. That seems to work best for me. Anytime you restart keyszer you'll need to reconfigure the repeat rate because each time a new virtual keyboard device is created... or maybe it's that there is only a single repeat rate and every time you "plug in" a new keyboard it changes?
 
 _If you could shed some light on this, please [get in touch](https://github.com/joshgoebel/keyszer/issues/55)._
 
