@@ -123,10 +123,21 @@ def resume_keys():
         ks.suspended = False
         if ks.key in _sticky:
             continue
-        # if some other key is waking us up then we must be a modifier (we know
-        # because if we were waking ourself it would happen in on_key)
+        # if some other key PRESS is waking us up then we must be a modifier (we
+        # know because if we were waking ourself it would happen in on_key)
+        # but if a key RELEASE is waking us then we still might be momentary -
+        # IF we were still the last key that was pressed
         if ks.is_multi:
-            ks.key = ks.multikey
+            other_mods = [e.key for e in states if e.key != ks.key]
+            # TODO: can this be cleaned up?
+            # special casing to allow shift-multi-mod to work more successfully if
+            # shift is the key you release first
+            if len(other_mods) == 1 \
+                and other_mods[0] in Modifier.SHIFT.keys \
+                    and _last_key == ks.key:
+                pass  # momentary
+            else:
+                ks.key = ks.multikey  # hold
             ks.multikey = False
             ks.is_multi = False
 
@@ -273,6 +284,7 @@ def find_keystate_or_new(inkey, action):
 #   - modmapping
 #   - multi-mapping
 # - on_key
+#   - on_mod_key
 #   - suspend/resume, etc
 # - transform_key
 # - handle_commands
@@ -314,47 +326,54 @@ def on_event(event, device_name):
     on_key(ks, context)
 
 
-def on_key(keystate, context):
-    global _last_key
+def on_mod_key(keystate, context):
     hold_output = False
     should_suspend = False
+
+    key, action = (keystate.key, keystate.action)
+
+    if action.is_pressed():
+        if none_pressed():
+            should_suspend = True
+
+    elif action.is_released():
+        if is_sticky(key):
+            outkey = _sticky[key]
+            debug(f"lift of BIND {key} => {outkey}")
+            _output.send_key_action(outkey, Action.RELEASE)
+            del _sticky[key]
+            hold_output = not keystate.exerted_on_output
+        elif keystate.spent:
+            # if we are being released (after spent) before we can be resumed
+            # then our press (as far as output is concerned) should be silent
+            debug("silent lift of spent mod", key)
+            hold_output = not keystate.exerted_on_output
+        else:
+            debug("resume because of mod release")
+            resume_keys()
+
+    update_pressed_states(keystate)
+
+    if should_suspend or is_suspended():
+        keystate.suspended = True
+        hold_output = True
+        if action.just_pressed():
+            suspend_or_resuspend_keys(_TIMEOUTS["suspend"])
+
+    if not hold_output:
+        _output.send_key_action(key, action)
+        if action.is_released():
+            keystate.exerted_on_output = False
+
+
+def on_key(keystate, context):
+    global _last_key
 
     key, action = (keystate.key, keystate.action)
     debug("on_key", key, action)
 
     if Modifier.is_key_modifier(key):
-        if action.is_pressed():
-            if none_pressed():
-                should_suspend = True
-
-        elif action.is_released():
-            if is_sticky(key):
-                outkey = _sticky[key]
-                debug(f"lift of BIND {key} => {outkey}")
-                _output.send_key_action(outkey, Action.RELEASE)
-                del _sticky[key]
-                hold_output = not keystate.exerted_on_output
-            elif keystate.spent:
-                # if we are being released (after spent) before we can be resumed
-                # then our press (as far as output is concerned) should be silent
-                debug("silent lift of spent mod", key)
-                hold_output = not keystate.exerted_on_output
-            else:
-                debug("resume because of mod release")
-                resume_keys()
-
-        update_pressed_states(keystate)
-
-        if should_suspend or is_suspended():
-            keystate.suspended = True
-            hold_output = True
-            if action.just_pressed():
-                suspend_or_resuspend_keys(_TIMEOUTS["suspend"])
-
-        if not hold_output:
-            _output.send_key_action(key, action)
-            if action.is_released():
-                keystate.exerted_on_output = False
+        on_mod_key(keystate, context)
 
     elif keystate.is_multi and action.just_pressed():
         # debug("multi pressed", key)
