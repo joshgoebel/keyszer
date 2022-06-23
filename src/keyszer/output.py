@@ -1,11 +1,13 @@
 from evdev import ecodes
 from evdev.uinput import UInput
-from .models.action import Action
+
+from .models.action import PRESS, RELEASE
 from .models.combo import Combo
 from .models.modifier import Modifier
 from .lib.logger import debug
 
-VIRT_DEVICE_PREFIX = "Keyszer VIRTUAL"
+VIRT_DEVICE_PREFIX = "Keyszer (virtual)"
+
 
 # Remove all buttons so udev doesn't think keyszer is a joystick
 _KEYBOARD_KEYS = ecodes.keys.keys() - ecodes.BTN
@@ -97,38 +99,38 @@ class Output:
         self.__send_sync()
 
     def send_combo(self, combo):
-        released_modifiers_keys = []
+        released_mod_keys = []
+        pressed_mod_keys = []
 
-        extra_modifier_keys = self._pressed_modifier_keys.copy()
-        missing_modifiers = combo.modifiers.copy()
+        mod_keys_we_need_to_lift = self._pressed_modifier_keys.copy()
+        mods_we_need_to_press = combo.modifiers.copy()
         for pressed_key in self._pressed_modifier_keys:
             for modifier in combo.modifiers:
                 if pressed_key in modifier.get_keys():
-                    extra_modifier_keys.remove(pressed_key)
-                    missing_modifiers.remove(modifier)
+                    # already held down, we don't need to press or lift
+                    mod_keys_we_need_to_lift.remove(pressed_key)
+                    mods_we_need_to_press.remove(modifier)
 
-        for modifier_key in extra_modifier_keys:
-            self.send_key_action(modifier_key, Action.RELEASE)
-            released_modifiers_keys.append(modifier_key)
+        for key in mod_keys_we_need_to_lift:
+            self.send_key_action(key, RELEASE)
+            released_mod_keys.append(key)
 
-        pressed_modifier_keys = []
-        for modifier in missing_modifiers:
-            modifier_key = modifier.get_key()
-            self.send_key_action(modifier_key, Action.PRESS)
-            pressed_modifier_keys.append(modifier_key)
+        for key in [mod.get_key() for mod in mods_we_need_to_press]:
+            self.send_key_action(key, PRESS)
+            pressed_mod_keys.append(key)
 
         # normal key portion of the combo
-        self.send_key_action(combo.key, Action.PRESS)
-        self.send_key_action(combo.key, Action.RELEASE)
+        self.send_key_action(combo.key, PRESS)
+        self.send_key_action(combo.key, RELEASE)
 
-        for modifier in reversed(pressed_modifier_keys):
-            self.send_key_action(modifier, Action.RELEASE)
+        for modifier in reversed(pressed_mod_keys):
+            self.send_key_action(modifier, RELEASE)
 
         if self.__is_suspending():  # sleep the keys
-            self._suspended_mod_keys.extend(released_modifiers_keys)
+            self._suspended_mod_keys.extend(released_mod_keys)
         else:  # reassert the keys
-            for modifier in reversed(released_modifiers_keys):
-                self.send_key_action(modifier, Action.PRESS)
+            for modifier in reversed(released_mod_keys):
+                self.send_key_action(modifier, PRESS)
 
     def send_key(self, key):
         self.send_combo(Combo(None, key))
@@ -137,9 +139,9 @@ class Output:
         # raise all keys for shutdown so that we have a clean state
         # on uninput with any watching apps as we're exiting
         for key in self._pressed_keys.copy():
-            self.send_key_action(key, Action.RELEASE)
+            self.send_key_action(key, RELEASE)
         for key in self._pressed_modifier_keys.copy():
-            self.send_key_action(key, Action.RELEASE)
+            self.send_key_action(key, RELEASE)
         _uinput.close()
 
     # ─── SUSPEND ──────────────────────────────────────────────────────────────────
@@ -154,7 +156,7 @@ class Output:
         return self._suspend_depth > 0
 
     def __reexert(self, key):
-        self.send_key_action(key, Action.PRESS)
+        self.send_key_action(key, PRESS)
 
     # the function that calls this is re-entrant so we need to make sure
     # we can suspend/resume to multiple depths without losing track of
