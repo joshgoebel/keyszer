@@ -29,7 +29,7 @@ TIMEOUT_DEFAULTS = {
     "multipurpose": 1,
     "suspend": 1,
     # TODO: not implemented yet
-    "post_combo": 0.5
+    "post_combo": 0.5,
 }
 
 # multipurpose timeout
@@ -65,35 +65,35 @@ def get_configuration():
 
     # setup modmaps
     conditionals = [mm for mm in _MODMAPS if mm.conditional]
-    default = [mm for mm in _MODMAPS if not mm.conditional] or \
-        [Modmap("default", {})]
+    default = [mm for mm in _MODMAPS if not mm.conditional] or [
+        Modmap("default", {})
+    ]
     if len(default) > 1:
         error(
             "You may only have a single default (non-conditional modmap),"
-            f"you have {len(default)} currently.")
+            f"you have {len(default)} currently."
+        )
         sys.exit(0)
     _MODMAPS = default + conditionals
 
     # setup multi-modmaps
     conditionals = [mm for mm in _MULTI_MODMAPS if mm.conditional]
-    default = [mm for mm in _MULTI_MODMAPS if not mm.conditional] or \
-        [MultiModmap("default", {})]
+    default = [mm for mm in _MULTI_MODMAPS if not mm.conditional] or [
+        MultiModmap("default", {})
+    ]
     if len(default) > 1:
         error(
             "You may only have a single default (non-conditional multi-modmap),"
-            f" you have {len(default)} currently.")
+            f" you have {len(default)} currently."
+        )
         sys.exit(0)
     _MULTI_MODMAPS = default + conditionals
 
-    return (
-        _MODMAPS,
-        _MULTI_MODMAPS,
-        _KEYMAPS,
-        _TIMEOUTS
-    )
+    return (_MODMAPS, _MULTI_MODMAPS, _KEYMAPS, _TIMEOUTS)
 
 
 # ─── HOTKEYS ─────────────────────────────────────────────────────────────────
+
 
 def dump_diagnostics_key(key):
     global DUMP_DIAGNOSTICS_KEY
@@ -106,6 +106,7 @@ def emergency_eject_key(key):
     if isinstance(key, Key):
         EMERGENCY_EJECT_KEY = key
 
+
 # ============================================================ #
 # Utility functions for keymap
 # ============================================================ #
@@ -113,16 +114,21 @@ def emergency_eject_key(key):
 
 def sleep(sec):
     """Sleep sec in commands"""
+
     def sleeper():
         time.sleep(sec)
+
     return sleeper
 
 
 def usleep(usec):
     """Sleep usec in commands"""
+
     def sleeper():
         time.sleep(usec / 1000)
+
     return sleeper
+
 
 # ============================================================ #
 
@@ -176,6 +182,7 @@ def set_mark(mark_set):
     def _set_mark():
         global _mark_set
         _mark_set = mark_set
+
     return _set_mark
 
 
@@ -196,10 +203,7 @@ def with_or_set_mark(combo):
 
 def timeouts(multipurpose=1, suspend=1):
     global _TIMEOUTS
-    _TIMEOUTS = {
-        "multipurpose": multipurpose,
-        "suspend": suspend
-    }
+    _TIMEOUTS = {"multipurpose": multipurpose, "suspend": suspend}
 
 
 def add_modifier(name, aliases, key=None, keys=None):
@@ -219,6 +223,7 @@ def wm_class_match(re_str):
 
     def cond(ctx):
         return rgx.search(ctx.wm_class)
+
     return cond
 
 
@@ -227,6 +232,7 @@ def not_wm_class_match(re_str):
 
     def cond(ctx):
         return not rgx.search(ctx.wm_class)
+
     return cond
 
 
@@ -382,7 +388,7 @@ def define_conditional_multipurpose_modmap(condition, mappings):
     """
     condition_fn = old_style_condition_to_fn(condition)
     if not callable(condition_fn):
-        raise ValueError('condition must be a function or compiled regexp')
+        raise ValueError("condition must be a function or compiled regexp")
 
     name = "anonymous multipurpose map (old API)"
     return conditional(condition_fn, multipurpose_modmap(name, mappings))
@@ -395,19 +401,22 @@ def old_style_condition_to_fn(condition):
     def re_search(regex):
         def fn(ctx):
             return regex.search(ctx.wm_class)
+
         return fn
 
     def wm_class(wm_class_fn):
         def fn(ctx):
             return wm_class_fn(ctx.wm_class)
+
         return fn
 
     def wm_class_and_device(cond_fn):
         def fn(ctx):
             return cond_fn(ctx.wm_class, ctx.device_name)
+
         return fn
 
-    if hasattr(condition, 'search'):
+    if hasattr(condition, "search"):
         condition_fn = re_search(condition)
     elif callable(condition):
         if len(signature(condition).parameters) == 1:
@@ -432,7 +441,7 @@ def define_conditional_modmap(condition, mappings):
     name = "define_conditional_modmap (old API)"
 
     if not callable(condition_fn):
-        raise ValueError('condition must be a function or compiled regexp')
+        raise ValueError("condition must be a function or compiled regexp")
 
     return conditional(condition_fn, modmap(name, mappings))
     # _conditional_mod_map.append((condition, mod_remappings))

@@ -9,7 +9,6 @@ A_Z_SPACE = [Key.SPACE, Key.A, Key.Z]
 
 
 class Devices:
-
     @staticmethod
     def is_keyboard(device):
         """Guess the device is a keyboard or not"""
@@ -32,28 +31,30 @@ class Devices:
     @staticmethod
     def print_list():
         devices = Devices.all()
-        device_format = '{1.fn:<20} {1.name:<35} {1.phys}'
-        device_lines = [device_format.format(n, d) for n, d in enumerate(devices)]
+        device_format = "{1.fn:<20} {1.name:<35} {1.phys}"
+        device_lines = [
+            device_format.format(n, d) for n, d in enumerate(devices)
+        ]
         header_len = max([20 + 35 + 3 + len(x.phys) for x in devices])
-        print('-' * header_len)
-        print('{:<20} {:<35} {}'.format('Device', 'Name', 'Phys'))
-        print('-' * header_len)
+        print("-" * header_len)
+        print("{:<20} {:<35} {}".format("Device", "Name", "Phys"))
+        print("-" * header_len)
         for i, line in enumerate(device_lines):
             dev = devices[i]
-            if (len(dev.name) > 35):
-                fmt = '{1.fn:<20} {1.name:<35}'
+            if len(dev.name) > 35:
+                fmt = "{1.fn:<20} {1.name:<35}"
                 print(fmt.format(None, dev))
                 print(" " * 57 + dev.phys)
             else:
                 print(line)
-        print('')
+        print("")
 
 
 class DeviceGrabError(IOError):
     pass
 
 
-class DeviceRegistry():
+class DeviceRegistry:
     def __init__(self, loop, input_cb, filterer):
         self._devices = []
         self._loop = loop
@@ -71,8 +72,9 @@ class DeviceRegistry():
 
         if not devices:
             error(
-                'no input devices matched '
-                '(do you have rw permission on /dev/input/*?)')
+                "no input devices matched "
+                "(do you have rw permission on /dev/input/*?)"
+            )
             exit(1)
 
         for device in devices:
@@ -85,7 +87,9 @@ class DeviceRegistry():
         try:
             device.grab()
         except IOError:
-            error("IOError grabbing keyboard. Maybe, another instance is running?")
+            error(
+                "IOError grabbing keyboard. Maybe, another instance is running?"
+            )
             raise DeviceGrabError()
 
     def ungrab(self, device):
@@ -105,7 +109,7 @@ class DeviceRegistry():
                 pass
 
 
-class DeviceFilter():
+class DeviceFilter:
     def __init__(self, matches):
         self.matches = matches
         if not matches:
@@ -116,6 +120,7 @@ class DeviceFilter():
             return True
 
         from .output import _uinput
+
         if _uinput.device == device:
             return True
 
