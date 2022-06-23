@@ -489,6 +489,19 @@ Event: time 1654948033.636611, -------------- SYN_REPORT ------------
 ```
 
 
+**What if my keyboard seems laggy or is not repeating keys fast enough?**
+
+You likely need to set the [virtual] keyboards repeat rate to match your actual keyboard.
+
+Here is the command I use:
+
+    xset r rate 200 20
+
+For best results your real keyboard and Keyszer [virtual] keyboard should have matching repeat rates. That seems to work best for me. Anytime you restart keyszer you'll need to reconfigure the repeat rate because each time a new virtual keyboard device is created... or maybe it's that there is only a single repeat rate and everytime you "plug in" a new keyboard it changes?
+
+_If you could shed some light on this, please [get in touch](https://github.com/joshgoebel/keyszer/issues/55)._
+
+
 **Does Keyszer support FreeBSD/NetBSD or other BSDs?**
 
 Not at the moment, perhaps never.  If you're an expert on the BSD kernel's input layers please
