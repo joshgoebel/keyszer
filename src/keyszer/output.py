@@ -14,28 +14,34 @@ _KEYBOARD_KEYS = ecodes.keys.keys() - ecodes.BTN
 
 # But we want mouse buttons, so let's enumerate those and add them
 # back into the set of buttons we'll watch and use
-_MOUSE_BUTTONS = {256: ['BTN_0', 'BTN_MISC'],
-                  257: 'BTN_1',
-                  258: 'BTN_2',
-                  259: 'BTN_3',
-                  260: 'BTN_4',
-                  261: 'BTN_5',
-                  262: 'BTN_6',
-                  263: 'BTN_7',
-                  264: 'BTN_8',
-                  265: 'BTN_9',
-                  272: ['BTN_LEFT', 'BTN_MOUSE'],
-                  274: 'BTN_MIDDLE',
-                  273: 'BTN_RIGHT'}
+_MOUSE_BUTTONS = {
+    256: ["BTN_0", "BTN_MISC"],
+    257: "BTN_1",
+    258: "BTN_2",
+    259: "BTN_3",
+    260: "BTN_4",
+    261: "BTN_5",
+    262: "BTN_6",
+    263: "BTN_7",
+    264: "BTN_8",
+    265: "BTN_9",
+    272: ["BTN_LEFT", "BTN_MOUSE"],
+    274: "BTN_MIDDLE",
+    273: "BTN_RIGHT",
+}
 _KEYBOARD_KEYS.update(_MOUSE_BUTTONS)
 
 _uinput = None
 
 
 def real_uinput():
-    return UInput(name=f"{VIRT_DEVICE_PREFIX} Keyboard",
-                  events={ecodes.EV_KEY: _KEYBOARD_KEYS,
-                          ecodes.EV_REL: set([0, 1, 6, 8, 9])})
+    return UInput(
+        name=f"{VIRT_DEVICE_PREFIX} Keyboard",
+        events={
+            ecodes.EV_KEY: _KEYBOARD_KEYS,
+            ecodes.EV_REL: set([0, 1, 6, 8, 9]),
+        },
+    )
 
 
 # TODO: improve injection?
@@ -45,7 +51,6 @@ def setup_uinput(uinput=None):
 
 
 class Output:
-
     def __init__(self):
         self._pressed_modifier_keys = set()
         self._pressed_keys = set()
@@ -181,6 +186,7 @@ class SuspendWhenLifting:
     of re-exerting them immediately after it will hold them until it is
     unsuspended (which is currently immediately when a sequence ends)
     """
+
     def __init__(self, output):
         self._output = output
 
