@@ -94,7 +94,7 @@ def main():
     setup()
     reset_transform()
 
-    eval_config("./kinto.py")
+    eval_config("./tests/fixtures/kinto.cfg")
     boot_config()
     print("keymaps", len(transform._KEYMAPS))
 
