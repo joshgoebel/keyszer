@@ -1,18 +1,19 @@
-import time
-from evdev import ecodes
 import asyncio
+import time
 
-from .lib.key_context import KeyContext
-from .models.key import Key
-from .models.action import Action
-from .models.modifier import Modifier
-from .models.combo import Combo, ComboHint
-from .models.keystate import Keystate
-from .models.keymap import Keymap
-from .lib.logger import debug
+from evdev import ecodes
+
+from .config_api import escape_next_key, get_configuration, ignore_key
 from .lib import logger
+from .lib.key_context import KeyContext
+from .lib.logger import debug
+from .models.action import Action
+from .models.combo import Combo, ComboHint
+from .models.key import Key
+from .models.keymap import Keymap
+from .models.keystate import Keystate
+from .models.modifier import Modifier
 from .output import Output
-from .config_api import get_configuration, escape_next_key, ignore_key
 
 _MODMAPS = None
 _MULTI_MODMAPS = None

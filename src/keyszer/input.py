@@ -1,15 +1,15 @@
-from evdev import ecodes, InputDevice, InputEvent
-from .models.action import Action
-from .models.key import Key
-from sys import exit
-from .transform import on_event, boot_config, dump_diagnostics
-from . import transform
-from . import config_api
-from .devices import DeviceRegistry, DeviceFilter, DeviceGrabError
-from .lib.logger import info, error, debug
 import asyncio
 import signal
+from sys import exit
 
+from evdev import InputDevice, InputEvent, ecodes
+
+from . import config_api, transform
+from .devices import DeviceFilter, DeviceGrabError, DeviceRegistry
+from .lib.logger import debug, error, info
+from .models.action import Action
+from .models.key import Key
+from .transform import boot_config, dump_diagnostics, on_event
 
 CONFIG = config_api
 

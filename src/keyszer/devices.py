@@ -1,8 +1,8 @@
 from evdev import InputDevice, list_devices
 
+from .lib.logger import error, info
 from .models.key import Key
 from .output import VIRT_DEVICE_PREFIX
-from .lib.logger import info, error
 
 QWERTY = [Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y]
 A_Z_SPACE = [Key.SPACE, Key.A, Key.Z]

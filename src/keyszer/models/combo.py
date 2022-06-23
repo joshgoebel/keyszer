@@ -1,9 +1,10 @@
-from enum import unique, IntEnum
 from collections.abc import Iterable
+from enum import IntEnum, unique
+
+from ordered_set import OrderedSet
 
 from .key import Key
 from .modifier import Modifier
-from ordered_set import OrderedSet
 
 
 @unique

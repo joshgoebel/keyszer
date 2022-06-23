@@ -1,10 +1,10 @@
 from evdev import ecodes
 from evdev.uinput import UInput
 
+from .lib.logger import debug
 from .models.action import PRESS, RELEASE
 from .models.combo import Combo
 from .models.modifier import Modifier
-from .lib.logger import debug
 
 VIRT_DEVICE_PREFIX = "Keyszer (virtual)"
 

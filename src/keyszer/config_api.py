@@ -1,16 +1,16 @@
 import itertools
-import sys
 import re
+import sys
 import time
 from inspect import signature
 
-from .models.key import Key
+from .lib.logger import error
 from .models.action import Action
 from .models.combo import Combo, ComboHint
+from .models.key import Key
+from .models.keymap import Keymap
 from .models.modifier import Modifier
 from .models.modmap import Modmap, MultiModmap
-from .models.keymap import Keymap
-from .lib.logger import error
 
 # GLOBALS
 bind = ComboHint.BIND

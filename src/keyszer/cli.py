@@ -1,6 +1,6 @@
-from .lib.logger import log, error, info, debug
 from .lib import logger
-from .version import __version__, __name__, __description__
+from .lib.logger import debug, error, info, log
+from .version import __description__, __name__, __version__
 
 CONFIG_HEADER = b"""
 import re
@@ -38,6 +38,7 @@ def has_access_to_uinput():
 def main():
     # Parse args
     import argparse
+
     from appdirs import user_config_dir
 
     parser = argparse.ArgumentParser(description=__description__)

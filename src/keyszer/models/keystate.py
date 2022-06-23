@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field, replace
-from .key import Key
-from .action import Action
 import time as _time
+from dataclasses import dataclass, field, replace
+
+from .action import Action
+from .key import Key
 
 
 @dataclass
