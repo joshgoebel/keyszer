@@ -245,7 +245,7 @@ The configuration API:
 
 Configures the timing behavior of various aspects of the keymapper.
 
-- `multipurpose` - The number of seconds before a held multi-purpose key is assumed to be a modifier (evne in the absense of other keys).
+- `multipurpose` - The number of seconds before a held multi-purpose key is assumed to be a modifier (evne in the absence of other keys).
 - `suspend` - The number of seconds modifiers are "suspended" and withheld from the output waiting to see whether if they are part of a combo or if they may be the actual intended output.
 
 
@@ -336,7 +336,7 @@ Defines a keymap of input combos mapped to output equivalents.
 
 ```py
 keymap("Firefox", {
-    # when Cmd-S is input instead send Ctrl-S to the ouput
+    # when Cmd-S is input instead send Ctrl-S to the output
     C("Cmd-s"): C("Ctrl-s"),
 }, when = lambda ctx: ctx.wm_class == "Firefox")
 ```
@@ -354,7 +354,7 @@ The argument `mappings` is a dictionary in the form of `{ combo: command, ...}` 
     - `{ ... }`: Sub-keymap. Used to define [Multiple Stroke Keys](#multiple-stroke-keys).
     - `escape_next_key`: Escape the next key pressed.
     - `ignore_key`: Ignore the key that is pressed next. (often used to disable native combos)
-    - `bind`: Bind an input and ouput modifier together such that the output is not lifted until the input is.
+    - `bind`: Bind an input and output modifier together such that the output is not lifted until the input is.
     - arbitrary function: The function is executed and the returned value (if any) is used as a command.
 
 The argument `name` specifies the keymap name. Every keymap has a name - using `default` is suggested for a non-conditional keymap.
@@ -434,7 +434,7 @@ Event: time 1655723568.594844, type 1 (EV_KEY), code 69 (KEY_NUMLOCK), value 1
 Event: time 1655723568.594844, -------------- SYN_REPORT ------------
 ```
 
-Above I've just pressed "clear" on my numpad and see `code 69 (KEY_NUMLOCK)` in the ouput. For Keyszer this would translate to `Key.NUMLOCK`.  You can also browse the [full list of key names](https://github.com/joshgoebel/keyszer/blob/main/src/keyszer/models/key.py) in the source.
+Above I've just pressed "clear" on my numpad and see `code 69 (KEY_NUMLOCK)` in the output. For Keyszer this would translate to `Key.NUMLOCK`.  You can also browse the [full list of key names](https://github.com/joshgoebel/keyszer/blob/main/src/keyszer/models/key.py) in the source.
 
 
 #### Finding an Application's `WM_CLASS`  and `WM_NAME` using `xprop`

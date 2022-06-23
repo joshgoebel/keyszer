@@ -1,4 +1,4 @@
-from evdev import ecodes, InputDevice, list_devices, InputEvent
+from evdev import ecodes, InputDevice, InputEvent
 from .models.action import Action
 from .models.key import Key
 from sys import exit
@@ -161,5 +161,5 @@ async def device_change(registry, events):
                 if registry.cares_about(device):
                     registry.grab(device)
         except FileNotFoundError:
-            # likely recieved ATTR right before a DELETE, so we ignore
+            # likely received ATTR right before a DELETE, so we ignore
             continue
