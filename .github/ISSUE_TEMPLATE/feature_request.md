@@ -9,7 +9,7 @@ assignees: ''
 
 **Is your request related to a specific problem you're having?**
 <!--
-	Please incldue a clear and concise description of the problem
+	Please include a clear and concise description of the problem
 	itself - that your feature would intend to solve. -->
 
 **The solution you'd prefer or feature you'd like to see added...**

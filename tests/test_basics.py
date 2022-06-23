@@ -1,5 +1,5 @@
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 from keyszer.output import setup_uinput
 from keyszer.models.key import Key
@@ -227,7 +227,7 @@ async def test_real_inputs_do_not_reexert_during_combo_sequence():
     press(Key.LEFT_CTRL)
     press(Key.LEFT_ALT)
     # we want to get past suspend so these keys
-    # are actually pushed to the ouput
+    # are actually pushed to the output
     await asyncio.sleep(2)
     press(Key.J)
     release(Key.J)

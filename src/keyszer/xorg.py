@@ -1,5 +1,6 @@
 from Xlib.display import Display
-from Xlib.error import ConnectionClosedError, DisplayConnectionError, DisplayNameError
+from Xlib.error import ConnectionClosedError, \
+    DisplayConnectionError, DisplayNameError
 
 from .lib.logger import error
 
@@ -17,7 +18,10 @@ NO_CONTEXT_WAS_ERROR = {
 
 
 def get_xorg_context():
-    """Get window context from Xorg, window name, class, whether there is an X error"""
+    """
+    Get window context from Xorg, window name, class,
+    whether there is an X error or not
+    """
     try:
         display = Display()
         wm_class = ""
@@ -49,6 +53,7 @@ def get_xorg_context():
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
 
+
 def get_actual_window(window):
     try:
         wmname = window.get_wm_name()
@@ -62,5 +67,5 @@ def get_actual_window(window):
             return None
 
         return window
-    except:
+    except Exception:
         return None

@@ -176,7 +176,7 @@ class SuspendWhenLifting:
     wraps the suspending pattern for output
 
     When output release keys it doesn't need for the current combo instead
-    of re-exerting them immediatley after it will hold them until it is
+    of re-exerting them immediately after it will hold them until it is
     unsuspended (which is currently immediately when a sequence ends)
     """
     def __init__(self, output):

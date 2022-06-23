@@ -185,7 +185,7 @@ def suspend_keys(timeout):
     _last_suspend_timeout = timeout
     _suspend_timer = loop.call_later(timeout, resume_keys)
 
-# ─── DUMP DIAGNOTICS ────────────────────────────────────────────────────────
+# ─── DUMP DIAGNOSTICS ────────────────────────────────────────────────────────
 
 
 def dump_diagnostics():
@@ -297,7 +297,6 @@ def on_event(event, device_name):
 
     debug()
     debug(f"in {key} ({action})", ctx="II")
-
 
     # if there is an X error (we don't have any window context)
     # then we turn off all mappings until it's resolved and act
@@ -522,7 +521,7 @@ def handle_commands(commands, key, action, input_combo=None):
             if callable(command):
                 # very likely we're just passing None forwards here but that OK
                 reset_mode = handle_commands(command(), key, action)
-                # if the command wants to disable reset, lets propogate that
+                # if the command wants to disable reset, lets propagate that
                 if reset_mode is False:
                     return False
             elif isinstance(command, Combo):

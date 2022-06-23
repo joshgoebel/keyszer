@@ -1,6 +1,6 @@
 
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import sys
 sys.modules["keyszer.xorg"] = __import__('lib.xorg_mock',
@@ -46,7 +46,7 @@ async def test_OLD_API_multiple_keys_at_once():
 
     press(Key.LEFT_CTRL)
     press(Key.LEFT_ALT)
-    press(Key.J)    
+    press(Key.J)
     release(Key.J)
     release(Key.LEFT_ALT)
     release(Key.LEFT_CTRL)
@@ -99,7 +99,7 @@ async def test_multiple_keys_at_once():
 
     press(Key.LEFT_CTRL)
     press(Key.LEFT_ALT)
-    press(Key.J)    
+    press(Key.J)
     release(Key.J)
     release(Key.LEFT_ALT)
     release(Key.LEFT_CTRL)
@@ -113,7 +113,7 @@ async def test_multiple_keys_at_once():
 @pytest.mark.looptime(False)
 async def test_multiple_combos_without_releasing_all_nonsticky():
     # NOTE: if we were sticky then techcanily the C on the output
-    # should probalby be held without release
+    # should probably be held without release
     window("Firefox")
     conditional(lambda ctx: re.compile("Firefox").search(ctx.wm_class),
         keymap("Firefox",{
@@ -126,9 +126,9 @@ async def test_multiple_combos_without_releasing_all_nonsticky():
 
     press(Key.LEFT_CTRL)
     press(Key.LEFT_ALT)
-    press(Key.J)    
+    press(Key.J)
     release(Key.J)
-    press(Key.K)            
+    press(Key.K)
     release(Key.K)
     release(Key.LEFT_ALT)
     release(Key.LEFT_CTRL)
@@ -138,7 +138,7 @@ async def test_multiple_combos_without_releasing_all_nonsticky():
         (PRESS, Key.TAB),
         (RELEASE, Key.TAB),
         (RELEASE, Key.LEFT_CTRL),
-        
+
         (PRESS, Key.LEFT_CTRL),
         (PRESS, Key.LEFT_SHIFT),
         (PRESS, Key.TAB),
