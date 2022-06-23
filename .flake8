@@ -4,4 +4,4 @@ per-file-ignores =
 exclude =
     example
 max-line-length = 85
-ignore = E221
+ignore = E221 W503
