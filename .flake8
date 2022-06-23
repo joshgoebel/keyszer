@@ -1,5 +1,7 @@
 [flake8]
 per-file-ignores =
     src/keyszer/models/key.py:E221,E261
+exclude =
+    example
 max-line-length = 85
 ignore = E221
