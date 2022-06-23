@@ -190,7 +190,7 @@ It would be better to open a terminal, `su` to a dedicated `keymapper` user and 
 
 ### Running as `root`
 
-_Don't do this, it's dangerous, and not unnecessary._  A semi-priveleged user with access to only the necessary input devices is a far better choice.
+_Don't do this, it's dangerous, and unnecessary._  A semi-priveleged user with access to only the necessary input devices is a far better choice.
 
 
 ## Usage
