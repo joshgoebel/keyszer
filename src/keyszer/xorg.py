@@ -14,6 +14,7 @@ from .lib.logger import error
 
 
 NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "x_error": True}
+_display = None
 
 
 def get_xorg_context():
@@ -21,12 +22,13 @@ def get_xorg_context():
     Get window context from Xorg, window name, class,
     whether there is an X error or not
     """
+    global _display
     try:
-        display = Display()
+        _display = _display or Display()
         wm_class = ""
         wm_name = ""
 
-        input_focus = display.get_input_focus().focus
+        input_focus = _display.get_input_focus().focus
         window = get_actual_window(input_focus)
         if window:
             wm_name = window.get_wm_name()
@@ -38,14 +40,17 @@ def get_xorg_context():
 
     except ConnectionClosedError as xerror:
         error(xerror)
+        _display = None
         return NO_CONTEXT_WAS_ERROR
     # most likely DISPLAY env isn't even set
     except DisplayNameError as xerror:
         error(xerror)
+        _display = None
         return NO_CONTEXT_WAS_ERROR
     # seen when we don't have permission to the X display
     except DisplayConnectionError as xerror:
         error(xerror)
+        _display = None
         return NO_CONTEXT_WAS_ERROR
 
 
