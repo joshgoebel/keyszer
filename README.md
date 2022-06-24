@@ -1,17 +1,17 @@
 # keyszer - a smart key remapper for Linux/X11
 
-[![latest version](https://badgen.net/pypi/v/keyszer?label=latest)](https://github.com/joshgoebel/keyszer/releases)
-[![](https://badgen.net/badge/python/3.10/blue)]()
+[![latest version](https://badgen.net/pypi/v/keyszer?label=beta)](https://github.com/joshgoebel/keyszer/releases)
+[![python 3.10](https://badgen.net/badge/python/3.10/blue)]()
 [![license](https://badgen.net/badge/license/GPL3/keyszer?color=cyan)](https://github.com/joshgoebel/keyszer/blob/main/LICENSE)
 [![code quality](https://badgen.net/lgtm/grade/g/joshgoebel/keyszer/js?label=code+quality)](https://lgtm.com/projects/g/joshgoebel/keyszer/?mode=list)
 [![discord](https://badgen.net/badge/icon/discord?icon=discord&label&color=pink)](https://discord.gg/nX6qSC8mer)
 
-<!-- ![build and CI status](https://badgen.net/github/checks/joshgoebel/keyszer/main?label=build) -->
 <!-- [![vulnerabilities](https://badgen.net/snyk/joshgoebel/keyszer)](https://snyk.io/test/github/joshgoebel/keyszer?targetFile=package.json) -->
 
 [![open issues](https://badgen.net/github/open-issues/joshgoebel/keyszer?label=issues)](https://github.com/joshgoebel/keyszer/issues)
 [![help welcome issues](https://badgen.net/github/label-issues/joshgoebel/keyszer/help%20welcome/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+welcome%22)
 [![good first issue](https://badgen.net/github/label-issues/joshgoebel/keyszer/good%20first%20issue/open)](https://github.com/joshgoebel/keyszer/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
+![build and CI status](https://badgen.net/github/checks/joshgoebel/keyszer)
 
 
 Keyszer is a smart key remapper for Linux (and X11) written in Python. It's similar to `xmodmap` but allows far more flexible remappings.  Keyszer was forked from [xkeysnail](https://github.com/mooz/xkeysnail) which no longer seems actively maintained.
