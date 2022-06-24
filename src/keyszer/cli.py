@@ -120,7 +120,7 @@ def main():
         "--very-bad-idea",
         dest="run_as_root",
         action="store_true",
-        help="(deprecated: run as root)",
+        help="(deprecated: allow running as root)",
     )
     args = parser.parse_args()
 
