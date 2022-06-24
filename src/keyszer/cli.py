@@ -2,6 +2,8 @@ from .lib import logger
 from .lib.logger import debug, error, info, log
 from .version import __description__, __name__, __version__
 
+
+CONFIG_NAMESPACE = "CFG:"
 CONFIG_HEADER = b"""
 import re
 from keyszer.config_api import *
@@ -14,7 +16,7 @@ def eval_config(path):
         # WARN: yes, this is potentially a security risk, but our config is
         # - python code so we're sort of stuck with this AFAIK
         # TODO: some sort of sandboxing maybe?
-        exec(compile(config_code, path, "exec"), globals())  # nosec
+        exec(compile(config_code, f"{CONFIG_NAMESPACE}{path}", "exec"), globals())  # nosec
 
 
 def uinput_device_exists():
@@ -33,6 +35,38 @@ def has_access_to_uinput():
         return True
     except UInputError:
         return False
+
+
+def print_config_traceback():
+    import traceback
+    import sys
+    cls, desc, tb = sys.exc_info()
+
+    print("\nTraceback (while executing your config):")
+    offset = len(CONFIG_HEADER.split(b"\n")) - 1
+    for frame in traceback.extract_tb(tb):
+        if "keyszer/cli" in frame.filename:
+            continue
+        lineno = frame.lineno - offset
+        file = frame.filename.replace(CONFIG_NAMESPACE, "")
+        print(f"  File \"{file}\", line {lineno}, in {frame.name}")
+        if (frame.line):
+            print(frame.line)
+    print(f"{cls.__name__}: {desc}")
+
+
+def check_config(filename):
+    config_good = False
+    try:
+        eval_config(filename)
+        log("CONFIG: Looks good to me.")
+        config_good = True
+    except BaseException:
+
+        error("CONFIG: No bueno, we have a problem...")
+        print_config_traceback()
+
+    exit(0) if config_good else exit(1)
 
 
 def main():
@@ -123,17 +157,7 @@ def main():
         exit(0)
 
     if args.check_config:
-        config_good = False
-        try:
-            eval_config(args.config)
-            log("CONFIG: Looks good to me.")
-            config_good = True
-        except Exception:
-            import traceback
-
-            error("CONFIG: No bueno, we have a problem...")
-            traceback.print_exc()
-        exit(0) if config_good else exit(1)
+        check_config(args.config)
 
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():
@@ -158,7 +182,11 @@ Please check access permissions for /dev/uinput."""
     debug(f"CONFIG: {args.config}")
 
     # Load configuration file
-    eval_config(args.config)
+    try:
+        eval_config(args.config)
+    except BaseException:
+        print_config_traceback()
+        exit(1)
 
     if args.watch:
         log("WATCH: Watching for new devices to hot-plug.")
@@ -167,3 +195,4 @@ Please check access permissions for /dev/uinput."""
     from keyszer.input import main_loop
 
     main_loop(args.devices, args.watch)
+
