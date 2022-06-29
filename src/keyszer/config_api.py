@@ -134,51 +134,67 @@ def usleep(usec):
 # ============================================================ #
 
 
-def ST(str_to_type):
-    """Turn alphanumeric string (with spaces) up to length of 250 characters into keystroke commands"""
-    if len(str_to_type) >= 251:
-        print("ERROR: String too long. Use some other solution for strings longer than 250 characters.")
-        return
-    if (str.isalnum(str_to_type.replace(" ", ""))) != True:
-        print("ERROR: String contains non-alphanumeric characters. Not supported yet.")
-        return
+class CharacterNotSupported(Exception):
+    """Base class for other exceptions"""
+    pass
+
+
+class TypingTooLong(Exception):
+    """Base class for other exceptions"""
+    pass
+
+
+def type(s):
+    """Turn alphanumeric string (with spaces) up to length of 100 characters into keystroke commands"""
+    if len(s) > 100:
+        raise TypingTooLong("`type` only supports strings of 100 characters or less")
+
     combo_list = []
-    for c in str_to_type:
-        if c.isupper(): 
+    for c in s:
+        if c.isupper():
             combo_list.append(C("Shift-" + c))
+        elif ord(c) > 127:
+            digits = hex(ord(c))[2:]
+            combos = unicode(digits)()
+            combo_list.extend(combos)
+        elif (str.isalnum(c)):
+            combo_list.append(Key[c.upper()])
         elif c == " ":
             combo_list.append(C("Space"))
-        elif (str.isalpha(c)):
-            combo_list.append(C(c))
         else:
-            combo_list.append(C("KEY_" + c))
-    def ascii_string_printer():
+            raise CharacterNotSupported(f"The character {c} is not supported by `type` yet.")
+
+    # TODO: workaround for command not always supporting lists
+    def _type():
         return combo_list
-    return ascii_string_printer
+    return _type
 
 
-def UC(unicode_address):
+# TODO: should input here be a hexadecimal value: 0x1cf93
+def unicode(hexstring):
     """Turn Unicode address hex string into keystroke commands"""
-    if (all(c in string.hexdigits for c in unicode_address) == False):
+    hexstring = hexstring.upper()
+    # TODO: need exceptions, not printed errors...
+    if (all(c in string.hexdigits for c in hexstring) == False):
         print("ERROR: Invalid Unicode address string. Must be hexadecimal, 1 to 6 characters.")
         return
-    elif (len(unicode_address) >= 7 or len(unicode_address) < 1):
+    elif (len(hexstring) < 1 or len(hexstring) > 6):
         print("ERROR: Invalid Unicode address string. Must be 1 to 6 hex characters in length.")
         return
+
     combo_list = []
     combo_list.append(C("Shift-Ctrl-u"))
-    for c in unicode_address:
-        if (str.isalpha(c)):
-            combo_list.append(C(c))            
-        else:
-            combo_list.append(C("KEY_" + c))
-    combo_list.append(K("Enter"))
-    def UC_printer():
+    for c in hexstring:
+        combo_list.append(Key[c])
+    combo_list.append(Key.ENTER)
+
+    # TODO: workaround for command not always supporting lists
+    def _unicode():
         return combo_list
-    return UC_printer
+    return _unicode
 
 
-def C(exp):  # pylint: disable=invalid-name
+def combo(exp):  # pylint: disable=invalid-name
     "Helper function to specify keymap"
     modifier_strs = []
     while True:
@@ -190,12 +206,14 @@ def C(exp):  # pylint: disable=invalid-name
         modifier_strs.append(modifier)
         exp = re.sub(rf"\A{modifier}-", "", exp)
     key_str = exp.upper()
-    key = getattr(Key, key_str)
+    key = Key[key_str]
     return Combo(_create_modifiers_from_strings(modifier_strs), key)
 
 
 # legacy helper name
-K = C
+K = combo
+# short form for most common used helper
+C = combo
 
 
 def _create_modifiers_from_strings(modifier_strs):
