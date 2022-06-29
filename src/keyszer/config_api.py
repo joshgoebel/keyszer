@@ -1,5 +1,6 @@
 import itertools
 import re
+import string
 import sys
 import time
 from inspect import signature
@@ -131,6 +132,50 @@ def usleep(usec):
 
 
 # ============================================================ #
+
+
+def ST(str_to_type):
+    """Turn alphanumeric string (with spaces) up to length of 250 characters into keystroke commands"""
+    if len(str_to_type) >= 251:
+        print("ERROR: String too long. Use some other solution for strings longer than 250 characters.")
+        return
+    if (str.isalnum(str_to_type.replace(" ", ""))) != True:
+        print("ERROR: String contains non-alphanumeric characters. Not supported yet.")
+        return
+    combo_list = []
+    for c in str_to_type:
+        if c.isupper(): 
+            combo_list.append(C("Shift-" + c))
+        elif c == " ":
+            combo_list.append(C("Space"))
+        elif (str.isalpha(c)):
+            combo_list.append(C(c))
+        else:
+            combo_list.append(C("KEY_" + c))
+    def ascii_string_printer():
+        return combo_list
+    return ascii_string_printer
+
+
+def UC(unicode_address):
+    """Turn Unicode address hex string into keystroke commands"""
+    if (all(c in string.hexdigits for c in unicode_address) == False):
+        print("ERROR: Invalid Unicode address string. Must be hexadecimal, 1 to 6 characters.")
+        return
+    elif (len(unicode_address) >= 7 or len(unicode_address) < 1):
+        print("ERROR: Invalid Unicode address string. Must be 1 to 6 hex characters in length.")
+        return
+    combo_list = []
+    combo_list.append(C("Shift-Ctrl-u"))
+    for c in unicode_address:
+        if (str.isalpha(c)):
+            combo_list.append(C(c))            
+        else:
+            combo_list.append(C("KEY_" + c))
+    combo_list.append(K("Enter"))
+    def UC_printer():
+        return combo_list
+    return UC_printer
 
 
 def C(exp):  # pylint: disable=invalid-name
