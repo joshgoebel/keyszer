@@ -1,10 +1,23 @@
-from enum import IntEnum
+from enum import IntEnum, EnumMeta
 
 # fmt: off
 
 
+class KeyMeta(EnumMeta):
+    """
+    fix numerics being a special case and allows them to be accessed via
+    Key["1"] just like any other normal key
+    """
+    def __getitem__(self, key):
+        s = super()
+        if key in "0123456789":
+            return s.__getitem__(f"KEY_{key}")
+        else:
+            return s.__getitem__(key)
+
+
 # https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
-class Key(IntEnum):
+class Key(IntEnum, metaclass=KeyMeta):
     """ representation of a single keyboard key"""
     RESERVED = 0
     ESC = 1
