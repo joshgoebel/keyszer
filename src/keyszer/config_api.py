@@ -156,7 +156,7 @@ def to_keystrokes(s):
         if c.isupper():
             combo_list.append(combo("Shift-" + c))
         elif ord(c) > 127:
-            combos = unicode_keystrokes(ord(c))()
+            combos = unicode_keystrokes(ord(c))
             combo_list.extend(combos)
         elif (str.isalnum(c)):
             combo_list.append(Key[c.upper()])
@@ -165,10 +165,7 @@ def to_keystrokes(s):
         else:
             raise CharacterNotSupported(f"The character {c} is not supported by `type` yet.")
 
-    # TODO: workaround for command not always supporting lists
-    def _type():
-        return combo_list
-    return _type
+    return combo_list
 
 
 def _digits(n, base):
@@ -193,10 +190,7 @@ def unicode_keystrokes(n):
         Key.ENTER
     ]
 
-    # TODO: workaround for command not always supporting lists
-    def _unicode_combo():
-        return combo_list
-    return _unicode_combo
+    return combo_list
 
 
 def combo(exp):  # pylint: disable=invalid-name
