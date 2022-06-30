@@ -142,7 +142,11 @@ class TypingTooLong(Exception):
     pass
 
 
-def type(s):
+class UnicodeNumberToolarge(Exception):
+    pass
+
+
+def to_keystrokes(s):
     """Turn alphanumeric string (with spaces) up to length of 100 characters into keystroke commands"""
     if len(s) > 100:
         raise TypingTooLong("`type` only supports strings of 100 characters or less")
@@ -150,10 +154,9 @@ def type(s):
     combo_list = []
     for c in s:
         if c.isupper():
-            combo_list.append(C("Shift-" + c))
+            combo_list.append(combo("Shift-" + c))
         elif ord(c) > 127:
-            digits = hex(ord(c))[2:]
-            combos = unicode_combo(digits)()
+            combos = unicode_keystrokes(ord(c))()
             combo_list.extend(combos)
         elif (str.isalnum(c)):
             combo_list.append(Key[c.upper()])
@@ -168,23 +171,27 @@ def type(s):
     return _type
 
 
-# TODO: should input here be a hexadecimal value: 0x1cf93
-def unicode_combo(hexstring):
-    """Turn Unicode address hex string into keystroke commands"""
-    hexstring = hexstring.upper()
-    # TODO: need exceptions, not printed errors...
-    if (all(c in string.hexdigits for c in hexstring) == False):
-        print("ERROR: Invalid Unicode address string. Must be hexadecimal, 1 to 6 characters.")
-        return
-    elif (len(hexstring) < 1 or len(hexstring) > 6):
-        print("ERROR: Invalid Unicode address string. Must be 1 to 6 hex characters in length.")
-        return
+def _digits(n, base):
+    digits = []
+    while n > 0:
+        digits.insert(0, n%base)
+        n //= base
+    return digits
 
-    combo_list = []
-    combo_list.append(C("Shift-Ctrl-u"))
-    for c in hexstring:
-        combo_list.append(Key[c])
-    combo_list.append(Key.ENTER)
+
+def unicode_keystrokes(n):
+    """Turn Unicode number into keystroke commands"""
+    if (n > 0x10ffff):
+        raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
+
+    combo_list = [
+        combo("Shift-Ctrl-u"),
+        *[Key[hexdigit]
+            for digit in _digits(n, 16)
+            for hexdigit in hex(digit)[2:].upper()
+            ],
+        Key.ENTER
+    ]
 
     # TODO: workaround for command not always supporting lists
     def _unicode_combo():
