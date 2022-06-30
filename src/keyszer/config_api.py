@@ -147,9 +147,9 @@ class UnicodeNumberToolarge(Exception):
 
 
 def to_keystrokes(s):
-    """Turn alphanumeric string (with spaces) up to length of 100 characters into keystroke commands"""
+    """Turn alphanumeric string (with spaces and some ASCII) up to length of 100 characters into keystroke commands"""
     if len(s) > 100:
-        raise TypingTooLong("`type` only supports strings of 100 characters or less")
+        raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
 
     combo_list = []
     for c in s:
@@ -163,7 +163,7 @@ def to_keystrokes(s):
         elif c in ASCII_TO_KEY:
             combo_list.append(ASCII_TO_KEY[c])
         else:
-            raise CharacterNotSupported(f"The character {c} is not supported by `type` yet.")
+            raise CharacterNotSupported(f"The character {c} is not supported by `to_keystrokes` yet.")
 
     return combo_list
 

@@ -563,6 +563,8 @@ def handle_commands(commands, key, action, input_combo=None):
             elif isinstance(command, Keymap):
                 _active_keymaps = [command]
                 return False
+            # to_keystrokes and unicode_keystrokes produce lists so
+            # we'll just handle it recursively
             elif isinstance(command, list):
                 reset_mode = handle_commands(command, key, action)
                 if reset_mode is False:
