@@ -261,3 +261,32 @@ async def test_real_inputs_do_not_reexert_during_combo_sequence():
         (RELEASE, Key.LEFT_CTRL),
         (RELEASE, Key.LEFT_ALT),
     ]
+
+async def test_simple_to_keystrokes():
+    keymap("default",{
+        K("C-j"): [Key.I, to_keystrokes("love"), Key.U]
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.J)
+    release(Key.J)
+    release(Key.LEFT_CTRL)
+
+    # thanks to escaping with just get a B rather
+    # than the C-b combo
+    assert _out.keys() == [
+        (PRESS, Key.I),
+        (RELEASE, Key.I),
+        (PRESS, Key.L),
+        (RELEASE, Key.L),
+        (PRESS, Key.O),
+        (RELEASE, Key.O),
+        (PRESS, Key.V),
+        (RELEASE, Key.V),
+        (PRESS, Key.E),
+        (RELEASE, Key.E),
+        (PRESS, Key.U),
+        (RELEASE, Key.U),
+    ]
