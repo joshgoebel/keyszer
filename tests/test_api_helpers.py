@@ -80,6 +80,12 @@ def test_type_extended_ascii():
              Key.F, Key.F,
              Key.ENTER] == out()
 
+def test_ascii_keys():
+    out = type("`-=[]\\;',./")
+    assert [ Key.GRAVE, Key.MINUS, Key.EQUAL, Key.LEFT_BRACE,
+             Key.RIGHT_BRACE, Key.BACKSLASH, Key.SEMICOLON,
+             Key.APOSTROPHE, Key.COMMA, Key.DOT, Key.SLASH
+             ] == out()
 
 def test_type_unicode():
     out = type("🎉")

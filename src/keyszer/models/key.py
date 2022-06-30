@@ -741,3 +741,19 @@ class Key(IntEnum, metaclass=KeyMeta):
 
     def __str__(self):
         return self.name
+
+
+ASCII_TO_KEY = {
+    ";": Key.SEMICOLON,
+    "'": Key.APOSTROPHE,
+    "=": Key.EQUAL,
+    "-": Key.MINUS,
+    "`": Key.GRAVE,
+    "[": Key.LEFT_BRACE,
+    "]": Key.RIGHT_BRACE,
+    ",": Key.COMMA,
+    ".": Key.DOT,
+    "/": Key.SLASH,
+    " ": Key.SPACE,
+    "\\": Key.BACKSLASH
+}

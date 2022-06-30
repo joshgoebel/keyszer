@@ -8,7 +8,7 @@ from inspect import signature
 from .lib.logger import error
 from .models.action import Action
 from .models.combo import Combo, ComboHint
-from .models.key import Key
+from .models.key import Key, ASCII_TO_KEY
 from .models.keymap import Keymap
 from .models.modifier import Modifier
 from .models.modmap import Modmap, MultiModmap
@@ -135,12 +135,10 @@ def usleep(usec):
 
 
 class CharacterNotSupported(Exception):
-    """Base class for other exceptions"""
     pass
 
 
 class TypingTooLong(Exception):
-    """Base class for other exceptions"""
     pass
 
 
@@ -155,12 +153,12 @@ def type(s):
             combo_list.append(C("Shift-" + c))
         elif ord(c) > 127:
             digits = hex(ord(c))[2:]
-            combos = unicode(digits)()
+            combos = unicode_combo(digits)()
             combo_list.extend(combos)
         elif (str.isalnum(c)):
             combo_list.append(Key[c.upper()])
-        elif c == " ":
-            combo_list.append(C("Space"))
+        elif c in ASCII_TO_KEY:
+            combo_list.append(ASCII_TO_KEY[c])
         else:
             raise CharacterNotSupported(f"The character {c} is not supported by `type` yet.")
 
@@ -171,7 +169,7 @@ def type(s):
 
 
 # TODO: should input here be a hexadecimal value: 0x1cf93
-def unicode(hexstring):
+def unicode_combo(hexstring):
     """Turn Unicode address hex string into keystroke commands"""
     hexstring = hexstring.upper()
     # TODO: need exceptions, not printed errors...
@@ -189,9 +187,9 @@ def unicode(hexstring):
     combo_list.append(Key.ENTER)
 
     # TODO: workaround for command not always supporting lists
-    def _unicode():
+    def _unicode_combo():
         return combo_list
-    return _unicode
+    return _unicode_combo
 
 
 def combo(exp):  # pylint: disable=invalid-name
