@@ -162,6 +162,8 @@ def to_keystrokes(s):
             combo_list.append(Key[c.upper()])
         elif c in ASCII_TO_KEY:
             combo_list.append(ASCII_TO_KEY[c])
+        elif c in ASCII_WITH_SHIFT:
+            combo_list.append(ASCII_WITH_SHIFT[c])
         else:
             raise CharacterNotSupported(f"The character {c} is not supported by `to_keystrokes` yet.")
 
@@ -222,6 +224,31 @@ def _create_modifiers_from_strings(modifier_strs):
         if key not in modifiers:
             modifiers.append(key)
     return modifiers
+
+
+ASCII_WITH_SHIFT = {
+    "~":    combo("Shift-Grave"),
+    "!":    combo("Shift-1"),
+    "@":    combo("Shift-2"),
+    "#":    combo("Shift-3"),
+    "$":    combo("Shift-4"),
+    "%":    combo("Shift-5"),
+    "^":    combo("Shift-6"),
+    "&":    combo("Shift-7"),
+    "*":    combo("Shift-8"),
+    "(":    combo("Shift-9"),
+    ")":    combo("Shift-0"),
+    "_":    combo("Shift-Minus"),
+    "+":    combo("Shift-Equal"),
+    "{":    combo("Shift-Left_Brace"),
+    "}":    combo("Shift-Right_Brace"),
+    "|":    combo("Shift-Backslash"),
+    ":":    combo("Shift-Semicolon"),
+    "\"":   combo("Shift-Apostrophe"),
+    "<":    combo("Shift-Comma"),
+    ">":    combo("Shift-Dot"),
+    "?":    combo("Shift-Slash")
+}
 
 
 # ─── MARKS ──────────────────────────────────────────────────────────────────
