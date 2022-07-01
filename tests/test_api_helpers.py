@@ -87,6 +87,15 @@ def test_ascii_keys():
              Key.APOSTROPHE, Key.COMMA, Key.DOT, Key.SLASH
              ] == out
 
+def test_ascii_with_shift_keys():
+    out = to_keystrokes('~!@#$%^&*()_+{}|:"<>?')
+    assert [C("Shift-Grave"),C("Shift-1"),C("Shift-2"),C("Shift-3"),C("Shift-4"),
+            C("Shift-5"),C("Shift-6"),C("Shift-7"),C("Shift-8"),C("Shift-9"),
+            C("Shift-0"),C("Shift-Minus"),C("Shift-Equal"),C("Shift-Left_Brace"),
+            C("Shift-Right_Brace"),C("Shift-Backslash"),C("Shift-Semicolon"),
+            C("Shift-Apostrophe"),C("Shift-Comma"),C("Shift-Dot"),C("Shift-Slash")
+             ] == out
+
 def test_type_unicode():
     out = to_keystrokes("🎉")
     assert [ C("Shift-Ctrl-U"),
