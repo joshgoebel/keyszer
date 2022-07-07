@@ -153,11 +153,11 @@ def to_keystrokes(s):
 
     combo_list = []
     for c in s:
-        if c.isupper():
-            combo_list.append(combo("Shift-" + c))
-        elif ord(c) > 127:
+        if ord(c) > 127:
             combos = unicode_keystrokes(ord(c))
             combo_list.extend(combos)
+        elif c.isupper():
+            combo_list.append(combo("Shift-" + c))
         elif (str.isalnum(c)):
             combo_list.append(Key[c.upper()])
         elif c in ASCII_TO_KEY:
