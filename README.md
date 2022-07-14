@@ -156,7 +156,7 @@ First, lets make a new user:
 
 ...then use udev and ACL to grant our new user access:
 
-Manually edit */etc/udev/rules.d/90-keymapper-acl.rules* to include the following:
+Manually edit `/etc/udev/rules.d/90-keymapper-acl.rules` to include the following:
 
     KERNEL=="event*", SUBSYSTEM=="input", RUN+="/usr/bin/setfacl -m user:keymapper:rw /dev/input/%k"
     KERNEL=="uinput", SUBSYSTEM=="misc", RUN+="/usr/bin/setfacl -m user:keymapper:rw /dev/uinput"
@@ -179,7 +179,7 @@ Many distros already have an input group; if not, you can create one.  Next, add
 
 ...then use udev to grant our new user access (via the `input` group):
 
-Manually edit */etc/udev/rules.d/90-keymapper-input.rules* to include the following:
+Manually edit `/etc/udev/rules.d/90-keymapper-input.rules` to include the following:
 
     SUBSYSTEM=="input", GROUP="input"
     KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="input"
