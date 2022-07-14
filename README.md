@@ -142,7 +142,7 @@ Keyszer requires read/write access to:
 - `/dev/uinput` - to provide an emulated keyboard to the kernel
 
 
-### Running as a semi-privleged user
+### Running as a semi-privileged user
 
 It's best to create an entirely isolated user to run the keymapper.  Group or ACL based permissions can be used to provide this user access to the necessary devices.  You'll need only a few `udev` rules to ensure that the input devices are all given correct permissions.
 
