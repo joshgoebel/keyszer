@@ -56,39 +56,39 @@ def test_combo_simple():
     assert [Modifier.ALT] == combo.modifiers
 
 def test_type_simple():
-    out = to_keystrokes("hello5")
+    out = to_US_keystrokes("hello5")
     assert [Key.H, Key.E, Key.L, Key.L, Key.O, Key.KEY_5] == out
 
 def test_type_simple_with_shift():
-    out = to_keystrokes("Hello")
+    out = to_US_keystrokes("Hello")
     assert [C("Shift-H"), Key.E, Key.L, Key.L, Key.O] == out
 
 def test_type_unsupported_character():
     with pytest.raises(CharacterNotSupported) as e:
-        out = to_keystrokes("{")
+        out = to_US_keystrokes("{")
         assert e.message == "The character { is not supported by `type` yet"
 
 def test_type_too_long():
     with pytest.raises(TypingTooLong) as e:
-        out = to_keystrokes("lasdjlkad jlkasjd laksjdlkasj dlkasj dlk ajlkd jaldkjal"
+        out = to_US_keystrokes("lasdjlkad jlkasjd laksjdlkasj dlkasj dlk ajlkd jaldkjal"
             "asdkjhasdkjahkjdhaskjdhakjdhkjadh kajhdkjashdkashdkjajhdajksd")
         assert e.message == "`type` only supports strings of 100 characters or less"
 
 def test_type_extended_ascii():
-    out = to_keystrokes("\u00ff")
+    out = to_US_keystrokes("\u00ff")
     assert [ C("Shift-Ctrl-U"),
              Key.F, Key.F,
              Key.ENTER] == out
 
 def test_ascii_keys():
-    out = to_keystrokes("`-=[]\\;',./")
+    out = to_US_keystrokes("`-=[]\\;',./")
     assert [ Key.GRAVE, Key.MINUS, Key.EQUAL, Key.LEFT_BRACE,
              Key.RIGHT_BRACE, Key.BACKSLASH, Key.SEMICOLON,
              Key.APOSTROPHE, Key.COMMA, Key.DOT, Key.SLASH
              ] == out
 
 def test_ascii_with_shift_keys():
-    out = to_keystrokes('~!@#$%^&*()_+{}|:"<>?')
+    out = to_US_keystrokes('~!@#$%^&*()_+{}|:"<>?')
     assert [C("Shift-Grave"),C("Shift-1"),C("Shift-2"),C("Shift-3"),C("Shift-4"),
             C("Shift-5"),C("Shift-6"),C("Shift-7"),C("Shift-8"),C("Shift-9"),
             C("Shift-0"),C("Shift-Minus"),C("Shift-Equal"),C("Shift-Left_Brace"),
@@ -97,12 +97,12 @@ def test_ascii_with_shift_keys():
              ] == out
 
 def test_type_unicode():
-    out = to_keystrokes("🎉")
+    out = to_US_keystrokes("🎉")
     assert [ C("Shift-Ctrl-U"),
              Key.KEY_1, Key.F, Key.KEY_3, Key.KEY_8, Key.KEY_9,
              Key.ENTER] == out
 
-    out = to_keystrokes("\U0001f389")
+    out = to_US_keystrokes("\U0001f389")
     assert [ C("Shift-Ctrl-U"),
              Key.KEY_1, Key.F, Key.KEY_3, Key.KEY_8, Key.KEY_9,
              Key.ENTER] == out

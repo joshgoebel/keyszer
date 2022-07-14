@@ -264,7 +264,7 @@ async def test_real_inputs_do_not_reexert_during_combo_sequence():
 
 async def test_simple_to_keystrokes():
     keymap("default",{
-        K("C-j"): [Key.I, to_keystrokes("love"), Key.U]
+        K("C-j"): [Key.I, to_US_keystrokes("love"), Key.U]
     })
 
     boot_config()

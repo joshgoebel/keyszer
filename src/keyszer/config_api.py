@@ -146,8 +146,12 @@ class UnicodeNumberToolarge(Exception):
     pass
 
 
-def to_keystrokes(s):
-    """Turn alphanumeric string (with spaces and some ASCII) up to length of 100 characters into keystroke commands"""
+def to_US_keystrokes(s):
+    """
+    Turn alphanumeric string (with spaces and some ASCII) up to length of 100 characters into keystroke commands
+
+    Warn: Almost certainly not going to work with non-US keymaps.
+    """
     if len(s) > 100:
         raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
 
