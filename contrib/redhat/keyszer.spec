@@ -16,6 +16,7 @@ Source1:	%{name}.service
 Source2:	uinput.conf
 Source3:	90-keymapper-acl.rules
 Source4:	xhostplus.desktop
+Source5:	keyszer.conf
 BuildRequires:	pyproject-rpm-macros
 BuildRequires:	systemd-rpm-macros
 Requires:	acl
@@ -50,7 +51,7 @@ install -p -D -m 0644 %{SOURCE3} %{buildroot}%{_udevrulesdir}/90-keymapper-acl.r
 # 4. xhost tuning
 install -p -D -m 0644 %{SOURCE4} %{buildroot}%{_sysconfdir}/xdg/autostart/xhostplus.desktop
 # 5. default config
-install -p -D -m 0644 example/config.py %{buildroot}%{_sysconfdir}/%{name}.conf
+install -p -D -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/%{name}.conf
 %pyproject_save_files keyszer
 
 
@@ -74,7 +75,7 @@ exit 0
 
 
 %files -f %{pyproject_files}
-%doc README.md
+%doc README.md example/config.py
 %{_bindir}/%{name}
 %{_unitdir}/%{name}.service
 %{_modulesloaddir}/uinput.conf
