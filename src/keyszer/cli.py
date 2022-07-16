@@ -55,7 +55,7 @@ def print_config_traceback():
     print(f"{cls.__name__}: {desc}")
 
 
-def check_config(filename):
+def check_is_config_good(filename):
     config_good = False
     try:
         eval_config(filename)
@@ -66,7 +66,7 @@ def check_config(filename):
         error("CONFIG: No bueno, we have a problem...")
         print_config_traceback()
 
-    exit(0) if config_good else exit(1)
+    return config_good
 
 
 def main():
@@ -157,7 +157,8 @@ def main():
         exit(0)
 
     if args.check_config:
-        check_config(args.config)
+        config_good = check_is_config_good(args.config)
+        exit(0) if config_good else exit(1)
 
     # Make sure that the /dev/uinput device exists
     if not uinput_device_exists():

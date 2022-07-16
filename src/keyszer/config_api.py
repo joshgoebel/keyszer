@@ -1,5 +1,6 @@
 import itertools
 import re
+import string
 import sys
 import time
 from inspect import signature
@@ -7,7 +8,7 @@ from inspect import signature
 from .lib.logger import error
 from .models.action import Action
 from .models.combo import Combo, ComboHint
-from .models.key import Key
+from .models.key import Key, ASCII_TO_KEY
 from .models.keymap import Keymap
 from .models.modifier import Modifier
 from .models.modmap import Modmap, MultiModmap
@@ -133,7 +134,72 @@ def usleep(usec):
 # ============================================================ #
 
 
-def C(exp):  # pylint: disable=invalid-name
+class CharacterNotSupported(Exception):
+    pass
+
+
+class TypingTooLong(Exception):
+    pass
+
+
+class UnicodeNumberToolarge(Exception):
+    pass
+
+
+def to_US_keystrokes(s):
+    """
+    Turn alphanumeric string (with spaces and some ASCII) up to length of 100 characters into keystroke commands
+
+    Warn: Almost certainly not going to work with non-US keymaps.
+    """
+    if len(s) > 100:
+        raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
+
+    combo_list = []
+    for c in s:
+        if ord(c) > 127:
+            combos = unicode_keystrokes(ord(c))
+            combo_list.extend(combos)
+        elif c.isupper():
+            combo_list.append(combo("Shift-" + c))
+        elif (str.isalnum(c)):
+            combo_list.append(Key[c.upper()])
+        elif c in ASCII_TO_KEY:
+            combo_list.append(ASCII_TO_KEY[c])
+        elif c in ASCII_WITH_SHIFT:
+            combo_list.append(ASCII_WITH_SHIFT[c])
+        else:
+            raise CharacterNotSupported(f"The character {c} is not supported by `to_keystrokes` yet.")
+
+    return combo_list
+
+
+def _digits(n, base):
+    digits = []
+    while n > 0:
+        digits.insert(0, n%base)
+        n //= base
+    return digits
+
+
+def unicode_keystrokes(n):
+    """Turn Unicode number into keystroke commands"""
+    if (n > 0x10ffff):
+        raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
+
+    combo_list = [
+        combo("Shift-Ctrl-u"),
+        *[Key[hexdigit]
+            for digit in _digits(n, 16)
+            for hexdigit in hex(digit)[2:].upper()
+            ],
+        Key.ENTER
+    ]
+
+    return combo_list
+
+
+def combo(exp):  # pylint: disable=invalid-name
     "Helper function to specify keymap"
     modifier_strs = []
     while True:
@@ -145,12 +211,14 @@ def C(exp):  # pylint: disable=invalid-name
         modifier_strs.append(modifier)
         exp = re.sub(rf"\A{modifier}-", "", exp)
     key_str = exp.upper()
-    key = getattr(Key, key_str)
+    key = Key[key_str]
     return Combo(_create_modifiers_from_strings(modifier_strs), key)
 
 
 # legacy helper name
-K = C
+K = combo
+# short form for most common used helper
+C = combo
 
 
 def _create_modifiers_from_strings(modifier_strs):
@@ -160,6 +228,31 @@ def _create_modifiers_from_strings(modifier_strs):
         if key not in modifiers:
             modifiers.append(key)
     return modifiers
+
+
+ASCII_WITH_SHIFT = {
+    "~":    combo("Shift-Grave"),
+    "!":    combo("Shift-1"),
+    "@":    combo("Shift-2"),
+    "#":    combo("Shift-3"),
+    "$":    combo("Shift-4"),
+    "%":    combo("Shift-5"),
+    "^":    combo("Shift-6"),
+    "&":    combo("Shift-7"),
+    "*":    combo("Shift-8"),
+    "(":    combo("Shift-9"),
+    ")":    combo("Shift-0"),
+    "_":    combo("Shift-Minus"),
+    "+":    combo("Shift-Equal"),
+    "{":    combo("Shift-Left_Brace"),
+    "}":    combo("Shift-Right_Brace"),
+    "|":    combo("Shift-Backslash"),
+    ":":    combo("Shift-Semicolon"),
+    "\"":   combo("Shift-Apostrophe"),
+    "<":    combo("Shift-Comma"),
+    ">":    combo("Shift-Dot"),
+    "?":    combo("Shift-Slash")
+}
 
 
 # ─── MARKS ──────────────────────────────────────────────────────────────────

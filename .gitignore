@@ -4,6 +4,9 @@ __pycache__/
 .idea
 keyszer.egg-info
 
+tools/short.sh
+configs/*
+
 extended.sh
 real_config.py
 tmp/
