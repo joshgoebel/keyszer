@@ -1,0 +1,6 @@
+[Desktop Entry]
+Exec=/usr/bin/xhost +si:localuser:keymapper
+Name=XHostPlus
+Comment=Enable keyszer's user to use user's X
+Type=Application
+Version=1.0
