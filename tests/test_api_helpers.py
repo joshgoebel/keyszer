@@ -63,10 +63,13 @@ def test_type_simple_with_shift():
     out = to_US_keystrokes("Hello")
     assert [C("Shift-H"), Key.E, Key.L, Key.L, Key.O] == out
 
+# TODO: it wasn't clear what to use here since we support
+# - most all ASCII now so we went with BELL but this may
+# - just be better to remove in the future
 def test_type_unsupported_character():
     with pytest.raises(CharacterNotSupported) as e:
-        out = to_US_keystrokes("{")
-        assert e.message == "The character { is not supported by `type` yet"
+        out = to_US_keystrokes("\u0007")
+        assert e.message == "The character \u0007 is not supported by `type` yet"
 
 def test_type_too_long():
     with pytest.raises(TypingTooLong) as e:
