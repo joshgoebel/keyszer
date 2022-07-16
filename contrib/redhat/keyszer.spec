@@ -1,17 +1,13 @@
 # Fedora Linux
-%global git_date 20220715
-%global git_rev_full 4ddf5fffb2f4330dcb535c8b4651616351c371f6
-%global git_rev %(c=%{git_rev_full}; echo ${c:0:6})
 %global keyszer_user keymapper
 
 Name:		keyszer
 Version:	0.6.0
-Release:	1.%{git_date}git%{git_rev}%{?dist}
+Release:	1%{?dist}
 License:	GPLv3
 Summary:	X keyboard remappring tool
 URL:		https://github.com/joshgoebel/%{name}
-#Source0:	https://github.com/joshgoebel/{name}/archive/{name}-{version}.tar.gz
-Source0:	https://github.com/joshgoebel/%{name}/archive/%{git_rev}/%{name}-%{git_rev}.tar.gz
+Source0:	https://github.com/joshgoebel/%{name}/archive/%{name}-%{version}.tar.gz
 Source1:	%{name}.service
 Source2:	uinput.conf
 Source3:	90-keymapper-acl.rules
@@ -29,7 +25,7 @@ It's similar to xmodmap but allows far more flexible remappings.
 
 
 %prep
-%autosetup -n %{name}-%{git_rev_full}
+%autosetup
 
 
 %generate_buildrequires
@@ -84,5 +80,5 @@ exit 0
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 
 %changelog
-* Sat Jul 16 2022 TI_Eugene <ti.eugene@gmail.com> - 0.6.0-1.20220715git4ddf5f
+* Sat Jul 16 2022 TI_Eugene <ti.eugene@gmail.com> - 0.6.0-1
 - Initial build
