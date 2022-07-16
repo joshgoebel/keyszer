@@ -65,7 +65,7 @@ class DeviceRegistry:
         return device in self._devices
 
     def cares_about(self, device):
-        return self._filter(device)
+        return self._filter.filter(device)
 
     def autodetect(self):
         devices = list(filter(self._filter.filter, Devices.all()))
