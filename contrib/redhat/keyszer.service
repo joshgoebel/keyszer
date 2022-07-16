@@ -4,7 +4,7 @@ Description=keyszer
 [Service]
 Type=simple
 KillMode=process
-ExecStart=/usr/bin/keyszer --watch --config /etc/keyszer.conf
+ExecStart=/usr/bin/keyszer --config /etc/keyszer.conf
 Restart=on-failure
 RestartSec=3
 Environment=DISPLAY=:0
