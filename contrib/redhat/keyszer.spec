@@ -14,7 +14,7 @@ URL:		https://github.com/joshgoebel/%{name}
 Source0:	https://github.com/joshgoebel/%{name}/archive/%{git_rev}/%{name}-%{git_rev}.tar.gz
 Source1:	%{name}.service
 Source2:	uinput.conf
-Source3:	99-keymapper-acl.rules
+Source3:	90-keymapper-acl.rules
 Source4:	xhostplus.desktop
 BuildRequires:	pyproject-rpm-macros
 BuildRequires:	systemd-rpm-macros
@@ -46,7 +46,7 @@ install -p -D -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
 # 2. little system fix
 install -p -D -m 0644 %{SOURCE2} %{buildroot}%{_modulesloaddir}/uinput.conf
 # 3. udev rules
-install -p -D -m 0644 %{SOURCE3} %{buildroot}%{_udevrulesdir}/99-keymapper-acl.rules
+install -p -D -m 0644 %{SOURCE3} %{buildroot}%{_udevrulesdir}/90-keymapper-acl.rules
 # 4. xhost tuning
 install -p -D -m 0644 %{SOURCE4} %{buildroot}%{_sysconfdir}/xdg/autostart/xhostplus.desktop
 # 5. default config
@@ -78,7 +78,7 @@ exit 0
 %{_bindir}/%{name}
 %{_unitdir}/%{name}.service
 %{_modulesloaddir}/uinput.conf
-%{_udevrulesdir}/99-keymapper-acl.rules
+%{_udevrulesdir}/90-keymapper-acl.rules
 %{_sysconfdir}/xdg/autostart/xhostplus.desktop
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 
