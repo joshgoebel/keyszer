@@ -48,8 +48,8 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
 - better debugging tools
   - configurable `EMERGENCY EJECT` hotkey
   - configurable `DIAGNOSTIC` hotkey
-- fully supports running as semi-privleged user (using `root` is now deprecated)
-- adds `Meta`, Command` and `Cmd` aliases for Super/Meta modifier
+- fully supports running as semi-privileged user (using `root` is now deprecated)
+- adds `Meta`, `Command` and `Cmd` aliases for Super/Meta modifier
 - add `C` combo helper (eventually to replace `K`)
 - supports custom modifiers via `add_modifier` (such as `Hyper`)
 - supports `Fn` as a potential modifier (on hardware where it works)
@@ -207,7 +207,7 @@ It would be better to open a terminal, `su` to a dedicated `keymapper` user and 
 
 ### Running as `root`
 
-_Don't do this, it's dangerous, and unnecessary._  A semi-priveleged user with access to only the necessary input devices is a far better choice.
+_Don't do this, it's dangerous, and unnecessary._  A semi-privileged user with access to only the necessary input devices is a far better choice.
 
 
 ## Usage
@@ -262,7 +262,7 @@ The configuration API:
 
 Configures the timing behavior of various aspects of the keymapper.
 
-- `multipurpose` - The number of seconds before a held multi-purpose key is assumed to be a modifier (evne in the absence of other keys).
+- `multipurpose` - The number of seconds before a held multi-purpose key is assumed to be a modifier (even in the absence of other keys).
 - `suspend` - The number of seconds modifiers are "suspended" and withheld from the output waiting to see whether if they are part of a combo or if they may be the actual intended output.
 
 
