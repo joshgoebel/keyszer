@@ -293,13 +293,13 @@ def find_keystate_or_new(inkey, action):
 
 
 # @benchit
-def on_event(event, device_name, device=""):
+def on_event(event, device):
     # we do not attempt to transform non-key events
     if event.type != ecodes.EV_KEY:
         _output.send_event(event)
         return
 
-    context = KeyContext(device_name, device)
+    context = KeyContext(device)
     action = Action(event.value)
     key = Key(event.code)
 
