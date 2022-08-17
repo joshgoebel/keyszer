@@ -2,7 +2,7 @@ from ..xorg import get_xorg_context
 
 
 class KeyContext:
-    def __init__(self, device_name):
+    def __init__(self, device_name, device):
         self._device_name = device_name
         self._X_ctx = None
 
