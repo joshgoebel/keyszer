@@ -33,10 +33,8 @@ class KeyContext:
 
     @property
     def capslock_on(self):
-        self._capslock_on = True if 1 in self.device.leds() else False
-        return self._capslock_on
+        return True if 1 in self.device.leds() else False
 
     @property
     def numlock_on(self):
-        self._numlock_on = True if 0 in self.device.leds() else False
-        return self._numlock_on
+        return True if 0 in self.device.leds() else False
