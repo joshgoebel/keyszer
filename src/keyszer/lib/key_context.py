@@ -4,19 +4,7 @@ from ..xorg import get_xorg_context
 class KeyContext:
     def __init__(self, device):
         self._X_ctx = None
-        leds_list = []
-
-        # Must declare these here or app will crash if keyboard device hasn't been "grabbed" yet
-        self._capslock_state = ""
-        self._numlock_state = ""
-
-        # Check for actual device name being present before using evdev's ".leds()" method
-        # or device.name (doesn't like strings)
-        if not device == "":
-            self._device_name = device.name
-            leds_list = device.leds()
-            self._capslock_state = "ON" if 1 in leds_list else "OFF"
-            self._numlock_state = "ON" if 0 in leds_list else "OFF"
+        self.device = device
 
     def _query_window_context(self):
         # cache this,  think it might be expensive
@@ -40,12 +28,15 @@ class KeyContext:
 
     @property
     def device_name(self):
+        self._device_name = self.device.name
         return self._device_name
 
     @property
-    def capslock_state(self):
-        return self._capslock_state
+    def capslock_on(self):
+        self._capslock_on = True if 1 in self.device.leds() else False
+        return self._capslock_on
 
     @property
-    def numlock_state(self):
-        return self._numlock_state
+    def numlock_on(self):
+        self._numlock_on = True if 0 in self.device.leds() else False
+        return self._numlock_on
