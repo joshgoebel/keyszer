@@ -32,8 +32,10 @@ class KeyContext:
 
     @property
     def capslock_on(self):
-        return True if 1 in self.device.leds() else False
+        CL_LED = 1          # evdev puts int 1 in leds() list if Capslock is ON
+        return True if CL_LED in self.device.leds() else False
 
     @property
     def numlock_on(self):
-        return True if 0 in self.device.leds() else False
+        NL_LED = 0          # evdev puts int 0 in leds() list if Numlock is ON
+        return True if NL_LED in self.device.leds() else False
