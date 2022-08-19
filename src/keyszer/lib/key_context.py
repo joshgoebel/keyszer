@@ -28,7 +28,7 @@ class KeyContext:
 
     @property
     def device_name(self):
-        return self.device.name
+        return self._device.name
 
     @property
     def capslock_on(self):
