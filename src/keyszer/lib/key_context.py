@@ -4,7 +4,7 @@ from ..xorg import get_xorg_context
 class KeyContext:
     def __init__(self, device):
         self._X_ctx = None
-        self.device = device
+        self._device = device
 
     def _query_window_context(self):
         # cache this,  think it might be expensive
@@ -33,9 +33,9 @@ class KeyContext:
     @property
     def capslock_on(self):
         CL_LED = 1  # evdev puts int 1 in leds() list if Capslock is ON
-        return True if CL_LED in self.device.leds() else False
+        return True if CL_LED in self._device.leds() else False
 
     @property
     def numlock_on(self):
         NL_LED = 0  # evdev puts int 0 in leds() list if Numlock is ON
-        return True if NL_LED in self.device.leds() else False
+        return True if NL_LED in self._device.leds() else False
