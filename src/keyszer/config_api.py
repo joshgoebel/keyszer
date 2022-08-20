@@ -8,6 +8,7 @@ from inspect import signature
 from .lib.logger import error
 from .models.action import Action
 from .models.combo import Combo, ComboHint
+from .models.trigger import Trigger
 from .models.key import Key, ASCII_TO_KEY
 from .models.keymap import Keymap
 from .models.modifier import Modifier
@@ -17,6 +18,8 @@ from .models.modmap import Modmap, MultiModmap
 bind = ComboHint.BIND
 escape_next_key = ComboHint.ESCAPE_NEXT
 ignore_key = ComboHint.IGNORE
+
+immediately = Trigger.IMMEDIATELY
 
 # keycode translation
 # e.g., { Key.CAPSLOCK: Key.LEFT_CTRL }
