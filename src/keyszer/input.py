@@ -100,19 +100,25 @@ async def supervisor():
 
 
 def receive_input(device):
-    for event in device.read():
-        if event.type == ecodes.EV_KEY:
-            if event.code == CONFIG.EMERGENCY_EJECT_KEY:
-                error("BAIL OUT: Emergency eject - shutting down.")
-                shutdown()
-                exit(0)
-            if event.code == CONFIG.DUMP_DIAGNOSTICS_KEY:
-                debug("DIAG: Diagnostics requested.")
-                action = Action(event.value)
-                if action.just_pressed():
-                    dump_diagnostics()
+    try:
+        for event in device.read():
+            if event.type == ecodes.EV_KEY:
+                if event.code == CONFIG.EMERGENCY_EJECT_KEY:
+                    error("BAIL OUT: Emergency eject - shutting down.")
+                    shutdown()
+                    exit(0)
+                if event.code == CONFIG.DUMP_DIAGNOSTICS_KEY:
+                    debug("DIAG: Diagnostics requested.")
+                    action = Action(event.value)
+                    if action.just_pressed():
+                        dump_diagnostics()
 
-        on_event(event, device)
+            on_event(event, device)
+    # swallow "no such device errors" when unplugging a USB
+    # device and we still have a few events in the inotify queue
+    except OSError as e:
+        if not e.errno == 19: # no such device
+            raise
 
 
 _add_timer = None
