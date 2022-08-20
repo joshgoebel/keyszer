@@ -105,7 +105,7 @@ def main():
         "-v", dest="verbose", action="store_true", help="increase debug logging"
     )
     parser.add_argument(
-        "--flush", dest="flush", action="store_true", help="flush log output to reduce terminal buffering"
+        "--flush", dest="flush", action="store_true", help="immediately flush all log output"
     )
     parser.add_argument(
         "--list-devices", dest="list_devices", action="store_true", help=""
