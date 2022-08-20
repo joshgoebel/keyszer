@@ -105,6 +105,9 @@ def main():
         "-v", dest="verbose", action="store_true", help="increase debug logging"
     )
     parser.add_argument(
+        "--flush", dest="flush", action="store_true", help="flush log output to reduce terminal buffering"
+    )
+    parser.add_argument(
         "--list-devices", dest="list_devices", action="store_true", help=""
     )
     parser.add_argument(
@@ -130,6 +133,9 @@ def main():
 
     if args.verbose:
         logger.VERBOSE = True
+
+    if args.flush:
+        logger.FLUSH = True
 
     print(f"{__name__} v{__version__}")
 
