@@ -5,12 +5,15 @@ from lib.xorg_mock import set_window
 from keyszer.models.action import PRESS, RELEASE
 from keyszer.transform import on_event
 
-_kb = "generic keyboard"
+class MockKeyboard:
+    name = "generic keyboard"
 
+
+_kb = MockKeyboard()
 
 def using_keyboard(name):
     global _kb
-    _kb = name
+    _kb.name = name
 
 
 def window(name):

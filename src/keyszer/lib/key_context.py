@@ -1,10 +1,11 @@
 from ..xorg import get_xorg_context
+from ..models.key import Key
 
 
 class KeyContext:
-    def __init__(self, device_name):
-        self._device_name = device_name
+    def __init__(self, device):
         self._X_ctx = None
+        self._device = device
 
     def _query_window_context(self):
         # cache this,  think it might be expensive
@@ -28,4 +29,12 @@ class KeyContext:
 
     @property
     def device_name(self):
-        return self._device_name
+        return self._device.name
+
+    @property
+    def capslock_on(self):
+        return Key.LED_CAPSL in self._device.leds()
+
+    @property
+    def numlock_on(self):
+        return Key.LED_NUML in self._device.leds()

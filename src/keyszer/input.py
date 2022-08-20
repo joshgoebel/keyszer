@@ -112,7 +112,7 @@ def receive_input(device):
                 if action.just_pressed():
                     dump_diagnostics()
 
-        on_event(event, device.name)
+        on_event(event, device)
 
 
 _add_timer = None
