@@ -155,7 +155,7 @@ async def device_change(registry, events):
         try:
             device = InputDevice(filename)
         except FileNotFoundError:
-            # device was probably unplugged, so ignore it
+            # device was probably unplugged, so ignore it, see issue #82
             continue
 
         # unplugging
