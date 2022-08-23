@@ -395,6 +395,8 @@ The `context` object passed to the `fn` function has several attributes:
 - `wm_class` - the WM_CLASS of the [input] focused X11 window
 - `wm_name` - the WM_NAME of the [input] focused X11 window
 - `device_name` - name of the device where an input originated
+- `capslock_on` - State of CapsLock LED. ON is True, OFF is False (coming in v0.7.0+)
+- `numlock_on` - State of NumLock LED. ON is True, OFF is False (coming in v0.7.0+)
 
 _Note:_ The same conditional `fn` can always be passed directly to `modmap` using the `when` argument.
 
