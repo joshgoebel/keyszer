@@ -47,7 +47,7 @@ def wakeup_output():
     down = InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.PRESS)
     up = InputEvent(0, 0, ecodes.EV_KEY, Key.LEFT_SHIFT, Action.RELEASE)
     for ev in [down, up]:
-        on_event(ev, "")
+        on_event(ev, None)
 
 
 def main_loop(arg_devices, device_watch):

@@ -295,7 +295,8 @@ def find_keystate_or_new(inkey, action):
 # @benchit
 def on_event(event, device):
     # we do not attempt to transform non-key events
-    if event.type != ecodes.EV_KEY:
+    # or any events with no device (startup key-presses)
+    if event.type != ecodes.EV_KEY or device == None:
         _output.send_event(event)
         return
 
