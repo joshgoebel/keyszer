@@ -108,6 +108,45 @@ async def test_when_in_emacs():
         (RELEASE, Key.ESC),
     ]
 
+
+async def test_multiple_conditional_maps_can_match():
+    define_conditional_modmap(re.compile(r'Chrome'), {
+        Key.RIGHT_CTRL: Key.ESC,
+    })
+
+    define_conditional_modmap(re.compile(r'Chrome'), {
+        Key.LEFT_CTRL: Key.ESC,
+    })
+
+    boot_config()
+
+    window("Google Chrome")
+
+    press(Key.RIGHT_CTRL)
+    press(Key.F)
+    release(Key.F)
+    release(Key.RIGHT_CTRL)
+
+    press(Key.LEFT_CTRL)
+    press(Key.G)
+    release(Key.G)
+    release(Key.LEFT_CTRL)
+
+
+
+    assert _out.keys() == [
+        # first modmap
+        (PRESS, Key.ESC),
+        (PRESS, Key.F),
+        (RELEASE, Key.F),
+        (RELEASE, Key.ESC),
+        # falls to second modmap
+        (PRESS, Key.ESC),
+        (PRESS, Key.G),
+        (RELEASE, Key.G),
+        (RELEASE, Key.ESC),
+    ]
+
 @pytest.mark.skip
 async def test_sticky_switch_modmaps_midstream():
     # TODO: correct behavior?

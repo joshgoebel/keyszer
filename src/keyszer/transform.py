@@ -234,9 +234,10 @@ def apply_modmap(keystate, context):
     # debug("conditionals", conditional_modmaps)
     if conditional_modmaps:
         for modmap in conditional_modmaps:
-            if modmap.conditional(context):
-                active_modmap = modmap
-                break
+            if inkey in modmap:
+                if modmap.conditional(context):
+                    active_modmap = modmap
+                    break
     if active_modmap and inkey in active_modmap:
         debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
         keystate.key = active_modmap[inkey]
@@ -247,9 +248,10 @@ def apply_multi_modmap(keystate, context):
     conditional_multimaps = _MULTI_MODMAPS[1:]
     if conditional_multimaps:
         for modmap in conditional_multimaps:
-            if modmap.conditional(context):
-                active_multi_modmap = modmap
-                break
+            if keystate.inkey in modmap:
+                if modmap.conditional(context):
+                    active_multi_modmap = modmap
+                    break
 
     if active_multi_modmap:
         if keystate.key in active_multi_modmap:
