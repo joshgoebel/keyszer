@@ -49,6 +49,7 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
   - configurable `EMERGENCY EJECT` hotkey
   - configurable `DIAGNOSTIC` hotkey
 - fully supports running as semi-privileged user (using `root` is now deprecated)
+- adds `immediately` to nested keymaps
 - adds `Meta`, `Command` and `Cmd` aliases for Super/Meta modifier
 - add `C` combo helper (eventually to replace `K`)
 - supports custom modifiers via `add_modifier` (such as `Hyper`)
@@ -441,6 +442,18 @@ keymap("multi stroke", {
     C("C-x"): {
       C("C-c"): C("C-q"),
     }
+})
+```
+
+If you'd like the first keystroke to also produce it's own output, `immediately` can be used:
+
+```python
+keymap("multi stroke", {
+  C("C-x"): {
+    # immediately output "x" when Ctrl-X is pressed
+    immediately: C("x"),
+    C("C-c"): C("C-q"),
+  }
 })
 ```
 

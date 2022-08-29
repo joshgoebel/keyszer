@@ -68,3 +68,32 @@ async def test_nested_keymaps():
         (RELEASE, Key.KEY_9),
         (RELEASE, Key.LEFT_ALT),
     ]
+
+
+async def test_trigger_immediately():
+    keymap("Firefox",{
+        K("C-a"): {
+            immediately: K("8"),
+            K("C-b"): K("Alt-KEY_9")
+        }
+    })
+
+    boot_config()
+
+    press(Key.LEFT_CTRL)
+    press(Key.A)
+    release(Key.A)
+    press(Key.B)
+    release(Key.B)
+    release(Key.LEFT_CTRL)
+
+    # the 8 (as the immediate effect of the C-a combo) is pressed
+    # first, and without any modifiers
+    assert _out.keys() == [
+        (PRESS, Key.KEY_8),
+        (RELEASE, Key.KEY_8),
+        (PRESS, Key.LEFT_ALT),
+        (PRESS, Key.KEY_9),
+        (RELEASE, Key.KEY_9),
+        (RELEASE, Key.LEFT_ALT),
+    ]

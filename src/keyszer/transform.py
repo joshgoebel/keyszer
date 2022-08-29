@@ -9,6 +9,7 @@ from .lib.key_context import KeyContext
 from .lib.logger import debug
 from .models.action import Action
 from .models.combo import Combo, ComboHint
+from .models.trigger import Trigger
 from .models.key import Key
 from .models.keymap import Keymap
 from .models.keystate import Keystate
@@ -564,7 +565,10 @@ def handle_commands(commands, key, action, input_combo=None):
                 return True
             # Go to next keymap
             elif isinstance(command, Keymap):
-                _active_keymaps = [command]
+                keymap = command
+                if Trigger.IMMEDIATELY in keymap:
+                    handle_commands(keymap[Trigger.IMMEDIATELY], None, None)
+                _active_keymaps = [keymap]
                 return False
             # to_keystrokes and unicode_keystrokes produce lists so
             # we'll just handle it recursively
