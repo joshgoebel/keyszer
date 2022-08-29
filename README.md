@@ -49,6 +49,7 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
   - configurable `EMERGENCY EJECT` hotkey
   - configurable `DIAGNOSTIC` hotkey
 - fully supports running as semi-privileged user (using `root` is now deprecated)
+- adds `immediately` to nested keymaps
 - adds `Meta`, `Command` and `Cmd` aliases for Super/Meta modifier
 - add `C` combo helper (eventually to replace `K`)
 - supports custom modifiers via `add_modifier` (such as `Hyper`)
