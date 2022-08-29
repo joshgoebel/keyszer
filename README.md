@@ -322,7 +322,7 @@ The negation of `wm_class_match`, matches only when the regex does NOT match.
 
 ### `modmap(name, mappings, when_conditional = None)`
 
-Maps a single physical key to a different key.  A default modmap will always be overruled by any conditional modmaps that apply.  `when_conditional` can be passed to make the modmap conditional.
+Maps a single physical key to a different key.  A default modmap will always be overruled by any conditional modmaps that apply.  `when_conditional` can be passed to make the modmap conditional.  The first modmap found that includes the pressed key and matches the `when_conditional` will be used to remap the key.
 
 ```py
 modmap("default", {
@@ -331,7 +331,7 @@ modmap("default", {
 })
 ```
 
-If you don't create a default (non-conditional) modmap a blank one is created for you.  For `modmap` sides of the pairing will be `Key` literals (not combos).
+If you don't create a default (non-conditional) modmap a blank one is created for you.  For `modmap` both sides of the pairing will be `Key` literals (not combos).
 
 
 ### `multipurpose_modmap(name, mappings)`
