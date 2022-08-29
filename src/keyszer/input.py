@@ -108,10 +108,11 @@ def receive_input(device):
                     shutdown()
                     exit(0)
                 if event.code == CONFIG.DUMP_DIAGNOSTICS_KEY:
-                    debug("DIAG: Diagnostics requested.")
                     action = Action(event.value)
                     if action.just_pressed():
+                        debug("DIAG: Diagnostics requested.")
                         dump_diagnostics()
+                    continue
 
             on_event(event, device)
     # swallow "no such device errors" when unplugging a USB
