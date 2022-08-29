@@ -442,6 +442,18 @@ keymap("multi stroke", {
 })
 ```
 
+If you'd like the first keystroke to also produce it's own output, `immediately` can be used:
+
+```python
+keymap("multi stroke", {
+  C("C-x"): {
+    # immediately output "x" when Ctrl-X is pressed
+    immediately: C("x"),
+    C("C-c"): C("C-q"),
+  }
+})
+```
+
 #### Finding out the proper `Key.NAME` literal for a key on your keyboard
 
 From a terminal session run `evtest` and select your keyboard's input device.  Now hit the key in question.
