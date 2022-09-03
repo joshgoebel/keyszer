@@ -1,6 +1,6 @@
 __name__ = "keyszer"
 
-__version__ = "0.6.91"
+__version__ = "0.6.92"
 
 __description__ = "A smart, flexible key remapper for Linux/X11."
 
