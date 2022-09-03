@@ -4,7 +4,7 @@ import warnings
 
 import pytest
 import pytest_asyncio
-from lib.api import PRESS, RELEASE, hit, press, release
+from lib.api import PRESS, RELEASE, hit, press, release, repeat
 from lib.uinput_stub import UInputStub
 
 from keyszer.config_api import modmap, multipurpose_modmap, reset_configuration
@@ -132,5 +132,28 @@ async def test_shift_multi_modifier():
         (PRESS, Key.RIGHT_SHIFT),
         (PRESS, Key.BACKSLASH),
         (RELEASE, Key.RIGHT_SHIFT),
+        (RELEASE, Key.BACKSLASH),
+    ]
+
+
+@pytest.mark.looptime
+async def test_hold_multi_normal_by_itself():
+
+    multipurpose_modmap(
+        "default",
+        # Enter is enter when pressed and released. Control when held down.
+        {Key.BACKSLASH: [Key.BACKSLASH, Key.RIGHT_CTRL]}
+    )
+
+    boot_config()
+
+    press(Key.BACKSLASH)
+    repeat(Key.BACKSLASH)
+    repeat(Key.BACKSLASH)
+    repeat(Key.BACKSLASH)
+    release(Key.BACKSLASH)
+
+    assert _out.keys() == [
+        (PRESS, Key.BACKSLASH),
         (RELEASE, Key.BACKSLASH),
     ]

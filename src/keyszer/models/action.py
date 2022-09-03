@@ -15,9 +15,14 @@ class Action(IntEnum):
     def is_released(self):
         return self == Action.RELEASE
 
+    @property
+    def is_repeat(self):
+        return self == Action.REPEAT
+
     def __str__(self):
         return self.name.lower()
 
 
 PRESS = Action.PRESS
 RELEASE = Action.RELEASE
+REPEAT = Action.REPEAT
