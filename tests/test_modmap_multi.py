@@ -141,7 +141,6 @@ async def test_hold_multi_normal_by_itself():
 
     multipurpose_modmap(
         "default",
-        # Enter is enter when pressed and released. Control when held down.
         {Key.BACKSLASH: [Key.BACKSLASH, Key.RIGHT_CTRL]}
     )
 
@@ -155,5 +154,6 @@ async def test_hold_multi_normal_by_itself():
 
     assert _out.keys() == [
         (PRESS, Key.BACKSLASH),
+        # repeats are dropped because key is suspended
         (RELEASE, Key.BACKSLASH),
     ]
