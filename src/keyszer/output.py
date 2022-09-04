@@ -1,3 +1,4 @@
+import time
 from evdev import ecodes
 from evdev.uinput import UInput
 
@@ -99,6 +100,7 @@ class Output:
     def send_key_action(self, key, action):
         self.__update_pressed_modifier_keys(key, action)
         self.__update_pressed_keys(key, action)
+        time.sleep(.012)
         _uinput.write(ecodes.EV_KEY, key, action)
         debug(action, key, ctx="OO")
         self.__send_sync()
