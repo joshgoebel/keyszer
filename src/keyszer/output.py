@@ -56,6 +56,7 @@ class Output:
         self._pressed_keys = set()
         self._suspended_mod_keys = []
         self._suspend_depth = 0
+        self._last_was_sync = False
 
     def __update_pressed_modifier_keys(self, key, action):
         if not Modifier.is_key_modifier(key):
@@ -82,8 +83,13 @@ class Output:
         print(self._suspended_mod_keys)
         print("_suspend_depth", self._suspend_depth)
 
+    @staticmethod
+    def is_sync_event(event):
+        return event.code == 0 and event.type == 0 and event.value == 0
+
     def __send_sync(self):
         _uinput.syn()
+        self._last_was_sync = True
 
     def is_mod_pressed(self, key):
         return key in self._pressed_modifier_keys
@@ -91,10 +97,18 @@ class Output:
     def is_pressed(self, key):
         return key in self._pressed_keys
 
+
     def send_event(self, event):
+        # prevent just sending a bunch of syncs that sneak in
+        # from the input side, only send syncs if we have sent
+        # raw data from the input and it seems a sync may be
+        # needed
+        if (self._last_was_sync and Output.is_sync_event(event)):
+            return
+
         _uinput.write_event(event)
-        # TODO: do we need this? I think not.
-        # self.__send_sync()
+        # debug(event.type, event.code, event.value, ctx="OO")
+        self._last_was_sync = Output.is_sync_event(event)
 
     def send_key_action(self, key, action):
         self.__update_pressed_modifier_keys(key, action)
