@@ -1,5 +1,7 @@
+import time
 from evdev import ecodes
 from evdev.uinput import UInput
+
 
 from .lib.logger import debug
 from .models.action import PRESS, RELEASE
@@ -100,7 +102,7 @@ class Output:
         self.__update_pressed_modifier_keys(key, action)
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
-        debug(action, key, ctx="OO")
+        debug(action, key, time.time(), ctx="OO")
         self.__send_sync()
 
     def send_combo(self, combo):
