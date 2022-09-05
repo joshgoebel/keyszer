@@ -2,7 +2,7 @@ from evdev.ecodes import EV_KEY
 from evdev.events import InputEvent
 from lib.xorg_mock import set_window
 
-from keyszer.models.action import PRESS, RELEASE
+from keyszer.models.action import PRESS, RELEASE, REPEAT
 from keyszer.transform import on_event
 
 class MockKeyboard:
@@ -27,6 +27,10 @@ def press(key):
 
 def release(key):
     ev = InputEvent(0, 0, EV_KEY, key, RELEASE)
+    on_event(ev, _kb)
+
+def repeat(key):
+    ev = InputEvent(0, 0, EV_KEY, key, REPEAT)
     on_event(ev, _kb)
 
 

@@ -386,6 +386,10 @@ def on_key(keystate, context):
         update_pressed_states(keystate)
         suspend_keys(_TIMEOUTS["multipurpose"])
 
+    elif keystate.is_multi and action.is_repeat and keystate.suspended:
+        pass
+        # do nothing
+
     # regular key releases, not modifiers (though possibly a multi-mod)
     elif action.is_released():
         if _output.is_pressed(key):
