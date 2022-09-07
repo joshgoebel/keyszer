@@ -4,15 +4,19 @@ from .version import __description__, __name__, __version__
 
 
 CONFIG_NAMESPACE = "CFG:"
-CONFIG_HEADER = b"""
-import re
-from keyszer.config_api import *
-"""
+
+
+def _gen_config_header(path):
+    return bytes("import re;"
+        "from keyszer.config_api import *;"
+        f"__config__ = '{path}';"
+        ,"utf-8")
 
 
 def eval_config(path):
     with open(path, "rb") as file:
-        config_code = CONFIG_HEADER + file.read()
+        header = _gen_config_header(path)
+        config_code = header + file.read()
         # WARN: yes, this is potentially a security risk, but our config is
         # - python code so we're sort of stuck with this AFAIK
         # TODO: some sort of sandboxing maybe?
@@ -43,13 +47,14 @@ def print_config_traceback():
     cls, desc, tb = sys.exc_info()
 
     print("\nTraceback (while executing your config):")
-    offset = len(CONFIG_HEADER.split(b"\n")) - 1
     for frame in traceback.extract_tb(tb):
         if "keyszer/cli" in frame.filename:
             continue
-        lineno = frame.lineno - offset
+        if frame.name == "include":
+            continue
+
         file = frame.filename.replace(CONFIG_NAMESPACE, "")
-        print(f"  File \"{file}\", line {lineno}, in {frame.name}")
+        print(f"  File \"{file}\", line {frame.lineno}, in {frame.name}")
         if (frame.line):
             print(frame.line)
     print(f"{cls.__name__}: {desc}")

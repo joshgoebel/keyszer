@@ -3,6 +3,8 @@ import re
 import string
 import sys
 import time
+import os
+import inspect
 from inspect import signature
 
 from .lib.logger import error
@@ -295,6 +297,15 @@ def with_or_set_mark(combo):
 
 
 # ─── STANDARD API ───────────────────────────────────────────────────────────
+
+
+def include(file):
+    config_globals = inspect.stack()[1][0].f_globals
+    dirname = os.path.dirname(config_globals["__config__"])
+    name = os.path.join(dirname, file)
+    with open(name, "rb") as file:
+        code = file.read()
+    exec(compile(code, name, "exec"), config_globals)  # nosec
 
 
 def timeouts(multipurpose=1, suspend=1):

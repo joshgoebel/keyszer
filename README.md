@@ -49,6 +49,7 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
   - configurable `EMERGENCY EJECT` hotkey
   - configurable `DIAGNOSTIC` hotkey
 - fully supports running as semi-privileged user (using `root` is now deprecated)
+- adds `include` to allow config to pull in other Python files
 - adds `immediately` to nested keymaps
 - adds `Meta`, `Command` and `Cmd` aliases for Super/Meta modifier
 - add `C` combo helper (eventually to replace `K`)
@@ -257,7 +258,17 @@ The configuration API:
 - `conditional(condition_fn, map)` - used to wrap maps, applying them conditionally
 - `dump_diagnostics_key(key)`
 - `emergency_eject_key(key)`
+- `include(relative_filename)`
 
+### `include(relative_filename)`
+
+Include a sub-configuration file into the existing config.  This file is loaded and executed at the point of inclusion and shares the same global scope as the existing config. These files should be present in the same directory as your main configuration.
+
+```py
+include("os.py")
+include("apps.py")
+include("deadkeys.py")
+```
 
 ### `timeouts(...)`
 
