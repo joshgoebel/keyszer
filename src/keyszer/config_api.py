@@ -300,11 +300,11 @@ def with_or_set_mark(combo):
 
 
 def include(file):
-    dirname = os.path.dirname(file)
-    name = f"{dirname}{file}"
+    config_globals = inspect.stack()[1][0].f_globals
+    dirname = os.path.dirname(config_globals["__config__"])
+    name = os.path.join(dirname, file)
     with open(name, "rb") as file:
         code = file.read()
-        config_globals = inspect.stack()[1][0].f_globals
     exec(compile(code, name, "exec"), config_globals)  # nosec
 
 
