@@ -32,6 +32,10 @@ def get_xorg_context():
         window = get_actual_window(input_focus)
         if window:
             wm_name = window.get_wm_name()
+            # Sometimes legacy WM_NAME attribute is encoded as COMPOUND_TEXT,
+            # causing empty byte object to return, instead of string. To fix:
+            if isinstance(wm_name, bytes) or len(wm_name) == 0:
+                wm_name = window.get_full_text_property(343)    # use _NET_WM_NAME string instead
             pair = window.get_wm_class()
             if pair:
                 wm_class = str(pair[1])
