@@ -152,6 +152,7 @@ async def device_change(registry, events):
             continue
 
         filename = f"/dev/input/{event.name}"
+        # TODO: need to handle this better and remove it from the DeviceRegistry also
         try:
             device = InputDevice(filename)
         except FileNotFoundError:
