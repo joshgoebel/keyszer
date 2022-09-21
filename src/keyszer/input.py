@@ -153,7 +153,12 @@ async def device_change(registry, events):
             continue
 
         filename = f"/dev/input/{event.name}"
-        device = InputDevice(filename)
+        # TODO: need to handle this better and remove it from the DeviceRegistry also
+        try:
+            device = InputDevice(filename)
+        except FileNotFoundError:
+            # device was probably unplugged, so ignore it, see issue #82
+            continue
 
         # unplugging
         from inotify_simple import flags
