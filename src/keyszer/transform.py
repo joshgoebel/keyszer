@@ -448,9 +448,14 @@ def transform_key(key, action, ctx):
             name_list = ", ".join(keymap_names)
             debug("")
             debug(
-                f"WM_CLS '{ctx.wm_class}' | "
-                f"DV '{ctx.device_name}' | "
-                f"KMAPS = [{name_list}]")
+                f"WM_CLS = '{ctx.wm_class}' | "
+                f"WM_NME = '{ctx.wm_name}'\n"
+                f"(DD) DVN = '{ctx.device_name}' | "
+                f"CLK = '{ctx.capslock_on}' | "
+                f"NLK = '{ctx.numlock_on}'\n"
+                f"(DD) Active Keymaps = ")
+            for km_name in keymap_names:
+                debug(f" KMAP: [{km_name}]")
             debug(f"  COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
 
         held = get_pressed_states()
