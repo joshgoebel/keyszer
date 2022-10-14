@@ -449,11 +449,12 @@ def transform_key(key, action, ctx):
             debug("")
             debug(
                 f"WM_CLS = '{ctx.wm_class}' | "
-                f"WM_NME = '{ctx.wm_name}'\n"
-                f"(DD) DVN = '{ctx.device_name}' | "
+                f"WM_NME = '{ctx.wm_name}'")
+            debug(
+                f"DVN = '{ctx.device_name}' | "
                 f"CLK = '{ctx.capslock_on}' | "
-                f"NLK = '{ctx.numlock_on}'\n"
-                f"(DD) Active Keymaps = ")
+                f"NLK = '{ctx.numlock_on}'")
+            debug(f"Active Keymaps = ")
             for km_name in keymap_names:
                 debug(f" KMAP: [{km_name}]")
             debug(f"  COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
