@@ -456,7 +456,8 @@ def transform_key(key, action, ctx):
                 f"NLK = '{ctx.numlock_on}'")
             n = 1
             for km_name in keymap_names:
-                if n == 1: print(f"(DD) KMAPS = [{km_name}, ", end='')
+                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS = [{km_name}, ", end='')
+                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS = [{km_name}]")
                 elif n % 2 != 0 and n < len(keymap_names):
                     print(f"(DD)          {km_name}, ", end='')
                 elif n % 2 != 0 and n == len(keymap_names):
