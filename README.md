@@ -197,7 +197,7 @@ Manually edit `/etc/udev/rules.d/90-keymapper-input.rules` to include the follow
 
 #### systemd
 
-For a sample systemd service file for running Keyszer as a service please see [keyszer.service](https://github.com/joshgoebel/keyszer/blob/main/keyszer.service).
+For a sample systemd service file for running Keyszer as a service please see [keyszer.service](contrib/redhat/keyszer.service).
 
 
 ### Running as the Active Logged in User
