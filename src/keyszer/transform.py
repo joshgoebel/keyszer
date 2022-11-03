@@ -448,16 +448,16 @@ def transform_key(key, action, ctx):
             # name_list = ", ".join(keymap_names)
             debug("")
             debug(
-                f"WM_CLS = '{ctx.wm_class}' | "
-                f"WM_NME = '{ctx.wm_name}'")
+                f"WM_CLS: '{ctx.wm_class}' | "
+                f"WM_NME: '{ctx.wm_name}'")
             debug(
-                f"DVN = '{ctx.device_name}' | "
-                f"CLK = '{ctx.capslock_on}' | "
-                f"NLK = '{ctx.numlock_on}'")
+                f"DVN: '{ctx.device_name}' | "
+                f"CLK: '{ctx.capslock_on}' | "
+                f"NLK: '{ctx.numlock_on}'")
             n = 1
             for km_name in keymap_names:
-                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS = [{km_name}, ", end='')
-                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS = [{km_name}]")
+                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS: [{km_name}, ", end='')
+                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS: [{km_name}]")
                 elif n % 2 != 0 and n < len(keymap_names):
                     print(f"(DD)          {km_name}, ", end='')
                 elif n % 2 != 0 and n == len(keymap_names):
@@ -465,7 +465,7 @@ def transform_key(key, action, ctx):
                 elif n == len(keymap_names): print(f"{km_name}]")
                 else: print(f"{km_name},")
                 n+=1
-            debug(f"COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
+            debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: [{keymap.name}]")
 
         held = get_pressed_states()
         for ks in held:
