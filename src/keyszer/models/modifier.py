@@ -88,28 +88,28 @@ class Modifier:
 Modifier("R_CONTROL", aliases=["RCtrl", "RC"], key=Key.RIGHT_CTRL)
 Modifier("L_CONTROL", aliases=["LCtrl", "LC"], key=Key.LEFT_CTRL)
 Modifier("CONTROL", aliases=["Ctrl", "C"], keys=[Key.LEFT_CTRL, Key.RIGHT_CTRL])
-Modifier("R_ALT", aliases=["RAlt", "RA", "ROpt", "ROption"], key=Key.RIGHT_ALT)
-Modifier("L_ALT", aliases=["LAlt", "LA", "LOpt", "LOption"], key=Key.LEFT_ALT)
-Modifier("ALT", aliases=["Alt", "A", "Opt", "Option"], keys=[Key.LEFT_ALT, Key.RIGHT_ALT])
-Modifier("R_SHIFT", aliases=["RShift"], key=Key.RIGHT_SHIFT)
-Modifier("L_SHIFT", aliases=["LShift"], key=Key.LEFT_SHIFT)
-Modifier("SHIFT", aliases=["Shift"], keys=[Key.LEFT_SHIFT, Key.RIGHT_SHIFT])
+Modifier("R_ALT", aliases=["RAlt", "RA", "ROption", "ROpt", "RO"], key=Key.RIGHT_ALT)
+Modifier("L_ALT", aliases=["LAlt", "LA", "LOption", "LOpt", "LO"], key=Key.LEFT_ALT)
+Modifier("ALT", aliases=["Alt", "A", "Option", "Opt", "O"], keys=[Key.LEFT_ALT, Key.RIGHT_ALT])
+Modifier("R_SHIFT", aliases=["RShift", "RSh"], key=Key.RIGHT_SHIFT)
+Modifier("L_SHIFT", aliases=["LShift", "LSh"], key=Key.LEFT_SHIFT)
+Modifier("SHIFT", aliases=["Shift", "Sh"], keys=[Key.LEFT_SHIFT, Key.RIGHT_SHIFT])
 # purposely we do not have M, MA, or ML to give some distance from the fact
 # that these use to be aliases for Alt, not Meta... they may come back in
 # the future
 Modifier(
     "R_META",
-    aliases=["RSuper", "RWin", "RCommand", "RCmd", "RMeta"],
+    aliases=["RSuper", "RSup", "RS", "RWin", "RW", "RCommand", "RCmd", "RCd", "RMeta"],
     key=Key.RIGHT_META,
 )
 Modifier(
     "L_META",
-    aliases=["LSuper", "LWin", "LCommand", "LCmd", "LMeta"],
+    aliases=["LSuper", "LSup", "LS", "LWin", "LW", "LCommand", "LCmd", "LCd", "LMeta"],
     key=Key.LEFT_META,
 )
 Modifier(
     "META",
-    aliases=["Super", "Win", "Command", "Cmd", "Meta"],
+    aliases=["Super", "Sup", "S", "Win", "W", "Command", "Cmd", "Cd", "Meta"],
     keys=[Key.LEFT_META, Key.RIGHT_META],
 )
 
