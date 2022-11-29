@@ -153,11 +153,11 @@ async def device_change(registry, events):
             continue
 
         filename = f"/dev/input/{event.name}"
-        # TODO: need to handle this better and remove it from the DeviceRegistry also
         try:
             device = InputDevice(filename)
         except FileNotFoundError:
-            # device was probably unplugged, so ignore it, see issue #82
+            # assume it's gone and try to remove it by name
+            registry.ungrab_by_filename(filename)
             continue
 
         # unplugging
