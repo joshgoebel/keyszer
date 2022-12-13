@@ -198,7 +198,8 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        Key.ENTER
+        Key.ENTER,
+        sleep(1/10)
     ]
 
     return combo_list
