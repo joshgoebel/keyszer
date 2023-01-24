@@ -103,7 +103,7 @@ class Output:
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
         debug(action, key, time.time(), ctx="OO")
-        self.__send_sync()
+        # self.__send_sync()
 
     def send_combo(self, combo):
         released_mod_keys = []
