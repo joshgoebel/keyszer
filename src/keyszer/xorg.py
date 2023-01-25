@@ -31,7 +31,8 @@ def get_xorg_context():
         input_focus = _display.get_input_focus().focus
         window = get_actual_window(input_focus)
         if window:
-            wm_name = window.get_wm_name()
+            # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
+            wm_name = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
             pair = window.get_wm_class()
             if pair:
                 wm_class = str(pair[1])
