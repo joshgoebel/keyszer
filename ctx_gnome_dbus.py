@@ -30,22 +30,3 @@ def get_gnome_dbus_context():
         error(f'####  Something went wrong in get_gnome_dbus_context().  ####')
         error(xerror)
         return NO_CONTEXT_WAS_ERROR
-
-
-# This probably doesn't work at all (suggestions from ChatGPT)
-def get_parent_window():
-    bus = dbus.SessionBus()
-    obj = bus.get_object("org.gnome.Shell", "/org/gnome/Shell")
-    shell = dbus.Interface(obj, "org.gnome.Shell")
-
-    # Get the currently focused window ID
-    focused_window_id = shell.Eval("global.display.focus_window.xid")
-
-    # Get the parent window ID of the focused window
-    parent_window_id = shell.Eval("global.display.focus_window.get_transient_for().xid")
-
-    # Get the class and title of the parent window
-    parent_window_obj = bus.get_object("org.freedesktop.Wnck", "/org/freedesktop/Wnck/Window/" + str(parent_window_id))
-    parent_window = dbus.Interface(parent_window_obj, "org.freedesktop.Wnck.Window")
-    parent_window_class = parent_window.GetClassName()
-    parent_window_title = parent_window.GetName()
