@@ -59,7 +59,6 @@ def get_actual_window(window):
     # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
     wmname  = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
     wmclass = window.get_wm_class()
-    debug(f'### get_actual_window():\n\t{wmname = }\n\t{wmclass = }')
     # workaround for Java app
     # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
     if (wmclass is None and wmname is None) or "FocusProxy" in (wmclass or ""):
