@@ -41,6 +41,28 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
+from .output import set_keystroke_delay
+
+# delay to fix Unicode entry sequence failures
+unicode_delay_ms = 0
+
+
+def throttle_delays(unicode_delay=0, keystroke_delay=0):
+    global unicode_delay_ms
+    _ud = unicode_delay
+    _kd = keystroke_delay
+    if _ud <= 100 and _ud >= 0 and isinstance(_ud, int):
+        unicode_delay_ms = _ud / 1000
+    else:
+        unicode_delay_ms = 0
+        print(f'(EE) ERROR: Unicode delay throttle must be int 1 to 100 ms. Defaulting to 0 ms.')
+    if _kd <= 150 and _kd >= 0 and isinstance(_kd, int):
+        set_keystroke_delay(_kd)
+    else:
+        set_keystroke_delay(0)
+        print(f'(EE) ERROR: Keystroke delay throttle must be int 1 to 150 ms. Defaulting to 0 ms.')
+
+
 # keymaps
 _KEYMAPS = []
 
@@ -198,7 +220,9 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        Key.ENTER
+        sleep(unicode_delay_ms),
+        Key.ENTER,
+        sleep(unicode_delay_ms),
     ]
 
     return combo_list
