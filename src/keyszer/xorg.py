@@ -26,14 +26,14 @@ def get_xorg_context():
     try:
         _display = _display or Display()
         wm_class = ""
-        wm_name = ""
+        wm_name  = ""
 
         input_focus = _display.get_input_focus().focus
-        window = get_actual_window(input_focus)
+        window      = get_actual_window(input_focus)
         if window:
             # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
             wm_name = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
-            pair = window.get_wm_class()
+            pair    = window.get_wm_class()
             if pair:
                 wm_class = str(pair[1])
 
@@ -56,7 +56,8 @@ def get_xorg_context():
 
 
 def get_actual_window(window):
-    wmname = window.get_wm_name()
+    # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
+    wmname  = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
     wmclass = window.get_wm_class()
     # workaround for Java app
     # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
