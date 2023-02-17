@@ -1,5 +1,6 @@
-from ..xorg import get_xorg_context
+from .logger import debug, error
 from ..models.key import Key
+from ..context.ctx__connector import get_window_context
 
 
 class KeyContext:
@@ -10,7 +11,7 @@ class KeyContext:
     def _query_window_context(self):
         # cache this,  think it might be expensive
         if self._X_ctx is None:
-            self._X_ctx = get_xorg_context()
+            self._X_ctx = get_window_context()
 
     @property
     def wm_class(self):
@@ -22,10 +23,11 @@ class KeyContext:
         self._query_window_context()
         return self._X_ctx["wm_name"]
 
+    # generic context error, covering both X11 and Wayland
     @property
-    def x_error(self):
+    def context_error(self):
         self._query_window_context()
-        return self._X_ctx["x_error"]
+        return self._X_ctx["context_error"]
 
     @property
     def device_name(self):

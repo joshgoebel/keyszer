@@ -1,5 +1,6 @@
 import asyncio
 import time
+import inspect
 
 from evdev import ecodes
 
@@ -114,7 +115,8 @@ def resume_keys():
     # keys = get_suspended_mods()
     states = [x for x in _key_states.values() if x.suspended]
     if len(states) > 0:
-        debug("resuming keys:", [x.key for x in states])
+        # debug("resuming keys:", [x.key for x in states])
+        debug("{:<18}{:<20}".format("resuming keys:", str([x.key for x in states])))
 
     for ks in states:
         # spent keys that are held long enough to resume
@@ -190,7 +192,7 @@ def suspend_or_resuspend_keys(timeout):
 def suspend_keys(timeout):
     global _suspend_timer
     global _last_suspend_timeout
-    debug("suspending keys", pressed_mods_not_exerted_on_output())
+    debug("{:<18}{:<20}".format("suspending keys:", str(pressed_mods_not_exerted_on_output())))
     states = [x for x in _key_states.values() if x.is_pressed()]
     for s in states:
         s.suspended = True
@@ -240,7 +242,7 @@ def apply_modmap(keystate, context):
                     active_modmap = modmap
                     break
     if active_modmap and inkey in active_modmap:
-        debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
+        debug(f"MODMAP:   {inkey} => {active_modmap[inkey]} in ['{active_modmap.name}']")
         keystate.key = active_modmap[inkey]
 
 
@@ -313,12 +315,13 @@ def on_event(event, device):
     )
 
     debug()
-    debug(f"in {key} ({action})", ctx="II")
+    # debug(f"input:    {key}     ({action})", ctx="II")
+    debug("{:<10}{:<18}{:<20}".format("input:", key, action), ctx="II")
 
     # if there is an X error (we don't have any window context)
     # then we turn off all mappings until it's resolved and act
     # more or less as a pass thru for all input => output
-    if context.x_error:
+    if context.context_error:
         ks.key = ks.key or ks.inkey
 
     # we only do modmap on the PRESS pass, keys may not
@@ -375,7 +378,8 @@ def on_key(keystate, context):
     global _last_key
 
     key, action = (keystate.key, keystate.action)
-    debug("on_key", key, action)
+    # debug("on_key", key, action)
+    debug("{:<10}{:<18}{:<20}".format("on_key:", key, action))
 
     if Modifier.is_key_modifier(key):
         on_mod_key(keystate, context)
@@ -421,7 +425,7 @@ def transform_key(key, action, ctx):
     # if we do have window context information we essentially short-circuit
     # the keymapper, acting in essentially a pass thru mode sending what is
     # typed straight thru from input to output
-    if ctx.x_error:
+    if ctx.context_error:
         resume_keys()
         _output.send_key_action(key, action)
         return
@@ -445,13 +449,27 @@ def transform_key(key, action, ctx):
 
         if logger.VERBOSE:
             keymap_names = [map.name for map in _active_keymaps]
-            name_list = ", ".join(keymap_names)
+            # name_list = ", ".join(keymap_names)
             debug("")
             debug(
-                f"WM_CLS '{ctx.wm_class}' | "
-                f"DV '{ctx.device_name}' | "
-                f"KMAPS = [{name_list}]")
-            debug(f"  COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
+                f"WM_CLS: '{ctx.wm_class}' | "
+                f"WM_NME: '{ctx.wm_name}'")
+            debug(
+                f"DVN: '{ctx.device_name}' | "
+                f"CLK: '{ctx.capslock_on}' | "
+                f"NLK: '{ctx.numlock_on}'")
+            n = 1
+            for km_name in keymap_names:
+                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS: ['{km_name}', ", end='')
+                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS: ['{km_name}']")
+                elif n % 2 != 0 and n < len(keymap_names):
+                    print(f"(DD)         '{km_name}', ", end='')
+                elif n % 2 != 0 and n == len(keymap_names):
+                    print(f"(DD)         '{km_name}']")
+                elif n == len(keymap_names): print(f"'{km_name}']")
+                else: print(f"'{km_name}',")
+                n+=1
+            debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: ['{keymap.name}']")
 
         held = get_pressed_states()
         for ks in held:
@@ -462,7 +480,8 @@ def transform_key(key, action, ctx):
             if not _output.is_mod_pressed(ks.key):
                 ks.spent = True
         debug("spent modifiers", [_.key for _ in held if _.spent])
-        reset_mode = handle_commands(keymap[combo], key, action, combo)
+        # reset_mode = handle_commands(keymap[combo], key, action, combo)
+        reset_mode = handle_commands(keymap[combo], key, action, ctx, combo)
         if reset_mode:
             _active_keymaps = None
         return
@@ -525,7 +544,8 @@ def auto_sticky(combo, input_combo):
 # ─── COMMAND PROCESSING ───────────────────────────────────────────────────────
 
 
-def handle_commands(commands, key, action, input_combo=None):
+# def handle_commands(commands, key, action, input_combo=None):
+def handle_commands(commands, key, action, ctx, input_combo=None):
     """
     returns: reset_mode (True/False) if this is True, _active_keymaps will be reset
     """
@@ -548,7 +568,12 @@ def handle_commands(commands, key, action, input_combo=None):
         for command in commands:
             if callable(command):
                 # very likely we're just passing None forwards here but that OK
-                reset_mode = handle_commands(command(), key, action)
+                # reset_mode = handle_commands(command(), key, action)
+                cmd_param_cnt = len(inspect.signature(command).parameters)
+                if cmd_param_cnt == 0:
+                    reset_mode = handle_commands(command(), key, action, ctx)
+                else:
+                    reset_mode = handle_commands(command(ctx), key, action, ctx)
                 # if the command wants to disable reset, lets propagate that
                 if reset_mode is False:
                     return False
