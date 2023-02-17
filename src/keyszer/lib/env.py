@@ -67,7 +67,7 @@ for k, v in de_names.items():
         break
 if not DESKTOP_ENV:
     debug(
-        f'Kinto config: Desktop Environment not in de_names list! Should fix this.\n\t{_desktop_env = }', ctx="EE")
+        f'Desktop Environment not in de_names list! Should fix this.\n\t{_desktop_env = }', ctx="EE")
 
 import psutil
 
