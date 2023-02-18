@@ -86,14 +86,5 @@ debug(f'ENV: {DISTRO_NAME  = }')
 debug(f'ENV: {DESKTOP_ENV  = }')
 
 
-# def get_session_type():
-#     return SESSION_TYPE
-
-# def get_distro_name():
-#     return DISTRO_NAME
-
-# def get_desktop_env():
-#     return DESKTOP_ENV
-
 def get_env():
     return {"SESSION_TYPE": SESSION_TYPE, "DISTRO_NAME": DISTRO_NAME, "DESKTOP_ENV": DESKTOP_ENV}
