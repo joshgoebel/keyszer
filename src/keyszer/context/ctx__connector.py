@@ -18,7 +18,7 @@ if SESSION_TYPE.casefold() in ['x11', 'xorg']:
     except Exception as x_error:
         error(x_error)
         raise EnvironmentError(f'Tried to use X11 context. Failed.')
-elif SESSION_TYPE == 'wayland' and DESKTOP_ENV == 'gnome':
+elif SESSION_TYPE.casefold() == 'wayland' and DESKTOP_ENV == 'gnome':
     try:
         from .ctx_wl_gnome_dbus import get_wl_gnome_dbus_context
         get_window_context = get_wl_gnome_dbus_context
@@ -26,7 +26,7 @@ elif SESSION_TYPE == 'wayland' and DESKTOP_ENV == 'gnome':
     except dbus.exceptions.DBusException as dbus_error:
         error(dbus_error)
         raise EnvironmentError(f'Tried to use Wayland+GNOME(DBus) context. Failed.')
-elif SESSION_TYPE == 'wayland' and DESKTOP_ENV == 'sway':
+elif SESSION_TYPE.casefold() == 'wayland' and DESKTOP_ENV == 'sway':
     try:
         from .ctx_wl_sway_dbus import get_wl_sway_dbus_context
         get_window_context = get_wl_sway_dbus_context

@@ -15,11 +15,11 @@ extension = dbus.Interface(
 
 def get_wl_gnome_dbus_context():
     try:
-        # window_id = ""
+        # window_pid = ""
         wm_class = ""
         wm_name = ""
 
-        # window_id = str(extension.FocusPID())   # probably not the ID we need to get parent
+        # window_pid = str(extension.FocusPID())   # just process ID, not window ID
         wm_class = str(extension.FocusClass())
         wm_name = str(extension.FocusTitle())
 

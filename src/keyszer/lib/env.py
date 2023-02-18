@@ -6,9 +6,9 @@ import re
 
 # ─── GLOBALS ─────────────────────────────────────────────────────────────────
 
-DISTRO_NAME  = None
-SESSION_TYPE = environ.get("XDG_SESSION_TYPE") or None
-DESKTOP_ENV  = None
+DISTRO_NAME  = ""
+SESSION_TYPE = environ.get("XDG_SESSION_TYPE") or ""
+DESKTOP_ENV  = ""
 _desktop_env = environ.get("XDG_SESSION_DESKTOP") or environ.get("XDG_CURRENT_DESKTOP")
 
 
