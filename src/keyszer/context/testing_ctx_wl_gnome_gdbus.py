@@ -1,5 +1,5 @@
 
-# This works but seems pretty slow to return
+# This works but seems pretty slow to return, using gdbus commands to the shell
 
 import subprocess
 from keyszer.lib.logger import debug, error

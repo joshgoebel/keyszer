@@ -1,3 +1,6 @@
+
+###  ALL CODE IN THIS MODULE IS COMPLETELY UNTESTED AND PROBABLY DOESN'T WORK
+
 import dbus
 
 def get_focused_window_info():
