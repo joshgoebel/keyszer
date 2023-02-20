@@ -41,27 +41,20 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
-from .output import set_keystroke_delay
+# delay globals to fix Unicode entry sequence and macro failures
+THROTTLE_DELAYS = {'unicode_delay_ms': 0, 'keystroke_delay_ms': 0}
 
-# delay to fix Unicode entry sequence failures
-unicode_delay_ms = 0
+def throttle_delays(unicode_delay_ms=0, keystroke_delay_ms=0):
+    _ud, _kd = unicode_delay_ms, keystroke_delay_ms
+    if _ud != 0 or _kd != 0: debug(f'Throttle delays: {unicode_delay_ms = }, {keystroke_delay_ms = }', ctx="II")
+    if _ud <= 100 and _ud >= 0 and isinstance(_ud, int): THROTTLE_DELAYS.update({'unicode_delay_ms': _ud})
+    else: debug(f'ERROR: Unicode delay throttle must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
+    if _kd <= 150 and _kd >= 0 and isinstance(_kd, int): THROTTLE_DELAYS.update({'keystroke_delay_ms': _kd})
+    else: debug(f'ERROR: Keystroke delay throttle must be int 0 to 150 ms. Defaulting to 0 ms.', ctx="EE")
 
-
-def throttle_delays(unicode_delay=0, keystroke_delay=0):
-    global unicode_delay_ms
-    _ud = unicode_delay
-    _kd = keystroke_delay
-    if _ud <= 100 and _ud >= 0 and isinstance(_ud, int):
-        unicode_delay_ms = _ud / 1000
-    else:
-        unicode_delay_ms = 0
-        print(f'(EE) ERROR: Unicode delay throttle must be int 1 to 100 ms. Defaulting to 0 ms.')
-    if _kd <= 150 and _kd >= 0 and isinstance(_kd, int):
-        set_keystroke_delay(_kd)
-    else:
-        set_keystroke_delay(0)
-        print(f'(EE) ERROR: Keystroke delay throttle must be int 1 to 150 ms. Defaulting to 0 ms.')
-
+# for use with throttle delays
+def sleep_ms(usec):
+    return time.sleep(usec / 1000)
 
 # keymaps
 _KEYMAPS = []
@@ -220,9 +213,9 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        sleep(unicode_delay_ms),
+        sleep_ms(THROTTLE_DELAYS['unicode_delay_ms']),
         Key.ENTER,
-        sleep(unicode_delay_ms),
+        sleep_ms(THROTTLE_DELAYS['unicode_delay_ms']),
     ]
 
     return combo_list
