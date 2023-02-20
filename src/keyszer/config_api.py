@@ -53,8 +53,8 @@ def throttle_delays(unicode_delay_ms=0, keystroke_delay_ms=0):
     else: debug(f'ERROR: Keystroke delay throttle must be int 0 to 150 ms. Defaulting to 0 ms.', ctx="EE")
 
 # for use with throttle delays
-def sleep_ms(usec):
-    return time.sleep(usec / 1000)
+def sleep_ms(msec):
+    return time.sleep(msec / 1000)
 
 # keymaps
 _KEYMAPS = []
