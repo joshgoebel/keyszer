@@ -41,16 +41,26 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
-# delay globals to fix Unicode entry sequence and macro failures
-THROTTLE_DELAYS = {'unicode_delay_ms': 0, 'keystroke_delay_ms': 0}
+# global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
+THROTTLE_DELAY_DEFAULTS = {
+    'unicode_delay_ms': 0,
+    'key_pre_delay_ms': 0,
+    'key_post_delay_ms': 0,
+}
+_THROTTLES = THROTTLE_DELAY_DEFAULTS
 
-def throttle_delays(unicode_delay_ms=0, keystroke_delay_ms=0):
-    _ud, _kd = unicode_delay_ms, keystroke_delay_ms
-    if _ud != 0 or _kd != 0: debug(f'Throttle delays: {unicode_delay_ms = }, {keystroke_delay_ms = }', ctx="II")
-    if _ud <= 100 and _ud >= 0 and isinstance(_ud, int): THROTTLE_DELAYS.update({'unicode_delay_ms': _ud})
-    else: debug(f'ERROR: Unicode delay throttle must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
-    if _kd <= 150 and _kd >= 0 and isinstance(_kd, int): THROTTLE_DELAYS.update({'keystroke_delay_ms': _kd})
-    else: debug(f'ERROR: Keystroke delay throttle must be int 0 to 150 ms. Defaulting to 0 ms.', ctx="EE")
+def throttle_delays(unicode_delay_ms=0,key_pre_delay_ms=0, key_post_delay_ms=0):
+    _ud, _kpre, _kpost = unicode_delay_ms, key_pre_delay_ms, key_post_delay_ms
+    if 100 >= _ud >= 0 and isinstance(_ud, int): _THROTTLES.update({'unicode_delays_ms': _ud})
+    else: debug(f'throttle_delays(): unicode_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
+    if 100 >= _kpre >= 0 and isinstance(_kpre, int): _THROTTLES.update({'key_pre_delay_ms': _kpre})
+    else: debug(f'throttle_delays(): key_pre_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
+    if 100 >= _kpost >= 0 and isinstance(_kpost, int): _THROTTLES.update({'key_post_delay_ms': _kpost})
+    else: debug(f'throttle_delays(): key_post_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
+    # Show values in log if user sets any custom delays
+    if any(_THROTTLES.values()) != 0:
+        debug(f'THROTTLES: Custom throttle delay values set by user: \
+                \n\t{unicode_delay_ms = }, {key_pre_delay_ms = }, {key_post_delay_ms = }', ctx="II")
 
 # for use with throttle delays
 def sleep_ms(msec):
@@ -213,9 +223,9 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        sleep_ms(THROTTLE_DELAYS['unicode_delay_ms']),
+        sleep_ms(_THROTTLES['unicode_delay_ms']),
         Key.ENTER,
-        sleep_ms(THROTTLE_DELAYS['unicode_delay_ms']),
+        sleep_ms(_THROTTLES['unicode_delay_ms']),
     ]
 
     return combo_list
