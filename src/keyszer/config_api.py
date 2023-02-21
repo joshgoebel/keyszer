@@ -7,7 +7,7 @@ import os
 import inspect
 from inspect import signature
 
-from .lib.logger import error
+from .lib.logger import error, debug
 from .models.action import Action
 from .models.combo import Combo, ComboHint
 from .models.trigger import Trigger
