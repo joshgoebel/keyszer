@@ -53,10 +53,10 @@ def throttle_delays(unicode_delay_ms=0,key_pre_delay_ms=0, key_post_delay_ms=0):
     _ud, _kpre, _kpost = unicode_delay_ms, key_pre_delay_ms, key_post_delay_ms
     if 100 >= _ud >= 0 and isinstance(_ud, int): _THROTTLES.update({'unicode_delays_ms': _ud})
     else: debug(f'throttle_delays(): unicode_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
-    if 100 >= _kpre >= 0 and isinstance(_kpre, int): _THROTTLES.update({'key_pre_delay_ms': _kpre})
-    else: debug(f'throttle_delays(): key_pre_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
-    if 100 >= _kpost >= 0 and isinstance(_kpost, int): _THROTTLES.update({'key_post_delay_ms': _kpost})
-    else: debug(f'throttle_delays(): key_post_delay_ms must be int 0 to 100 ms. Defaulting to 0 ms.', ctx="EE")
+    if 150 >= _kpre >= 0 and isinstance(_kpre, int): _THROTTLES.update({'key_pre_delay_ms': _kpre})
+    else: debug(f'throttle_delays(): key_pre_delay_ms must be int 0 to 150 ms. Defaulting to 0 ms.', ctx="EE")
+    if 150 >= _kpost >= 0 and isinstance(_kpost, int): _THROTTLES.update({'key_post_delay_ms': _kpost})
+    else: debug(f'throttle_delays(): key_post_delay_ms must be int 0 to 150 ms. Defaulting to 0 ms.', ctx="EE")
     # Show values in log if user sets any custom delays
     if any(_THROTTLES.values()) != 0:
         debug(f'THROTTLES: Custom throttle delay values set by user: \
