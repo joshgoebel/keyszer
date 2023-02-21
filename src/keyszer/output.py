@@ -6,7 +6,7 @@ from .lib.logger import debug
 from .models.action import PRESS, RELEASE
 from .models.combo import Combo
 from .models.modifier import Modifier
-from .config_api import sleep_ms, THROTTLE_DELAYS
+from .config_api import sleep_ms, _THROTTLES
 
 
 VIRT_DEVICE_PREFIX = "Keyszer (virtual)"
@@ -127,12 +127,10 @@ class Output:
             pressed_mod_keys.append(key)
 
         # normal key portion of the combo
-        # pre keystroke delay can be a little shorter than post
-        sleep_ms(THROTTLE_DELAYS['keystroke_delay_ms'] / 1.5)
+        sleep_ms(_THROTTLES['key_pre_delay_ms'])
         self.send_key_action(combo.key, PRESS)
         self.send_key_action(combo.key, RELEASE)
-        # post keystroke delay slightly more effective?
-        sleep_ms(THROTTLE_DELAYS['keystroke_delay_ms'])
+        sleep_ms(_THROTTLES['key_post_delay_ms'])
 
         for modifier in reversed(pressed_mod_keys):
             self.send_key_action(modifier, RELEASE)
