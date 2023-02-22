@@ -53,11 +53,11 @@ def throttle_delays(unicode_delay_ms=0,key_pre_delay_ms=0, key_post_delay_ms=0):
     _ud, _kpre, _kpost = unicode_delay_ms, key_pre_delay_ms, key_post_delay_ms
     ms_min, ms_max = 0.0, 150.0
     if ms_min <= _ud <= ms_max: _THROTTLES.update({'unicode_delays_ms': _ud})
-    else: debug(f'throttle_delays(): unicode_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.', ctx="EE")
+    else: error(f'throttle_delays(): unicode_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
     if ms_min <= _kpre <= ms_max: _THROTTLES.update({'key_pre_delay_ms': _kpre})
-    else: debug(f'throttle_delays(): key_pre_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.', ctx="EE")
+    else: error(f'throttle_delays(): key_pre_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
     if ms_min <= _kpost <= ms_max: _THROTTLES.update({'key_post_delay_ms': _kpost})
-    else: debug(f'throttle_delays(): key_post_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.', ctx="EE")
+    else: error(f'throttle_delays(): key_post_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
     # Show values in log if user sets any custom delays
     if any(_THROTTLES.values()):
         debug(f'THROTTLES: Custom throttle delay values set by user: \
