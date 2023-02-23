@@ -1,30 +1,14 @@
 import time
 from evdev import ecodes
 from evdev.uinput import UInput
-
-
 from .lib.logger import debug
 from .models.action import PRESS, RELEASE
 from .models.combo import Combo
 from .models.modifier import Modifier
+from .config_api import sleep_ms, _THROTTLES
+
 
 VIRT_DEVICE_PREFIX = "Keyszer (virtual)"
-
-# keystroke delays to work around modifier timing problems
-key_pre_delay_ms = 0
-key_post_delay_ms = 0
-
-
-def set_keystroke_delay(keystroke_delay=0):
-    """Used from config_api to pass keystroke delay from user's config."""
-    _kd = keystroke_delay
-    global key_pre_delay_ms
-    global key_post_delay_ms
-    key_pre_delay_ms = round( (_kd / 1500), 3) if _kd <= 200 and _kd > 0 else 0
-    key_post_delay_ms = round( (_kd / 1000), 3) if _kd <= 200 and _kd > 0 else 0
-    if _kd != 0:
-        debug(f'Keystroke delays: {key_pre_delay_ms = }, {key_post_delay_ms = }')
-
 
 # Remove all buttons so udev doesn't think keyszer is a joystick
 _KEYBOARD_KEYS = ecodes.keys.keys() - ecodes.BTN
@@ -118,8 +102,7 @@ class Output:
         self.__update_pressed_keys(key, action)
         _uinput.write(ecodes.EV_KEY, key, action)
         self.__send_sync()
-        # debug(action, key, time.time(), ctx="OO")
-        debug("{:<10}{:<18}{:<20}".format(action, key, time.time(), ctx="OO"))
+        debug(action, key, time.time(), ctx="OO")
 
     def send_combo(self, combo):
         released_mod_keys = []
@@ -143,10 +126,10 @@ class Output:
             pressed_mod_keys.append(key)
 
         # normal key portion of the combo
-        time.sleep(key_pre_delay_ms)
+        sleep_ms(_THROTTLES['key_pre_delay_ms'])
         self.send_key_action(combo.key, PRESS)
         self.send_key_action(combo.key, RELEASE)
-        time.sleep(key_post_delay_ms)  # post keystroke delay slightly more effective? 
+        sleep_ms(_THROTTLES['key_post_delay_ms'])
 
         for modifier in reversed(pressed_mod_keys):
             self.send_key_action(modifier, RELEASE)

@@ -115,8 +115,8 @@ def resume_keys():
     # keys = get_suspended_mods()
     states = [x for x in _key_states.values() if x.suspended]
     if len(states) > 0:
-        # debug("resuming keys:", [x.key for x in states])
-        debug("{:<18}{:<20}".format("resuming keys:", str([x.key for x in states])))
+        debug("resuming keys:", [x.key for x in states])
+        # debug("{:<18}{:<20}".format("resuming keys:", str([x.key for x in states])))
 
     for ks in states:
         # spent keys that are held long enough to resume
@@ -192,7 +192,8 @@ def suspend_or_resuspend_keys(timeout):
 def suspend_keys(timeout):
     global _suspend_timer
     global _last_suspend_timeout
-    debug("{:<18}{:<20}".format("suspending keys:", str(pressed_mods_not_exerted_on_output())))
+    debug("suspending keys:", pressed_mods_not_exerted_on_output())
+    # debug("{:<18}{:<20}".format("suspending keys:", str(pressed_mods_not_exerted_on_output())))
     states = [x for x in _key_states.values() if x.is_pressed()]
     for s in states:
         s.suspended = True
@@ -315,8 +316,7 @@ def on_event(event, device):
     )
 
     debug()
-    # debug(f"input:    {key}     ({action})", ctx="II")
-    debug("{:<10}{:<18}{:<20}".format("input:", key, action), ctx="II")
+    debug(f"input:    {key}     ({action})", ctx="II")
 
     # if there is an X error (we don't have any window context)
     # then we turn off all mappings until it's resolved and act
@@ -378,8 +378,8 @@ def on_key(keystate, context):
     global _last_key
 
     key, action = (keystate.key, keystate.action)
-    # debug("on_key", key, action)
-    debug("{:<10}{:<18}{:<20}".format("on_key:", key, action))
+    debug("on_key", key, action)
+    # debug("{:<10}{:<18}{:<20}".format("on_key:", key, action))
 
     if Modifier.is_key_modifier(key):
         on_mod_key(keystate, context)

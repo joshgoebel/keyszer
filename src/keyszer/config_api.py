@@ -7,7 +7,7 @@ import os
 import inspect
 from inspect import signature
 
-from .lib.logger import error
+from .lib.logger import error, debug
 from .models.action import Action
 from .models.combo import Combo, ComboHint
 from .models.trigger import Trigger
@@ -41,27 +41,48 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
-from .output import set_keystroke_delay
+# global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
+THROTTLE_DELAY_DEFAULTS = {
+    'unicode_delay_ms': 0,
+    'key_pre_delay_ms': 0,
+    'key_post_delay_ms': 0,
+}
+_THROTTLES = THROTTLE_DELAY_DEFAULTS
 
-# delay to fix Unicode entry sequence failures
-unicode_delay_ms = 0
+def throttle_delays(unicode_delay_ms=0,key_pre_delay_ms=0, key_post_delay_ms=0):
+    _ud, _kpre, _kpost = unicode_delay_ms, key_pre_delay_ms, key_post_delay_ms
+    ms_min, ms_max = 0.0, 150.0
+    if ms_min <= _ud <= ms_max: _THROTTLES.update({'unicode_delays_ms': _ud})
+    else: error(f'throttle_delays(): unicode_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
+    if ms_min <= _kpre <= ms_max: _THROTTLES.update({'key_pre_delay_ms': _kpre})
+    else: error(f'throttle_delays(): key_pre_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
+    if ms_min <= _kpost <= ms_max: _THROTTLES.update({'key_post_delay_ms': _kpost})
+    else: error(f'throttle_delays(): key_post_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
+    # Show values in log if user sets any custom delays
+    if any(_THROTTLES.values()):
+        debug(f'THROTTLES: Custom throttle delay values set by user: \
+                \n\t{unicode_delay_ms = }, {key_pre_delay_ms = }, {key_post_delay_ms = }')
 
+# for use with throttle delays
+def sleep_ms(msec):
+    return time.sleep(msec / 1000)
 
-def throttle_delays(unicode_delay=0, keystroke_delay=0):
-    global unicode_delay_ms
-    _ud = unicode_delay
-    _kd = keystroke_delay
-    if _ud <= 100 and _ud >= 0 and isinstance(_ud, int):
-        unicode_delay_ms = _ud / 1000
-    else:
-        unicode_delay_ms = 0
-        print(f'(EE) ERROR: Unicode delay throttle must be int 1 to 100 ms. Defaulting to 0 ms.')
-    if _kd <= 150 and _kd >= 0 and isinstance(_kd, int):
-        set_keystroke_delay(_kd)
-    else:
-        set_keystroke_delay(0)
-        print(f'(EE) ERROR: Keystroke delay throttle must be int 1 to 150 ms. Defaulting to 0 ms.')
+ENVIRONMENT_DEFAULTS = {
+    'DISTRO_NAME' : "",     # Ubuntu, Fedora, Pop!_OS, etc.
+    'SESSION_TYPE': "",     # x11, wayland, mir, etc.
+    'DESKTOP_ENV' : "",     # GNOME, KDE, Neon, Xfce, sway, hyprland, etc.
+    'SHELL_EXT'   : "",     # window-calls-extended@hseliger.eu, xremap@k0kubun.com, etc.
+}
+_ENVIRONMENT = ENVIRONMENT_DEFAULTS
 
+def environment(distro_name='', session_type='', desktop_env='', shell_ext=''):
+    _dst, _ses, _dsk, _shx = distro_name, session_type, desktop_env, shell_ext
+    if _dst: _ENVIRONMENT.update({'DISTRO_NAME' : _dst})
+    if _ses: _ENVIRONMENT.update({'SESSION_TYPE': _ses})
+    if _dsk: _ENVIRONMENT.update({'DESKTOP_ENV' : _dsk})
+    if _shx: _ENVIRONMENT.update({'SHELL_EXT'   : _shx})
+    if _dst or _ses or _dsk or _shx:
+        debug(f'ENV: User configured environment:\n\t{_ENVIRONMENT}')
 
 # keymaps
 _KEYMAPS = []
@@ -224,14 +245,14 @@ def unicode_keystrokes(n):
             raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
         global unicode_combo_list
         combo_list = [
-            combo("Shift-Ctrl-u"),  # requires "ibus" as input manager
+            combo("Shift-Ctrl-u"),  # requires "ibus" or "fctix" as input manager?
             *[Key[hexdigit]
                 for digit in _digits(n, 16)
                 for hexdigit in hex(digit)[2:].upper()
                 ],
-            sleep(unicode_delay_ms),
+            sleep_ms(_THROTTLES['unicode_delay_ms']),
             Key.ENTER,
-            sleep(unicode_delay_ms),
+            sleep_ms(_THROTTLES['unicode_delay_ms']),
         ]
         if ctx.capslock_on:
             combo_list.insert(0, Key.CAPSLOCK)
