@@ -4,10 +4,9 @@ import dbus.exceptions
 import json
 
 
-NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "context_error": True}
-last_shell_ext_uuid = None
-unsuccessful_cycle  = None
-cycle_count         = 0
+NO_CONTEXT_WAS_ERROR    = {"wm_class": "", "wm_name": "", "context_error": True}
+last_shell_ext_uuid     = None
+cycle_count             = 0
 
 # Only need one session bus object for multiple D-Bus interfaces
 session_bus             = dbus.SessionBus()        # Bus() also seems to work.
@@ -35,7 +34,6 @@ def get_wl_gnome_dbus_shell_ext_context():
     """
 
     global last_shell_ext_uuid
-    global unsuccessful_cycle
     global cycle_count
 
     ext_name_windowsext     = 'window-calls-extended@hseliger.eu'
@@ -47,7 +45,7 @@ def get_wl_gnome_dbus_shell_ext_context():
         except Exception as e:
             # Indicate the attempt to use this extension didn't work this cycle
             last_shell_ext_uuid = None
-            # error(f'Error returned from GNOME Shell extension {ext_name_windowsext}\n\t {e}')
+            error(f'Error returned from GNOME Shell extension {ext_name_windowsext}\n\t {e}')
         else:
             last_shell_ext_uuid = ext_name_windowsext
             debug(f"SHELL_EXT: Using '{last_shell_ext_uuid}' for window context")
@@ -59,7 +57,7 @@ def get_wl_gnome_dbus_shell_ext_context():
         except Exception as e:
             # Indicate the attempt to use this extension didn't work this cycle
             last_shell_ext_uuid = None
-            # error(f'Error returned from GNOME Shell extension {ext_name_xremap}\n\t {e}')
+            error(f'Error returned from GNOME Shell extension {ext_name_xremap}\n\t {e}')
         else:
             last_shell_ext_uuid = ext_name_xremap
             debug(f"SHELL_EXT: Using '{last_shell_ext_uuid}' for window context")
@@ -77,8 +75,7 @@ def get_wl_gnome_dbus_shell_ext_context():
         print()
         error(f'########################################################################')
         error(f'SHELL_EXT: No compatible GNOME Shell extension responding via D-Bus.')
-        error(
-            f'Compatible GNOME Shell extensions: \
+        error(f'Compatible GNOME Shell extensions: \
             \n       {ext_name_windowsext}: \
             \n\t\t(https://extensions.gnome.org/extension/4974/window-calls-extended/)\
             \n       {ext_name_xremap}: \
@@ -91,18 +88,19 @@ def get_wl_gnome_dbus_shell_ext_context():
 
 
 def get_wl_gnome_dbus_xremap_context():
-    # This function connects to GNOME Shell extension: "Xremap"
-    #
-    # This extension exposes a D-Bus interface with the name:
-    # com.k0kubun.Xremap
-    #
-    # ActiveWindow(): returns a JSON object with the window's WM class and title.
-    # WMClass(): returns the WM class of the currently focused window.
-    # WMClasses(): returns a JSON array of all unique WM classes of the currently open windows.
-    #
-    # https://extensions.gnome.org/extension/5060/xremap/
-    # https://github.com/xremap/xremap-gnome
-    #
+    """"
+    This function connects to GNOME Shell extension: "Xremap"
+    
+    The extension exposes a D-Bus interface with the name:
+    com.k0kubun.Xremap
+    
+    ActiveWindow(): returns a JSON object with the window's WM class and title.
+    WMClass(): returns the WM class of the currently focused window.
+    WMClasses(): returns a JSON array of all unique WM classes of the currently open windows.
+    
+    https://extensions.gnome.org/extension/5060/xremap/
+    https://github.com/xremap/xremap-gnome
+    """
     active_window_dbus  = ""
     active_window_dct   = ""
     wm_class            = ""
@@ -119,21 +117,22 @@ def get_wl_gnome_dbus_xremap_context():
 
 
 def get_wl_gnome_dbus_windowsext_context():
-    # This module connects to GNOME Shell extension: "Window Calls Extended"
-    #
-    # This extension exposes a D-Bus interface with the name 
-    # org.gnome.Shell.Extensions.WindowsExt
-    # 
-    # The List() method returns a JSON string with information about all 
-    #   windows currently open, including their window class, process ID, 
-    #   window ID, title, and whether they are maximized and focused.
-    # The FocusTitle() method returns the title of the currently focused window.
-    # The FocusPID() method returns the process ID of the currently focused window.
-    # The FocusClass() method returns the class of the currently focused window.    
-    #
-    # https://extensions.gnome.org/extension/4974/window-calls-extended/
-    # https://github.com/hseliger/window-calls-extended
-    #
+    """
+    This function connects to GNOME Shell extension: "Window Calls Extended"
+    
+    The extension exposes a D-Bus interface with the name: 
+    org.gnome.Shell.Extensions.WindowsExt
+    
+    - The List() method returns a JSON string with information about all 
+        windows currently open, including their window class, process ID, 
+        window ID, title, and whether they are maximized and focused.
+    - The FocusTitle() method returns the title of the currently focused window.
+    - The FocusPID() method returns the process ID of the currently focused window.
+    - The FocusClass() method returns the class of the currently focused window.    
+    
+    https://extensions.gnome.org/extension/4974/window-calls-extended/
+    https://github.com/hseliger/window-calls-extended
+    """
     wm_class = ""
     wm_name = ""
 

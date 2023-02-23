@@ -8,11 +8,11 @@ from ..config_api import _ENVIRONMENT
 
 # ─── GLOBALS ─────────────────────────────────────────────────────────────────
 
-DISTRO_NAME  = ""
-SESSION_TYPE = environ.get("XDG_SESSION_TYPE") or ""
-DESKTOP_ENV  = ""
-_desktop_env = environ.get("XDG_SESSION_DESKTOP") or environ.get("XDG_CURRENT_DESKTOP")
-SHELL_EXT = None
+DISTRO_NAME     = ""
+SESSION_TYPE    = environ.get("XDG_SESSION_TYPE") or ""
+DESKTOP_ENV     = ""
+_desktop_env    = environ.get("XDG_SESSION_DESKTOP") or environ.get("XDG_CURRENT_DESKTOP")
+SHELL_EXT       = ""
 
 
 # ─── ENVIRONMENT ─────────────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ with open('/etc/os-release', 'r') as f:
             DISTRO_NAME = line.split('=')[1].strip().strip('"')
             break
 if not DISTRO_NAME:
+    DISTRO_NAME = 'Unidentified'
     error(f"ENV: Distro name couldn't be found in /etc/os-release.")
 
 if not SESSION_TYPE:  # Why isn't XDG_SESSION_TYPE set? This shouldn't happen.
@@ -71,7 +72,7 @@ for k, v in de_names.items():
     if DESKTOP_ENV:
         break
 if not DESKTOP_ENV:
-    error(f'Desktop Environment not in de_names list! Should fix this.\n\t{_desktop_env = }')
+    error(f'ENV: Desktop Environment not in de_names list! Should fix this.\n\t{_desktop_env = }')
 
 # Doublecheck the desktop env by checking for running processes
 for proc in psutil.process_iter(['name']):
@@ -177,17 +178,17 @@ if DESKTOP_ENV == 'gnome' and RUN_THIS_TEST_STUFF:
 
 
 debug("")
-debug(f'ENV: {SESSION_TYPE = }')
 debug(f'ENV: {DISTRO_NAME  = }')
+debug(f'ENV: {SESSION_TYPE = }')
 debug(f'ENV: {DESKTOP_ENV  = }')
 debug(f'ENV: {SHELL_EXT    = }')
 
 
 def get_env():
     return {
-                "SESSION_TYPE": SESSION_TYPE, 
-                "DISTRO_NAME": DISTRO_NAME, 
-                "DESKTOP_ENV": DESKTOP_ENV,
-                "SHELL_EXT": SHELL_EXT,
+                "DISTRO_NAME"   : DISTRO_NAME,
+                "SESSION_TYPE"  : SESSION_TYPE,
+                "DESKTOP_ENV"   : DESKTOP_ENV,
+                "SHELL_EXT"     : SHELL_EXT,
             }
 
