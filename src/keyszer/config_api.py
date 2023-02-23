@@ -43,25 +43,20 @@ _TIMEOUTS = TIMEOUT_DEFAULTS
 
 # global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
 THROTTLE_DELAY_DEFAULTS = {
-    'unicode_delay_ms': 0,
     'key_pre_delay_ms': 0,
     'key_post_delay_ms': 0,
 }
 _THROTTLES = THROTTLE_DELAY_DEFAULTS
 
-def throttle_delays(unicode_delay_ms=0,key_pre_delay_ms=0, key_post_delay_ms=0):
-    _ud, _kpre, _kpost = unicode_delay_ms, key_pre_delay_ms, key_post_delay_ms
-    ms_min, ms_max = 0.0, 150.0
-    if ms_min <= _ud <= ms_max: _THROTTLES.update({'unicode_delays_ms': _ud})
-    else: error(f'throttle_delays(): unicode_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
+def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
+    _kpre, _kpost, ms_min, ms_max = key_pre_delay_ms, key_post_delay_ms, 0.0, 150.0
     if ms_min <= _kpre <= ms_max: _THROTTLES.update({'key_pre_delay_ms': _kpre})
     else: error(f'throttle_delays(): key_pre_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
     if ms_min <= _kpost <= ms_max: _THROTTLES.update({'key_post_delay_ms': _kpost})
     else: error(f'throttle_delays(): key_post_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
-    # Show values in log if user sets any custom delays
+    # Show values in log if user sets custom delays
     if any(_THROTTLES.values()):
-        debug(f'THROTTLES: Custom throttle delay values set by user: \
-                \n\t{unicode_delay_ms = }, {key_pre_delay_ms = }, {key_post_delay_ms = }', ctx="II")
+        debug(f'THROTTLES: {key_pre_delay_ms = }, {key_post_delay_ms = }')
 
 # for use with throttle delays
 def sleep_ms(msec):
@@ -224,9 +219,7 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        sleep_ms(_THROTTLES['unicode_delay_ms']),
         Key.ENTER,
-        sleep_ms(_THROTTLES['unicode_delay_ms']),
     ]
 
     return combo_list
