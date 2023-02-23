@@ -11,11 +11,11 @@ cycle_count             = 0
 # Only need one session bus object for multiple D-Bus interfaces
 session_bus             = dbus.SessionBus()        # Bus() also seems to work.
 
-# Set up interface for extension "window-calls-extended@hseliger.eu"
+# Set up interface for extension "xremap@k0kubun.com"
 proxy_xremap            = session_bus.get_object("org.gnome.Shell", "/com/k0kubun/Xremap")
 iface_xremap            = dbus.Interface(proxy_xremap, "com.k0kubun.Xremap")
 
-# Set up interface for extension "xremap@k0kubun.com"
+# Set up interface for extension "window-calls-extended@hseliger.eu"
 proxy_windowsext        = session_bus.get_object("org.gnome.Shell", "/org/gnome/Shell/Extensions/WindowsExt")
 iface_windowsext        = dbus.Interface(proxy_windowsext, "org.gnome.Shell.Extensions.WindowsExt")
 
