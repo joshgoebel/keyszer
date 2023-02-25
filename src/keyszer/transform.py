@@ -459,9 +459,9 @@ def transform_key(key, action, ctx):
                 if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS: ['{km_name}', ", end='')
                 elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS: ['{km_name}']")
                 elif n % 2 != 0 and n < len(keymap_names):
-                    print(f"(DD)         '{km_name}', ", end='')
+                    print(f"             '{km_name}', ", end='')
                 elif n % 2 != 0 and n == len(keymap_names):
-                    print(f"(DD)         '{km_name}']")
+                    print(f"             '{km_name}']")
                 elif n == len(keymap_names): print(f"'{km_name}']")
                 else: print(f"'{km_name}',")
                 n+=1
