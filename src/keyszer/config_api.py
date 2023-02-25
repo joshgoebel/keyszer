@@ -65,21 +65,19 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
 
 
 ENVIRONMENT_DEFAULTS = {
-    'DISTRO_NAME' : "",     # Ubuntu, Fedora, Pop!_OS, etc.
-    'SESSION_TYPE': "",     # x11, wayland, mir, etc.
-    'DESKTOP_ENV' : "",     # GNOME, KDE, Neon, Xfce, sway, hyprland, etc.
-    'SHELL_EXT'   : "",     # window-calls-extended@hseliger.eu, xremap@k0kubun.com, etc.
+    'distro_name' : "",     # Ubuntu, Fedora, KDE Neon, Linux Mint, Pop!_OS, etc.
+    'session_type': "",     # x11, wayland, mir, etc.
+    'desktop_env' : "",     # gnome, kde, xfce, sway, hypr, etc.
 }
 _ENVIRONMENT = ENVIRONMENT_DEFAULTS
 
-def environment(distro_name='', session_type='', desktop_env='', shell_ext=''):
-    _dst, _ses, _dsk, _shx = distro_name, session_type, desktop_env, shell_ext
-    if _dst: _ENVIRONMENT.update({'DISTRO_NAME' : _dst})
-    if _ses: _ENVIRONMENT.update({'SESSION_TYPE': _ses})
-    if _dsk: _ENVIRONMENT.update({'DESKTOP_ENV' : _dsk})
-    if _shx: _ENVIRONMENT.update({'SHELL_EXT'   : _shx})
-    if _dst or _ses or _dsk or _shx:
-        debug(f'ENV: User configured environment:\n\t{_ENVIRONMENT}')
+
+def environment(distro_name=None, session_type=None, desktop_env=None):
+    if distro_name  : _ENVIRONMENT.update({'distro_name' : distro_name})
+    if session_type : _ENVIRONMENT.update({'session_type': session_type})
+    if desktop_env  : _ENVIRONMENT.update({'desktop_env' : desktop_env})
+    debug(f'CONFIG_API: User configured environment:\n\t{_ENVIRONMENT}')
+
 
 # keymaps
 _KEYMAPS = []
