@@ -35,7 +35,6 @@ def get_wl_gnome_dbus_shell_ext_context():
 
     global last_shell_ext_uuid
     global cycle_count
-
     ext_name_windowsext     = 'window-calls-extended@hseliger.eu'
     ext_name_xremap         = 'xremap@k0kubun.com'
 
@@ -73,7 +72,7 @@ def get_wl_gnome_dbus_shell_ext_context():
         # Already been through? Reset cycle and show problem in log
         cycle_count = 0
         print()
-        error(f'########################################################################')
+        error(f'############################################################################')
         error(f'SHELL_EXT: No compatible GNOME Shell extension responding via D-Bus.')
         error(f'Compatible GNOME Shell extensions: \
             \n       {ext_name_windowsext}: \
@@ -81,8 +80,8 @@ def get_wl_gnome_dbus_shell_ext_context():
             \n       {ext_name_xremap}: \
             \n\t\t(https://extensions.gnome.org/extension/5060/xremap/) \
             ')
-        error(f'Install "Extension Manager" from Flathub to manage Shell extensions')
-        error(f'########################################################################')
+        error(f'Install "Extension Manager" from Flathub to manage GNOME Shell extensions')
+        error(f'############################################################################')
         print()
         return NO_CONTEXT_WAS_ERROR
 

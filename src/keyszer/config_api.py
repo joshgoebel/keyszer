@@ -48,19 +48,21 @@ THROTTLE_DELAY_DEFAULTS = {
 }
 _THROTTLES = THROTTLE_DELAY_DEFAULTS
 
-def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
-    _kpre, _kpost, ms_min, ms_max = key_pre_delay_ms, key_post_delay_ms, 0.0, 150.0
-    if ms_min <= _kpre <= ms_max: _THROTTLES.update({'key_pre_delay_ms': _kpre})
-    else: error(f'throttle_delays(): key_pre_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
-    if ms_min <= _kpost <= ms_max: _THROTTLES.update({'key_post_delay_ms': _kpost})
-    else: error(f'throttle_delays(): key_post_delay_ms must be {ms_min} to {ms_max} ms. Defaulting to 0 ms.')
-    # Show values in log if user sets custom delays
-    if any(_THROTTLES.values()):
-        debug(f'THROTTLES: {key_pre_delay_ms = }, {key_post_delay_ms = }')
 
-# for use with throttle delays
-def sleep_ms(msec):
-    return time.sleep(msec / 1000)
+def clamp(num, min_value, max_value):
+    return max(min(num, max_value), min_value)
+
+
+def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
+    ms_min, ms_max = 0.0, 150.0
+    if any([not(ms_min <= e <= ms_max) for e in [key_pre_delay_ms, key_post_delay_ms]]):
+        error(f'Throttle delay value out of range. Clamping to valid range: {ms_min} to {ms_max}.')
+    _THROTTLES.update({ 'key_pre_delay_ms' : clamp(key_pre_delay_ms, ms_min, ms_max), 
+                        'key_post_delay_ms': clamp(key_post_delay_ms, ms_min, ms_max) })
+    debug(f'THROTTLES:\
+        \n\tPre-key  : {_THROTTLES["key_pre_delay_ms"]}\
+        \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
+
 
 ENVIRONMENT_DEFAULTS = {
     'DISTRO_NAME' : "",     # Ubuntu, Fedora, Pop!_OS, etc.
@@ -288,27 +290,27 @@ def _create_modifiers_from_strings(modifier_strs):
 
 
 ASCII_WITH_SHIFT = {
-    "~":    combo("Shift-Grave"),
-    "!":    combo("Shift-1"),
-    "@":    combo("Shift-2"),
-    "#":    combo("Shift-3"),
-    "$":    combo("Shift-4"),
-    "%":    combo("Shift-5"),
-    "^":    combo("Shift-6"),
-    "&":    combo("Shift-7"),
-    "*":    combo("Shift-8"),
-    "(":    combo("Shift-9"),
-    ")":    combo("Shift-0"),
-    "_":    combo("Shift-Minus"),
-    "+":    combo("Shift-Equal"),
-    "{":    combo("Shift-Left_Brace"),
-    "}":    combo("Shift-Right_Brace"),
-    "|":    combo("Shift-Backslash"),
-    ":":    combo("Shift-Semicolon"),
-    "\"":   combo("Shift-Apostrophe"),
-    "<":    combo("Shift-Comma"),
-    ">":    combo("Shift-Dot"),
-    "?":    combo("Shift-Slash")
+    '~':    combo("Shift-Grave"),
+    '!':    combo("Shift-1"),
+    '@':    combo("Shift-2"),
+    '#':    combo("Shift-3"),
+    '$':    combo("Shift-4"),
+    '%':    combo("Shift-5"),
+    '^':    combo("Shift-6"),
+    '&':    combo("Shift-7"),
+    '*':    combo("Shift-8"),
+    '(':    combo("Shift-9"),
+    ')':    combo("Shift-0"),
+    '_':    combo("Shift-Minus"),
+    '+':    combo("Shift-Equal"),
+    '{':    combo("Shift-Left_Brace"),
+    '}':    combo("Shift-Right_Brace"),
+    '|':    combo("Shift-Backslash"),
+    ':':    combo("Shift-Semicolon"),
+    '"':    combo("Shift-Apostrophe"),
+    '<':    combo("Shift-Comma"),
+    '>':    combo("Shift-Dot"),
+    '?':    combo("Shift-Slash")
 }
 
 
