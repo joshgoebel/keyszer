@@ -7,7 +7,7 @@ import os
 import inspect
 from inspect import signature
 
-from .lib.logger import error
+from .lib.logger import error, debug
 from .models.action import Action
 from .models.combo import Combo, ComboHint
 from .models.trigger import Trigger
@@ -40,6 +40,29 @@ TIMEOUT_DEFAULTS = {
 
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
+
+# global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
+THROTTLE_DELAY_DEFAULTS = {
+    'key_pre_delay_ms': 0,
+    'key_post_delay_ms': 0,
+}
+_THROTTLES = THROTTLE_DELAY_DEFAULTS
+
+
+def clamp(num, min_value, max_value):
+    return max(min(num, max_value), min_value)
+
+
+def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
+    ms_min, ms_max = 0.0, 150.0
+    if any([not(ms_min <= e <= ms_max) for e in [key_pre_delay_ms, key_post_delay_ms]]):
+        error(f'Throttle delay value out of range. Clamping to valid range: {ms_min} to {ms_max}.')
+    _THROTTLES.update({ 'key_pre_delay_ms' : clamp(key_pre_delay_ms, ms_min, ms_max), 
+                        'key_post_delay_ms': clamp(key_post_delay_ms, ms_min, ms_max) })
+    debug(f'THROTTLES:\
+        \n\tPre-key  : {_THROTTLES["key_pre_delay_ms"]}\
+        \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
+
 
 # keymaps
 _KEYMAPS = []
@@ -198,7 +221,7 @@ def unicode_keystrokes(n):
             for digit in _digits(n, 16)
             for hexdigit in hex(digit)[2:].upper()
             ],
-        Key.ENTER
+        Key.ENTER,
     ]
 
     return combo_list
