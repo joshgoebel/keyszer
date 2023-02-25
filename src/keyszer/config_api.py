@@ -166,8 +166,7 @@ def to_US_keystrokes(s):
         combo_list = []
         for c in s:
             if ord(c) > 127:
-                unicode_keystrokes(ord(c))(ctx)    # extra "()" updates global variable
-                combo_list.extend(unicode_combo_list)
+                combo_list.extend(unicode_keystrokes(ord(c))(ctx))
             elif c.isupper():
                 if ctx.capslock_on: combo_list.append(combo(c))
                 else: combo_list.append(combo("Shift-" + c))
