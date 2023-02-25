@@ -38,6 +38,8 @@ _uinput = None
 
 # for use with throttle delays
 def sleep_ms(msec):
+    if msec == 0:
+        return
     return time.sleep(msec / 1000)
 
 
