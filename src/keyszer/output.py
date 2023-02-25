@@ -6,7 +6,7 @@ from .lib.logger import debug
 from .models.action import PRESS, RELEASE
 from .models.combo import Combo
 from .models.modifier import Modifier
-from .config_api import sleep_ms, _THROTTLES
+from .config_api import _THROTTLES
 
 
 VIRT_DEVICE_PREFIX = "Keyszer (virtual)"
@@ -34,6 +34,11 @@ _MOUSE_BUTTONS = {
 _KEYBOARD_KEYS.update(_MOUSE_BUTTONS)
 
 _uinput = None
+
+
+# for use with throttle delays
+def sleep_ms(msec):
+    return time.sleep(msec / 1000)
 
 
 def real_uinput():
