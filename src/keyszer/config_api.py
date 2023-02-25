@@ -160,9 +160,9 @@ def to_US_keystrokes(s):
 
     Warn: Almost certainly not going to work with non-US keymaps.
     """
+    if len(s) > 100:
+        raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
     def _to_keystrokes(ctx):
-        if len(s) > 100:
-            raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
         combo_list = []
         for c in s:
             if ord(c) > 127:
@@ -197,17 +197,17 @@ def _digits(n, base):
 
 def unicode_keystrokes(n):
     """Turn Unicode number into keystroke commands"""
+    if (n > 0x10ffff):
+        raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
     def _unicode_keystrokes(ctx):
-        if (n > 0x10ffff):
-            raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
         global unicode_combo_list
         combo_list = [
-            combo("Shift-Ctrl-u"),  # requires "ibus" as input manager
+            combo("Shift-Ctrl-u"),  # requires "ibus" or "fctix" as input manager?
             *[Key[hexdigit]
                 for digit in _digits(n, 16)
                 for hexdigit in hex(digit)[2:].upper()
                 ],
-            Key.ENTER
+            Key.ENTER,
         ]
         if ctx.capslock_on:
             combo_list.insert(0, Key.CAPSLOCK)
