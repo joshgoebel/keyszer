@@ -50,6 +50,7 @@ Keyszer works at quite a low-level.  It grabs input directly from the kernel's [
   - configurable `DIAGNOSTIC` hotkey
 - fully supports running as semi-privileged user (using `root` is now deprecated)
 - adds `include` to allow config to pull in other Python files
+- adds `throttle_delays` to allow control of output speed of macros/combos
 - adds `immediately` to nested keymaps
 - adds `Meta`, `Command` and `Cmd` aliases for Super/Meta modifier
 - add `C` combo helper (eventually to replace `K`)
@@ -226,7 +227,7 @@ A successful startup should resemble:
 
 **Limiting Devices**
 
-Limit remapping to specify devices with `--devices`:
+Limit remapping to specific devices with `--devices`:
 
     keyszer --devices /dev/input/event3 'Topre Corporation HHKB Professional'
 
@@ -249,6 +250,7 @@ For an example configuration please see [`example/config.py`](https://github.com
 The configuration API:
 
 - `timeouts(multipurpose, suspend)`
+- `throttle_delays(key_pre_delay_ms, key_post_delay_ms)`
 - `wm_class_match(re_str)`
 - `not_wm_class_match(re_str)`
 - `add_modifier(name, aliases, key/keys)`
@@ -286,6 +288,45 @@ timeouts(
     suspend = 1,
 )
 ```
+
+### `throttle_delays(...)`
+
+Configures the speed of virtual keyboard keystroke output to deal with issues that occur in various situations with the timing of modifier key presses and releases being misinterpreted. 
+
+- `key_pre_delay_ms` - The number of milliseconds to delay the press-release keystroke of the "normal" key after pressing modifier keys. 
+- `key_post_delay_ms` - The number of milliseconds to delay the next key event (modifier release) after the "normal" key press-release event.
+
+Defaults:
+
+```py
+throttle_delays(
+    key_pre_delay_ms    = 0,    # default: 0 ms, range: 0 to 150 ms, suggested: 1-50 ms
+    key_post_delay_ms   = 0,    # default: 0 ms, range: 0 to 150 ms, suggested: 1-100 ms
+)
+```
+
+Use the throttle delays if you are having the following kinds of problems: 
+
+- Shortcut combos seeming to behave unreliably, sometimes as if the unmapped shortcut (or part of the unmapped shortcut) is being pressed at the same time.
+- Macros of sets of keystrokes, or strings or Unicode sequences processed by the keymapper into keystrokes, having various kinds of failures, such as: 
+    - Missing characters
+    - Premature termination of macro
+    - Shifted or uppercase characters coming out as unshifted/lowercase
+    - Unshifted or lowercase characters coming out as shifted/uppercase
+    - Unicode sequences failing to complete and create the desired Unicode character
+
+Suggested values to try if you are in a virtual machine and having major problems with even common shortcut combos:  
+
+- key_pre_delay_ms: 40
+- key_post_delay_ms: 70
+
+The post delay seems a little more effective in testing, but your situation may be different. For a bare-metal install where you are just having a few glitches in macro output, try much smaller delays: 
+
+- key_pre_delay_ms: 0.1
+- key_post_delay_ms: 0.5
+
+These are just examples that have worked fairly well in current testing on machines that have had these issues. 
+
 
 ### `dump_diagnostics_key(key)`
 
