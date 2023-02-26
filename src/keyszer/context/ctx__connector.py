@@ -4,13 +4,13 @@ from keyszer.lib.logger import debug, error
 import dbus.exceptions
 
 
+# This module "connects" keycontext.py to the correct window context function for the detected
+# environment (if available). 
+
 SESSION_TYPE = ENVIRONMENT_OVERRIDES['override_session_type'] or get_env()['SESSION_TYPE']
 DESKTOP_ENV  = ENVIRONMENT_OVERRIDES['override_desktop_env']  or get_env()['DESKTOP_ENV']
 
 get_window_context = None
-
-# This module "connects" keycontext.py to the correct window context function for the detected
-# environment (if available). 
 
 if SESSION_TYPE == 'wayland' and DESKTOP_ENV == 'gnome':
     try:
