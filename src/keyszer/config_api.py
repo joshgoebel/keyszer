@@ -64,6 +64,27 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
         \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
 
 
+ENVIRONMENT_OVERRIDES = {
+    'override_distro_name' : None,     # Ubuntu, Fedora, KDE Neon, Linux Mint, Pop!_OS, etc.
+    'override_session_type': None,     # x11, wayland, mir, etc.
+    'override_desktop_env' : None,     # gnome, kde, xfce, sway, hypr, etc.
+}
+
+
+# API function to inject environment if problems with auto-detection
+def environment_overrides(
+    override_distro_name=None, 
+    override_session_type=None, 
+    override_desktop_env=None
+    ):
+    ENVIRONMENT_OVERRIDES.update({
+        'override_distro_name' : override_distro_name,
+        'override_session_type': override_session_type.casefold(),
+        'override_desktop_env' : override_desktop_env.casefold()
+    })
+    debug(f'CONFIG_API: User configured environment:\n\t{ENVIRONMENT_OVERRIDES}')
+
+ 
 # keymaps
 _KEYMAPS = []
 
