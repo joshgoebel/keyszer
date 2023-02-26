@@ -4,6 +4,9 @@ import dbus.exceptions
 import json
 
 
+# This module handles attempting to connect to and retrieve window context
+# information using any available compatible GNOME Shell extension. 
+
 NO_CONTEXT_WAS_ERROR    = {"wm_class": "", "wm_name": "", "context_error": True}
 last_shell_ext_uuid     = None
 cycle_count             = 0
