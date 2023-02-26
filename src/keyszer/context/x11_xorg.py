@@ -56,7 +56,8 @@ def get_xorg_context():
 
 
 def get_actual_window(window):
-    wmname = window.get_wm_name()
+    # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
+    wmname  = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
     wmclass = window.get_wm_class()
     # workaround for Java app
     # https://github.com/JetBrains/jdk8u_jdk/blob/master/src/solaris/classes/sun/awt/X11/XFocusProxyWindow.java#L35
