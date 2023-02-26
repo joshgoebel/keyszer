@@ -5,7 +5,7 @@ from Xlib.error import (
     DisplayNameError,
 )
 
-from ..lib.logger import error
+from .lib.logger import error
 
 # https://github.com/python-xlib/python-xlib/blob/master/Xlib/display.py#L153
 # https://stackoverflow.com/questions/23786289/how-to-correctly-detect-application-name-when-changing-focus-event-occurs-with
@@ -13,7 +13,7 @@ from ..lib.logger import error
 # TODO: keep tabs on active window vs constant querying?
 
 
-NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "context_error": True}
+NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "x_error": True}
 _display = None
 
 
@@ -37,7 +37,7 @@ def get_xorg_context():
             if pair:
                 wm_class = str(pair[1])
 
-        return {"wm_class": wm_class, "wm_name": wm_name, "context_error": False}
+        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
     except ConnectionClosedError as xerror:
         error(xerror)
