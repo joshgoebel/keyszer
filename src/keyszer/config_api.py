@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import copy
 import time
 import inspect
 import itertools
@@ -70,7 +69,7 @@ ENVIRONMENT_OVERRIDES = {
     'override_desktop_env' : None,     # gnome, kde, xfce, sway, hypr, etc.
 }
 
-
+# API function to inject environment if problems with auto-detection
 def environment_overrides(
     override_distro_name=None, 
     override_session_type=None, 
@@ -207,7 +206,8 @@ def to_US_keystrokes(s):
         combo_list = []
         for c in s:
             if ord(c) > 127:
-                combo_list.extend(unicode_keystrokes(ord(c))(ctx))
+                # combo_list.extend(unicode_keystrokes(ord(c))(ctx))
+                combo_list.append(unicode_keystrokes(ord(c)))
             elif c.isupper():
                 if ctx.capslock_on: combo_list.append(combo(c))
                 else: combo_list.append(combo("Shift-" + c))
