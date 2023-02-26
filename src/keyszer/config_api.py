@@ -150,8 +150,6 @@ class TypingTooLong(Exception):
 class UnicodeNumberToolarge(Exception):
     pass
 
-unicode_combo_list = []
-
 
 def to_US_keystrokes(s):
     """
@@ -199,7 +197,6 @@ def unicode_keystrokes(n):
     if (n > 0x10ffff):
         raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
     def _unicode_keystrokes(ctx):
-        global unicode_combo_list
         combo_list = [
             combo("Shift-Ctrl-u"),  # requires "ibus" or "fctix" as input manager?
             *[Key[hexdigit]
@@ -211,7 +208,6 @@ def unicode_keystrokes(n):
         if ctx.capslock_on:
             combo_list.insert(0, Key.CAPSLOCK)
             combo_list.append(Key.CAPSLOCK)
-        unicode_combo_list = combo_list
         return combo_list
 
     return _unicode_keystrokes
