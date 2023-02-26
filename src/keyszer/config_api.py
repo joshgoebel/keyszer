@@ -1,10 +1,10 @@
-import itertools
-import re
-import string
-import sys
-import time
 import os
+import re
+import sys
+import copy
+import time
 import inspect
+import itertools
 from inspect import signature
 
 from .lib.logger import error, debug
@@ -46,8 +46,8 @@ THROTTLE_DELAY_DEFAULTS = {
     'key_pre_delay_ms': 0,
     'key_post_delay_ms': 0,
 }
-_THROTTLES = THROTTLE_DELAY_DEFAULTS
-
+import copy
+_THROTTLES = copy.deepcopy(THROTTLE_DELAY_DEFAULTS)
 
 def clamp(num, min_value, max_value):
     return max(min(num, max_value), min_value)
@@ -64,19 +64,24 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
         \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
 
 
-ENVIRONMENT_DEFAULTS = {
-    'distro_name' : "",     # Ubuntu, Fedora, KDE Neon, Linux Mint, Pop!_OS, etc.
-    'session_type': "",     # x11, wayland, mir, etc.
-    'desktop_env' : "",     # gnome, kde, xfce, sway, hypr, etc.
+ENVIRONMENT_OVERRIDES = {
+    'override_distro_name' : None,     # Ubuntu, Fedora, KDE Neon, Linux Mint, Pop!_OS, etc.
+    'override_session_type': None,     # x11, wayland, mir, etc.
+    'override_desktop_env' : None,     # gnome, kde, xfce, sway, hypr, etc.
 }
-_ENVIRONMENT = ENVIRONMENT_DEFAULTS
 
 
-def environment(distro_name=None, session_type=None, desktop_env=None):
-    if distro_name  : _ENVIRONMENT.update({'distro_name' : distro_name})
-    if session_type : _ENVIRONMENT.update({'session_type': session_type})
-    if desktop_env  : _ENVIRONMENT.update({'desktop_env' : desktop_env})
-    debug(f'CONFIG_API: User configured environment:\n\t{_ENVIRONMENT}')
+def environment_overrides(
+    override_distro_name=None, 
+    override_session_type=None, 
+    override_desktop_env=None
+    ):
+    ENVIRONMENT_OVERRIDES.update({
+        'override_distro_name' : override_distro_name,
+        'override_session_type': override_session_type.casefold(),
+        'override_desktop_env' : override_desktop_env.casefold()
+    })
+    debug(f'CONFIG_API: User configured environment:\n\t{ENVIRONMENT_OVERRIDES}')
 
 
 # keymaps
@@ -188,8 +193,6 @@ class TypingTooLong(Exception):
 class UnicodeNumberToolarge(Exception):
     pass
 
-unicode_combo_list = []
-
 
 def to_US_keystrokes(s):
     """
@@ -198,14 +201,13 @@ def to_US_keystrokes(s):
 
     Warn: Almost certainly not going to work with non-US keymaps.
     """
+    if len(s) > 100:
+        raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
     def _to_keystrokes(ctx):
-        if len(s) > 100:
-            raise TypingTooLong("`to_keystrokes` only supports strings of 100 characters or less")
         combo_list = []
         for c in s:
             if ord(c) > 127:
-                unicode_keystrokes(ord(c))(ctx)    # extra "()" updates global variable
-                combo_list.extend(unicode_combo_list)
+                combo_list.extend(unicode_keystrokes(ord(c))(ctx))
             elif c.isupper():
                 if ctx.capslock_on: combo_list.append(combo(c))
                 else: combo_list.append(combo("Shift-" + c))
@@ -235,10 +237,9 @@ def _digits(n, base):
 
 def unicode_keystrokes(n):
     """Turn Unicode number into keystroke commands"""
+    if (n > 0x10ffff):
+        raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
     def _unicode_keystrokes(ctx):
-        if (n > 0x10ffff):
-            raise UnicodeNumberToolarge(f"{hex(n)} too large for Unicode keyboard entry.")
-        global unicode_combo_list
         combo_list = [
             combo("Shift-Ctrl-u"),  # requires "ibus" or "fctix" as input manager?
             *[Key[hexdigit]
@@ -250,7 +251,6 @@ def unicode_keystrokes(n):
         if ctx.capslock_on:
             combo_list.insert(0, Key.CAPSLOCK)
             combo_list.append(Key.CAPSLOCK)
-        unicode_combo_list = combo_list
         return combo_list
 
     return _unicode_keystrokes

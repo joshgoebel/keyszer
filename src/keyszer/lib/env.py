@@ -4,7 +4,7 @@ import dbus
 import dbus.exceptions
 from os import environ
 from .logger import debug, error
-from ..config_api import _ENVIRONMENT
+from ..config_api import ENVIRONMENT_OVERRIDES
 
 # ─── GLOBALS ─────────────────────────────────────────────────────────────────
 
@@ -107,18 +107,18 @@ for proc in psutil.process_iter(['name']):
     if proc.info['name'] in ['plasmashell', 'kwin_ft', 'kwin_x11']:
         if DESKTOP_ENV != 'kde':
             error(f'Desktop may have been misidentified: {DESKTOP_ENV = }. KWin detected.')
-        DESKTOP_ENV = 'kde'
-        break
+            DESKTOP_ENV = 'kde'
+            break
     if proc.info['name'] == 'gnome-shell':
         if DESKTOP_ENV != 'gnome':
             error(f'Desktop may have been misidentified: {DESKTOP_ENV = }. GNOME Shell detected.')
-        DESKTOP_ENV = 'gnome'
-        break
+            DESKTOP_ENV = 'gnome'
+            break
     if proc.info['name'] == 'sway':
         if DESKTOP_ENV != 'sway':
             error(f'Desktop may have been misidentified: {DESKTOP_ENV = }. SwayWM detected.')
-        DESKTOP_ENV = 'sway'
-        break
+            DESKTOP_ENV = 'sway'
+            break
 
 
 debug("")
