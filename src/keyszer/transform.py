@@ -454,17 +454,20 @@ def transform_key(key, action, ctx):
                 f"DVN: '{ctx.device_name}' | "
                 f"CLK: '{ctx.capslock_on}' | "
                 f"NLK: '{ctx.numlock_on}'")
-            n = 1
-            for km_name in keymap_names:
-                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS: ['{km_name}', ", end='')
-                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS: ['{km_name}']")
-                elif n % 2 != 0 and n < len(keymap_names):
-                    print(f"             '{km_name}', ", end='')
-                elif n % 2 != 0 and n == len(keymap_names):
-                    print(f"             '{km_name}']")
-                elif n == len(keymap_names): print(f"'{km_name}']")
-                else: print(f"'{km_name}',")
-                n+=1
+            prefix = "(DD) KMAPS:"
+            indent = " " * ( len(prefix) + 2 )
+            max_len = 80 - len(indent) - 2  # 2 is for quotes and comma
+            formatted_list = [f"'{keymap_names[0]}'"]
+            for name in keymap_names[1:]:
+                if len(formatted_list[-1]) + len(name) + 3 <= max_len:
+                    formatted_list[-1] += f", '{name}'"
+                else:
+                    formatted_list.append(f"'{name}'")
+            output_str = f"{prefix} [{formatted_list[0]}"
+            for line in formatted_list[1:]:
+                output_str += f",\n{indent}{line}"
+            output_str += "]"
+            print(output_str)
             debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: ['{keymap.name}']")
 
         held = get_pressed_states()
