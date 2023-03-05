@@ -224,8 +224,8 @@ def log_combo_context(combo, ctx, keymap, _active_keymaps):
     import textwrap
 
     debug("")
-    debug(f"WM_CLS: '{ctx.wm_class}' | WM_NME: '{ctx.wm_name}'")
-    debug(f"DVN: '{ctx.device_name}' | CLK: '{ctx.capslock_on}' | NLK: '{ctx.numlock_on}'")
+    debug(f"WM_CLASS: '{ctx.wm_class}' | WM_NAME: '{ctx.wm_name}'")
+    debug(f"DEVICE: '{ctx.device_name}' | CAPS_LOCK: '{ctx.capslock_on}' | NUM_LOCK: '{ctx.numlock_on}'")
     debug(f'ACTIVE KEYMAPS:')
 
     indent = ' ' * 5
