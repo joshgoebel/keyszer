@@ -216,6 +216,31 @@ def dump_diagnostics():
     print("")
 
 
+# ─── COMBO CONTEXT LOGGING ────────────────────────────────────────────────────────
+
+
+def log_combo_context(combo, ctx, keymap, _active_keymaps):
+    """Log context around usage of combo"""
+    import textwrap
+
+    debug("")
+    debug(f"WM_CLS: '{ctx.wm_class}' | WM_NME: '{ctx.wm_name}'")
+    debug(f"DVN: '{ctx.device_name}' | CLK: '{ctx.capslock_on}' | NLK: '{ctx.numlock_on}'")
+    debug(f'ACTIVE KEYMAPS:')
+
+    indent = ' ' * 5
+    max_len = max(80 - len(indent), 64)
+    wrapped_items = textwrap.wrap(", ".join([f"'{item.name}'" for item in _active_keymaps]), width=max_len)
+    output_str = f"{indent}{wrapped_items[0]}"
+    for item in wrapped_items[1:]:
+        if not item.startswith("'"):
+            item = ' ' + item
+        output_str += f"\n{indent}{item}"
+    print(output_str)
+
+    debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: '{keymap.name}'")
+
+
 # ─── KEYBOARD INPUT PROCESSING HELPERS ──────────────────────────────────────────
 
 
@@ -444,31 +469,7 @@ def transform_key(key, action, ctx):
             continue
 
         if logger.VERBOSE:
-            keymap_names = [map.name for map in _active_keymaps]
-            # name_list = ", ".join(keymap_names)
-            debug("")
-            debug(
-                f"WM_CLS: '{ctx.wm_class}' | "
-                f"WM_NME: '{ctx.wm_name}'")
-            debug(
-                f"DVN: '{ctx.device_name}' | "
-                f"CLK: '{ctx.capslock_on}' | "
-                f"NLK: '{ctx.numlock_on}'")
-            prefix = "(DD) KMAPS:"
-            indent = " " * ( len(prefix) + 2 )
-            max_len = 80 - len(indent) - 2  # 2 is for quotes and comma
-            formatted_list = [f"'{keymap_names[0]}'"]
-            for name in keymap_names[1:]:
-                if len(formatted_list[-1]) + len(name) + 3 <= max_len:
-                    formatted_list[-1] += f", '{name}'"
-                else:
-                    formatted_list.append(f"'{name}'")
-            output_str = f"{prefix} [{formatted_list[0]}"
-            for line in formatted_list[1:]:
-                output_str += f",\n{indent}{line}"
-            output_str += "]"
-            print(output_str)
-            debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: ['{keymap.name}']")
+            log_combo_context(combo, ctx, keymap, _active_keymaps)
 
         held = get_pressed_states()
         for ks in held:
