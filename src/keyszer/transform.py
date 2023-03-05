@@ -216,6 +216,31 @@ def dump_diagnostics():
     print("")
 
 
+# ─── COMBO CONTEXT LOGGING ────────────────────────────────────────────────────────
+
+
+def log_combo_context(combo, ctx, keymap, _active_keymaps):
+    """Log context around usage of combo"""
+    import textwrap
+
+    debug("")
+    debug(f"WM_CLASS: '{ctx.wm_class}' | WM_NAME: '{ctx.wm_name}'")
+    debug(f"DEVICE: '{ctx.device_name}' | CAPS_LOCK: '{ctx.capslock_on}' | NUM_LOCK: '{ctx.numlock_on}'")
+    debug(f'ACTIVE KEYMAPS:')
+
+    indent = ' ' * 5
+    max_len = max(80 - len(indent), 64)
+    wrapped_items = textwrap.wrap(", ".join([f"'{item.name}'" for item in _active_keymaps]), width=max_len)
+    output_str = f"{indent}{wrapped_items[0]}"
+    for item in wrapped_items[1:]:
+        if not item.startswith("'"):
+            item = ' … ' + item
+        output_str += f"\n{indent}{item}"
+    print(output_str)
+
+    debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: '{keymap.name}'")
+
+
 # ─── KEYBOARD INPUT PROCESSING HELPERS ──────────────────────────────────────────
 
 
@@ -444,14 +469,7 @@ def transform_key(key, action, ctx):
             continue
 
         if logger.VERBOSE:
-            keymap_names = [map.name for map in _active_keymaps]
-            name_list = ", ".join(keymap_names)
-            debug("")
-            debug(
-                f"WM_CLS '{ctx.wm_class}' | "
-                f"DV '{ctx.device_name}' | "
-                f"KMAPS = [{name_list}]")
-            debug(f"  COMBO: {combo} => {keymap[combo]} [{keymap.name}]")
+            log_combo_context(combo, ctx, keymap, _active_keymaps)
 
         held = get_pressed_states()
         for ks in held:
