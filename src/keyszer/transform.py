@@ -234,7 +234,7 @@ def log_combo_context(combo, ctx, keymap, _active_keymaps):
     output_str = f"{indent}{wrapped_items[0]}"
     for item in wrapped_items[1:]:
         if not item.startswith("'"):
-            item = ' ' + item
+            item = ' … ' + item
         output_str += f"\n{indent}{item}"
     print(output_str)
 
