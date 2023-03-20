@@ -7,7 +7,11 @@ from keyszer.transform import on_event
 
 class MockKeyboard:
     name = "generic keyboard"
-
+    device = "/dev/input/event99"
+    phys = "isa0060/serio0/input99"
+    
+    def leds(self):
+        return []
 
 _kb = MockKeyboard()
 
