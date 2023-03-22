@@ -7,7 +7,6 @@ from evdev.events import InputEvent
 from lib.api import *
 from lib.uinput_stub import UInputStub
 
-from keyszer import input
 from keyszer.config_api import *
 from keyszer.lib import logger
 from keyszer.models.action import Action
@@ -54,19 +53,19 @@ def setup_function(module):
     reset_configuration()
 
 def test_combo_single_letter():
-    combo = C("A")
-    assert Key.A == combo.key
-    assert [] == combo.modifiers
+    assert_combo = C("A")
+    assert Key.A == assert_combo.key
+    assert [] == assert_combo.modifiers
 
 def test_combo_single_simple_number():
-    combo = C("1")
-    assert Key.KEY_1 == combo.key
-    assert [] == combo.modifiers
+    assert_combo = C("1")
+    assert Key.KEY_1 == assert_combo.key
+    assert [] == assert_combo.modifiers
 
 def test_combo_simple():
-    combo = C("Alt-A")
-    assert Key.A == combo.key
-    assert [Modifier.ALT] == combo.modifiers
+    assert_combo = C("Alt-A")
+    assert Key.A == assert_combo.key
+    assert [Modifier.ALT] == assert_combo.modifiers
 
 def test_to_US_keystrokes_simple():
     out = to_US_keystrokes("hello5")(ctx)
