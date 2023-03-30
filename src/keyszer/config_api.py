@@ -59,9 +59,8 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
         error(f'Throttle delay value out of range. Clamping to valid range: {ms_min} to {ms_max}.')
     _THROTTLES.update({ 'key_pre_delay_ms' : clamp(key_pre_delay_ms, ms_min, ms_max), 
                         'key_post_delay_ms': clamp(key_post_delay_ms, ms_min, ms_max) })
-    debug(f'THROTTLES:\
-        \n\tPre-key  : {_THROTTLES["key_pre_delay_ms"]}\
-        \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
+    debug(  f'THROTTLES: Pre-key: {_THROTTLES["key_pre_delay_ms"]}ms, '
+            f'Post-key: {_THROTTLES["key_post_delay_ms"]}ms')
 
 
 # keymaps
