@@ -13,6 +13,9 @@ class ComboHint(IntEnum):
     ESCAPE_NEXT = 2
     IGNORE = 3
 
+    def __str__(self):
+        return self.__repr__()
+
 
 class Combo:
     def __init__(self, modifiers, key):
