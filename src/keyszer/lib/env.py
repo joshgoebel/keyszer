@@ -4,7 +4,7 @@ import dbus
 import dbus.exceptions
 from os import environ
 from .logger import debug, error
-from ..config_api import ENVIRONMENT_OVERRIDES
+# from ..config_api import ENVIRONMENT_OVERRIDES
 
 # ─── GLOBALS ─────────────────────────────────────────────────────────────────
 
