@@ -5,7 +5,7 @@ def get_xorg_context():
     return {
         "wm_class": _window or "",
         "wm_name": _wm_name or "",
-        "x_error": False
+        "context_error": False
     }
 
 

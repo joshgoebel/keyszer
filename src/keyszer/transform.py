@@ -116,6 +116,7 @@ def resume_keys():
     states = [x for x in _key_states.values() if x.suspended]
     if len(states) > 0:
         debug("resuming keys:", [x.key for x in states])
+        # debug("{:<18}{:<20}".format("resuming keys:", str([x.key for x in states])))
 
     for ks in states:
         # spent keys that are held long enough to resume
@@ -191,7 +192,8 @@ def suspend_or_resuspend_keys(timeout):
 def suspend_keys(timeout):
     global _suspend_timer
     global _last_suspend_timeout
-    debug("suspending keys", pressed_mods_not_exerted_on_output())
+    debug("suspending keys:", pressed_mods_not_exerted_on_output())
+    # debug("{:<18}{:<20}".format("suspending keys:", str(pressed_mods_not_exerted_on_output())))
     states = [x for x in _key_states.values() if x.is_pressed()]
     for s in states:
         s.suspended = True
@@ -266,7 +268,7 @@ def apply_modmap(keystate, context):
                     active_modmap = modmap
                     break
     if active_modmap and inkey in active_modmap:
-        debug(f"modmap: {inkey} => {active_modmap[inkey]} [{active_modmap.name}]")
+        debug(f"MODMAP:   {inkey} => {active_modmap[inkey]} in ['{active_modmap.name}']")
         keystate.key = active_modmap[inkey]
 
 
@@ -339,12 +341,12 @@ def on_event(event, device):
     )
 
     debug()
-    debug(f"in {key} ({action})", ctx="II")
+    debug(f"input:    {key}     ({action})", ctx="II")
 
     # if there is an X error (we don't have any window context)
     # then we turn off all mappings until it's resolved and act
     # more or less as a pass thru for all input => output
-    if context.x_error:
+    if context.context_error:
         ks.key = ks.key or ks.inkey
 
     # we only do modmap on the PRESS pass, keys may not
@@ -402,6 +404,7 @@ def on_key(keystate, context):
 
     key, action = (keystate.key, keystate.action)
     debug("on_key", key, action)
+    # debug("{:<10}{:<18}{:<20}".format("on_key:", key, action))
 
     if Modifier.is_key_modifier(key):
         on_mod_key(keystate, context)
@@ -447,7 +450,7 @@ def transform_key(key, action, ctx):
     # if we do have window context information we essentially short-circuit
     # the keymapper, acting in essentially a pass thru mode sending what is
     # typed straight thru from input to output
-    if ctx.x_error:
+    if ctx.context_error:
         resume_keys()
         _output.send_key_action(key, action)
         return

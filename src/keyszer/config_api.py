@@ -1,10 +1,9 @@
-import itertools
+import os
 import re
-import string
 import sys
 import time
-import os
 import inspect
+import itertools
 from inspect import signature
 
 from .lib.logger import error, debug
@@ -48,7 +47,6 @@ THROTTLE_DELAY_DEFAULTS = {
 }
 _THROTTLES = THROTTLE_DELAY_DEFAULTS
 
-
 def clamp(num, min_value, max_value):
     return max(min(num, max_value), min_value)
 
@@ -61,6 +59,7 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
                         'key_post_delay_ms': clamp(key_post_delay_ms, ms_min, ms_max) })
     debug(  f'THROTTLES: Pre-key: {_THROTTLES["key_pre_delay_ms"]}ms, '
             f'Post-key: {_THROTTLES["key_post_delay_ms"]}ms')
+
 
 
 # keymaps
@@ -267,27 +266,27 @@ def _create_modifiers_from_strings(modifier_strs):
 
 
 ASCII_WITH_SHIFT = {
-    "~":    combo("Shift-Grave"),
-    "!":    combo("Shift-1"),
-    "@":    combo("Shift-2"),
-    "#":    combo("Shift-3"),
-    "$":    combo("Shift-4"),
-    "%":    combo("Shift-5"),
-    "^":    combo("Shift-6"),
-    "&":    combo("Shift-7"),
-    "*":    combo("Shift-8"),
-    "(":    combo("Shift-9"),
-    ")":    combo("Shift-0"),
-    "_":    combo("Shift-Minus"),
-    "+":    combo("Shift-Equal"),
-    "{":    combo("Shift-Left_Brace"),
-    "}":    combo("Shift-Right_Brace"),
-    "|":    combo("Shift-Backslash"),
-    ":":    combo("Shift-Semicolon"),
-    "\"":   combo("Shift-Apostrophe"),
-    "<":    combo("Shift-Comma"),
-    ">":    combo("Shift-Dot"),
-    "?":    combo("Shift-Slash")
+    '~':    combo("Shift-Grave"),
+    '!':    combo("Shift-1"),
+    '@':    combo("Shift-2"),
+    '#':    combo("Shift-3"),
+    '$':    combo("Shift-4"),
+    '%':    combo("Shift-5"),
+    '^':    combo("Shift-6"),
+    '&':    combo("Shift-7"),
+    '*':    combo("Shift-8"),
+    '(':    combo("Shift-9"),
+    ')':    combo("Shift-0"),
+    '_':    combo("Shift-Minus"),
+    '+':    combo("Shift-Equal"),
+    '{':    combo("Shift-Left_Brace"),
+    '}':    combo("Shift-Right_Brace"),
+    '|':    combo("Shift-Backslash"),
+    ':':    combo("Shift-Semicolon"),
+    '"':    combo("Shift-Apostrophe"),
+    '<':    combo("Shift-Comma"),
+    '>':    combo("Shift-Dot"),
+    '?':    combo("Shift-Slash")
 }
 
 
