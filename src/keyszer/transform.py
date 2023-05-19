@@ -219,6 +219,31 @@ def dump_diagnostics():
     print("")
 
 
+# ─── COMBO CONTEXT LOGGING ────────────────────────────────────────────────────────
+
+
+def log_combo_context(combo, ctx, keymap, _active_keymaps):
+    """Log context around usage of combo"""
+    import textwrap
+
+    debug("")
+    debug(f"WM_CLASS: '{ctx.wm_class}' | WM_NAME: '{ctx.wm_name}'")
+    debug(f"DEVICE: '{ctx.device_name}' | CAPS_LOCK: '{ctx.capslock_on}' | NUM_LOCK: '{ctx.numlock_on}'")
+    debug(f'ACTIVE KEYMAPS:')
+
+    indent = ' ' * 5
+    max_len = max(80 - len(indent), 64)
+    wrapped_items = textwrap.wrap(", ".join([f"'{item.name}'" for item in _active_keymaps]), width=max_len)
+    output_str = f"{indent}{wrapped_items[0]}"
+    for item in wrapped_items[1:]:
+        if not item.startswith("'"):
+            item = ' … ' + item
+        output_str += f"\n{indent}{item}"
+    print(output_str)
+
+    debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: '{keymap.name}'")
+
+
 # ─── KEYBOARD INPUT PROCESSING HELPERS ──────────────────────────────────────────
 
 
@@ -448,28 +473,7 @@ def transform_key(key, action, ctx):
             continue
 
         if logger.VERBOSE:
-            keymap_names = [map.name for map in _active_keymaps]
-            # name_list = ", ".join(keymap_names)
-            debug("")
-            debug(
-                f"WM_CLS: '{ctx.wm_class}' | "
-                f"WM_NME: '{ctx.wm_name}'")
-            debug(
-                f"DVN: '{ctx.device_name}' | "
-                f"CLK: '{ctx.capslock_on}' | "
-                f"NLK: '{ctx.numlock_on}'")
-            n = 1
-            for km_name in keymap_names:
-                if n == 1 and len(keymap_names) > 1: print(f"(DD) KMAPS: ['{km_name}', ", end='')
-                elif n == 1 and len(keymap_names) == 1: print(f"(DD) KMAPS: ['{km_name}']")
-                elif n % 2 != 0 and n < len(keymap_names):
-                    print(f"             '{km_name}', ", end='')
-                elif n % 2 != 0 and n == len(keymap_names):
-                    print(f"             '{km_name}']")
-                elif n == len(keymap_names): print(f"'{km_name}']")
-                else: print(f"'{km_name}',")
-                n+=1
-            debug(f"COMBO: {combo} => {keymap[combo]} in KMAP: ['{keymap.name}']")
+            log_combo_context(combo, ctx, keymap, _active_keymaps)
 
         held = get_pressed_states()
         for ks in held:
@@ -480,7 +484,6 @@ def transform_key(key, action, ctx):
             if not _output.is_mod_pressed(ks.key):
                 ks.spent = True
         debug("spent modifiers", [_.key for _ in held if _.spent])
-        # reset_mode = handle_commands(keymap[combo], key, action, combo)
         reset_mode = handle_commands(keymap[combo], key, action, ctx, combo)
         if reset_mode:
             _active_keymaps = None
@@ -544,7 +547,6 @@ def auto_sticky(combo, input_combo):
 # ─── COMMAND PROCESSING ───────────────────────────────────────────────────────
 
 
-# def handle_commands(commands, key, action, input_combo=None):
 def handle_commands(commands, key, action, ctx, input_combo=None):
     """
     returns: reset_mode (True/False) if this is True, _active_keymaps will be reset
@@ -568,7 +570,6 @@ def handle_commands(commands, key, action, ctx, input_combo=None):
         for command in commands:
             if callable(command):
                 # very likely we're just passing None forwards here but that OK
-                # reset_mode = handle_commands(command(), key, action)
                 cmd_param_cnt = len(inspect.signature(command).parameters)
                 if cmd_param_cnt == 0:
                     reset_mode = handle_commands(command(), key, action, ctx)

@@ -1,3 +1,4 @@
+from Xlib.xobject.drawable import Window
 from Xlib.display import Display
 from Xlib.error import (
     ConnectionClosedError,
@@ -56,6 +57,9 @@ def get_xorg_context():
 
 
 def get_actual_window(window):
+    if not isinstance(window, Window):
+        return None
+
     # use _NET_WM_NAME string instead of WM_NAME to bypass (COMPOUND_TEXT) encoding problems
     wmname  = window.get_full_text_property(_display.get_atom("_NET_WM_NAME"))
     wmclass = window.get_wm_class()

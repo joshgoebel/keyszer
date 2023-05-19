@@ -45,8 +45,7 @@ THROTTLE_DELAY_DEFAULTS = {
     'key_pre_delay_ms': 0,
     'key_post_delay_ms': 0,
 }
-import copy
-_THROTTLES = copy.deepcopy(THROTTLE_DELAY_DEFAULTS)
+_THROTTLES = THROTTLE_DELAY_DEFAULTS
 
 def clamp(num, min_value, max_value):
     return max(min(num, max_value), min_value)
@@ -58,29 +57,9 @@ def throttle_delays(key_pre_delay_ms=0, key_post_delay_ms=0):
         error(f'Throttle delay value out of range. Clamping to valid range: {ms_min} to {ms_max}.')
     _THROTTLES.update({ 'key_pre_delay_ms' : clamp(key_pre_delay_ms, ms_min, ms_max), 
                         'key_post_delay_ms': clamp(key_post_delay_ms, ms_min, ms_max) })
-    debug(f'THROTTLES:\
-        \n\tPre-key  : {_THROTTLES["key_pre_delay_ms"]}\
-        \n\tPost-key : {_THROTTLES["key_post_delay_ms"]}')
+    debug(  f'THROTTLES: Pre-key: {_THROTTLES["key_pre_delay_ms"]}ms, '
+            f'Post-key: {_THROTTLES["key_post_delay_ms"]}ms')
 
-
-ENVIRONMENT_OVERRIDES = {
-    'override_distro_name' : None,     # Ubuntu, Fedora, KDE Neon, Linux Mint, Pop!_OS, etc.
-    'override_session_type': None,     # x11, wayland, mir, etc.
-    'override_desktop_env' : None,     # gnome, kde, xfce, sway, hypr, etc.
-}
-
-# API function to inject environment if problems with auto-detection
-def environment_overrides(
-    override_distro_name=None, 
-    override_session_type=None, 
-    override_desktop_env=None
-    ):
-    ENVIRONMENT_OVERRIDES.update({
-        'override_distro_name' : override_distro_name,
-        'override_session_type': override_session_type.casefold(),
-        'override_desktop_env' : override_desktop_env.casefold()
-    })
-    debug(f'CONFIG_API: User configured environment:\n\t{ENVIRONMENT_OVERRIDES}')
 
 
 # keymaps
@@ -206,7 +185,6 @@ def to_US_keystrokes(s):
         combo_list = []
         for c in s:
             if ord(c) > 127:
-                # combo_list.extend(unicode_keystrokes(ord(c))(ctx))
                 combo_list.append(unicode_keystrokes(ord(c)))
             elif c.isupper():
                 if ctx.capslock_on: combo_list.append(combo(c))

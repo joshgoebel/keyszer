@@ -1,6 +1,7 @@
 import time
 from evdev import ecodes
 from evdev.uinput import UInput
+
 from .lib.logger import debug
 from .models.action import PRESS, RELEASE
 from .models.combo import Combo
@@ -37,6 +38,8 @@ _uinput = None
 
 # for use with throttle delays
 def sleep_ms(msec):
+    if msec == 0:
+        return
     return time.sleep(msec / 1000)
 
 
