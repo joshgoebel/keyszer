@@ -1,5 +1,5 @@
 from keyszer.lib.env import get_env
-from keyszer.config_api import ENVIRONMENT_OVERRIDES
+# from keyszer.config_api import ENVIRONMENT_OVERRIDES
 from keyszer.lib.logger import debug, error
 import dbus.exceptions
 
@@ -7,8 +7,12 @@ import dbus.exceptions
 # This module "connects" keycontext.py to the correct window context function for the detected
 # environment (if available). 
 
-SESSION_TYPE = ENVIRONMENT_OVERRIDES['override_session_type'] or get_env()['SESSION_TYPE']
-DESKTOP_ENV  = ENVIRONMENT_OVERRIDES['override_desktop_env']  or get_env()['DESKTOP_ENV']
+# SESSION_TYPE = ENVIRONMENT_OVERRIDES['override_session_type'] or get_env()['SESSION_TYPE']
+# DESKTOP_ENV  = ENVIRONMENT_OVERRIDES['override_desktop_env']  or get_env()['DESKTOP_ENV']
+
+SESSION_TYPE = get_env()['SESSION_TYPE']
+DESKTOP_ENV  = get_env()['DESKTOP_ENV']
+
 
 get_window_context = None
 
