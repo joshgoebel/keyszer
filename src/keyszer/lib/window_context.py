@@ -7,7 +7,6 @@ from .logger import error, debug
 NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "x_error": True}
 
 
-
 class WindowContextProviderInterface(abc.ABC):
 
     @abc.abstractmethod

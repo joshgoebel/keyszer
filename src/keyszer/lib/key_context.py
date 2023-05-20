@@ -1,4 +1,4 @@
-from ..xorg import get_xorg_context
+# from ..xorg import get_xorg_context
 from ..models.key import Key
 from .window_context import WindowContextProvider
 

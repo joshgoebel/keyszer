@@ -66,6 +66,7 @@ def environ_api(session_type='x11', wl_desktop_env=None):
     # disregard any capitalization mistakes by user
     if isinstance(session_type, str):
         session_type = session_type.casefold()
+
     if isinstance(wl_desktop_env, str):
         wl_desktop_env = wl_desktop_env.casefold()
 

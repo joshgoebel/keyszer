@@ -328,6 +328,7 @@ def on_event(event, device):
         _output.send_event(event)
         return
 
+
     session_type    = _ENVIRON['session_type']
     wl_desktop_env  = _ENVIRON['wl_desktop_env']
 
