@@ -9,6 +9,10 @@ class KeyContext:
         self._device = device
         self.session_type = session_type
         self.wl_desktop_env = wl_desktop_env
+        
+        print(f'## ## ## In KeyContext: {session_type = }, {wl_desktop_env = }')
+        print(f'## ## ## In KeyContext: {self.session_type = }, {self.wl_desktop_env = }')
+
         self._win_ctx_provider = WindowContextProvider(self.session_type, self.wl_desktop_env)
 
     def _query_window_context(self):

@@ -18,10 +18,18 @@ class WindowContextProvider(WindowContextProviderInterface):
     """generic object to provide correct window context to KeyContext"""
 
     def __init__(self, session_type, wl_desktop_env) -> None:
+        
+        # debug(f'In WindowContextProvider: {session_type = }, {wl_desktop_env = }')
+
         if session_type == 'x11':
             self._provider = Xorg_WindowContext()
-        if session_type == 'wayland' and wl_desktop_env == 'gnome':
-            self._provider = Wl_GNOME_WindowContext()
+        elif session_type == 'wayland':
+            if wl_desktop_env == 'gnome':
+                self._provider = Wl_GNOME_WindowContext()
+            else:
+                raise ValueError(f"Unsupported desktop environment for Wayland: {wl_desktop_env}")
+        else:
+            raise ValueError(f"Unsupported session type: {session_type}")
         # TODO: Add more compatible providers here in future
         # Next up: Wayland + KDE Plasma
 
@@ -88,7 +96,7 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
             try:
                 # Call the function associated with the extension
                 context     = self.GNOME_SHELL_EXTENSIONS[extension_uuid]()
-            except self.DBusException as e:
+            except (self.DBusException, KeyError) as e:
                 self.last_shell_ext_uuid = None
                 error(f'Error returned from GNOME Shell extension {extension_uuid}\n\t {e}')
             else:
@@ -122,7 +130,7 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         wm_class            = active_window_dct['wm_class']
         wm_name             = active_window_dct['title']
 
-        return {"wm_class": wm_class, "wm_name": wm_name, "context_error": False}
+        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
     def get_wl_gnome_dbus_windowsext_context(self):
         wm_class            = ""
@@ -131,7 +139,7 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         wm_class            = str(self.iface_windowsext.FocusClass())
         wm_name             = str(self.iface_windowsext.FocusTitle())
 
-        return {"wm_class": wm_class, "wm_name": wm_name, "context_error": False}
+        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
 
 class Xorg_WindowContext(WindowContextProviderInterface):

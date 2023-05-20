@@ -70,6 +70,7 @@ def environ_api(session_type='x11', wl_desktop_env=None):
     if isinstance(wl_desktop_env, str):
         wl_desktop_env = wl_desktop_env.casefold()
 
+    
     if session_type not in valid_session_types:
         error( f'Invalid session type: {session_type}')
         debug(  f'Valid session types for keyszer are:'
@@ -82,13 +83,17 @@ def environ_api(session_type='x11', wl_desktop_env=None):
                 f'\n\t{valid_wl_desktop_envs}')
         sys.exit(1)
 
-    if wl_desktop_env and session_type != 'wayland':
+    debug(f'API func before: {session_type = }, {wl_desktop_env = }')
+
+    if wl_desktop_env is not None and session_type != 'wayland':
         wl_desktop_env = None
         debug(f"API arg 'wl_desktop_env' ignored if session_type is not 'wayland'")
 
+    debug(f'API func after: {session_type = }, {wl_desktop_env = }')
+
     _ENVIRON.update({
         'session_type': session_type,
-        'desktop_env' : wl_desktop_env
+        'wl_desktop_env' : wl_desktop_env
     })
     debug(  f"ENVIRON: Session type: '{session_type}', Desktop env: '{wl_desktop_env}'")
 
