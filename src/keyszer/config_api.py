@@ -41,6 +41,57 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
+valid_session_types = ['x11', 'wayland']
+valid_wl_desktop_envs = ['gnome']
+
+_ENVIRON = {
+        'session_type'  : 'x11',
+        'wl_desktop_env': None
+}
+
+
+def environ_api(session_type='x11', wl_desktop_env=None):
+    """
+    API function to specify the session type (X11/Xorg or Wayland)
+    and if Wayland, which desktop environment, to be used to try 
+    to instantiate the correct window context provider object.
+    
+    Supported Wayland + desktop environment combinations:
+        - Wayland + GNOME (shell extension required)
+
+    Default session type is 'x11' for backwards compatibility
+    with existing configs not using the API.
+    """
+
+    # disregard any capitalization mistakes by user
+    if isinstance(session_type, str):
+        session_type = session_type.casefold()
+    if isinstance(wl_desktop_env, str):
+        wl_desktop_env = wl_desktop_env.casefold()
+
+    if session_type not in valid_session_types:
+        error( f'Invalid session type: {session_type}')
+        debug(  f'Valid session types for keyszer are:'
+                f'\n\t{valid_session_types}')
+        sys.exit(1)
+
+    if wl_desktop_env not in valid_wl_desktop_envs:
+        error(f'Invalid Wayland desktop environment: {wl_desktop_env}')
+        debug(  f'Valid Wayland desktop environments for keyszer are:'
+                f'\n\t{valid_wl_desktop_envs}')
+        sys.exit(1)
+
+    if wl_desktop_env and session_type != 'wayland':
+        wl_desktop_env = None
+        debug(f"API arg 'wl_desktop_env' ignored if session_type is not 'wayland'")
+
+    _ENVIRON.update({
+        'session_type': session_type,
+        'desktop_env' : wl_desktop_env
+    })
+    debug(  f"ENVIRON: Session type: '{session_type}', Desktop env: '{wl_desktop_env}'")
+
+
 # global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
 THROTTLE_DELAY_DEFAULTS = {
     'key_pre_delay_ms': 0,

@@ -3,7 +3,7 @@ import time
 
 from evdev import ecodes
 
-from .config_api import escape_next_key, get_configuration, ignore_key
+from .config_api import escape_next_key, get_configuration, ignore_key, _ENVIRON
 from .lib import logger
 from .lib.key_context import KeyContext
 from .lib.logger import debug
@@ -324,11 +324,14 @@ def find_keystate_or_new(inkey, action):
 def on_event(event, device):
     # we do not attempt to transform non-key events
     # or any events with no device (startup key-presses)
-    if event.type != ecodes.EV_KEY or device == None:
+    if event.type != ecodes.EV_KEY or device is None:
         _output.send_event(event)
         return
 
-    context = KeyContext(device)
+    session_type    = _ENVIRON['session_type']
+    wl_desktop_env  = _ENVIRON['wl_desktop_env']
+
+    context = KeyContext(device, session_type, wl_desktop_env)
     action = Action(event.value)
     key = Key(event.code)
 
