@@ -320,6 +320,12 @@ def find_keystate_or_new(inkey, action):
 #   - process the actual combos, commands
 
 
+session_type    = _ENVIRON['session_type']
+wl_desktop_env  = _ENVIRON['wl_desktop_env']
+
+from .lib.window_context import WindowContextProvider
+window_context = WindowContextProvider(session_type, wl_desktop_env)
+
 # @benchit
 def on_event(event, device):
     # we do not attempt to transform non-key events
@@ -329,10 +335,8 @@ def on_event(event, device):
         return
 
 
-    session_type    = _ENVIRON['session_type']
-    wl_desktop_env  = _ENVIRON['wl_desktop_env']
-
-    context = KeyContext(device, session_type, wl_desktop_env)
+    # Give KeyContext the device and window context objects
+    context = KeyContext(device, window_context)
     action = Action(event.value)
     key = Key(event.code)
 

@@ -16,10 +16,14 @@ class WindowContextProviderInterface(abc.ABC):
 
 class WindowContextProvider(WindowContextProviderInterface):
     """generic object to provide correct window context to KeyContext"""
+    _instance = None
+    
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(WindowContextProvider, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self, session_type, wl_desktop_env) -> None:
-        
-        # debug(f'In WindowContextProvider: {session_type = }, {wl_desktop_env = }')
 
         if session_type == 'x11':
             self._provider = Xorg_WindowContext()
@@ -60,7 +64,9 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
                                             self.proxy_windowsext,
                                             "org.gnome.Shell.Extensions.WindowsExt")
 
-        self.last_shell_ext_uuid    = None
+        self.last_good_ext_uuid     = None
+        # global last_good_ext_uuid
+        self.cycle_count            = 0
         self.ext_uuid_windowsext    = 'window-calls-extended@hseliger.eu'
         self.ext_uuid_xremap        = 'xremap@k0kubun.com'
 
@@ -79,29 +85,34 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         
         If it fails, it tries the other one. If both fail, it returns an error.
         """
+        # global last_good_ext_uuid
 
         # Order of the extensions
-        extension_order = [self.ext_uuid_windowsext, self.ext_uuid_xremap]
+        extension_uuids = [self.ext_uuid_windowsext, self.ext_uuid_xremap]
 
-        # If we don't have a successful previous extension or it was the last in the order
-        if (self.last_shell_ext_uuid not in extension_order
-            or extension_order.index(self.last_shell_ext_uuid) == len(extension_order) - 1):
-            starting_index  = 0  # We start from the first extension
+        # If we have a last successful extension
+        if self.last_good_ext_uuid in extension_uuids:
+            starting_index = extension_uuids.index(self.last_good_ext_uuid)
         else:
-            # We start from the next extension
-            starting_index  = extension_order.index(self.last_shell_ext_uuid) + 1
+            # We don't have a last successful extension, so start from the first
+            starting_index = 0
 
-        for i in range(starting_index, len(extension_order)):
-            extension_uuid  = extension_order[i]
+        # Create a new list that starts with the last successful extension, followed by the others
+        ordered_extensions = extension_uuids[starting_index:] + extension_uuids[:starting_index]
+
+        for extension_uuid in ordered_extensions:
             try:
                 # Call the function associated with the extension
-                context     = self.GNOME_SHELL_EXTENSIONS[extension_uuid]()
-            except (self.DBusException, KeyError) as e:
-                self.last_shell_ext_uuid = None
+                context = self.GNOME_SHELL_EXTENSIONS[extension_uuid]()
+            # pylint disable=broad-exception-caught
+            except self.DBusException as e:
                 error(f'Error returned from GNOME Shell extension {extension_uuid}\n\t {e}')
+                # Continue to the next extension
+                continue
             else:
-                self.last_shell_ext_uuid = extension_uuid
-                debug(f"SHELL_EXT: Using '{self.last_shell_ext_uuid}' for window context")
+                # No exceptions were thrown, so this extension is now the preferred one
+                self.last_good_ext_uuid = extension_uuid
+                debug(f"SHELL_EXT: Using '{self.last_good_ext_uuid}' for window context")
                 return context
 
         # If we reach here, it means all extensions have failed
@@ -117,6 +128,7 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         error(f'############################################################################')
         print()
         return NO_CONTEXT_WAS_ERROR
+
 
 
     def get_wl_gnome_dbus_xremap_context(self):

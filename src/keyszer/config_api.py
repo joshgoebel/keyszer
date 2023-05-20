@@ -83,13 +83,9 @@ def environ_api(session_type='x11', wl_desktop_env=None):
                 f'\n\t{valid_wl_desktop_envs}')
         sys.exit(1)
 
-    debug(f'API func before: {session_type = }, {wl_desktop_env = }')
-
     if wl_desktop_env is not None and session_type != 'wayland':
         wl_desktop_env = None
         debug(f"API arg 'wl_desktop_env' ignored if session_type is not 'wayland'")
-
-    debug(f'API func after: {session_type = }, {wl_desktop_env = }')
 
     _ENVIRON.update({
         'session_type': session_type,

@@ -4,16 +4,14 @@ from .window_context import WindowContextProvider
 
 
 class KeyContext:
-    def __init__(self, device, session_type, wl_desktop_env):
+    def __init__(self, device, window_context):
         self._X_ctx = None
         self._device = device
-        self.session_type = session_type
-        self.wl_desktop_env = wl_desktop_env
-        
-        print(f'## ## ## In KeyContext: {session_type = }, {wl_desktop_env = }')
-        print(f'## ## ## In KeyContext: {self.session_type = }, {self.wl_desktop_env = }')
+        # self.session_type = session_type
+        # self.wl_desktop_env = wl_desktop_env
 
-        self._win_ctx_provider = WindowContextProvider(self.session_type, self.wl_desktop_env)
+        # self._win_ctx_provider = WindowContextProvider(self.session_type, self.wl_desktop_env)
+        self._win_ctx_provider: WindowContextProvider = window_context
 
     def _query_window_context(self):
         # cache this,  think it might be expensive
