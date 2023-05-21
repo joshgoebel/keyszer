@@ -58,7 +58,7 @@ def get_all_supported_environments():
     # Get all classes in the window context module
     all_classes = inspect.getmembers(window_context, inspect.isclass)
 
-    # shorter reference to long interface class name in 'if' condition below
+    # shorter reference for long interface class name in 'if' condition below
     WinCtxProvIface = window_context.WindowContextProviderInterface
 
     # Iterate through each class
