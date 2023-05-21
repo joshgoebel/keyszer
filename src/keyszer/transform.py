@@ -1,5 +1,6 @@
 import asyncio
 import time
+import inspect
 
 from evdev import ecodes
 
@@ -488,7 +489,7 @@ def transform_key(key, action, ctx):
             if not _output.is_mod_pressed(ks.key):
                 ks.spent = True
         debug("spent modifiers", [_.key for _ in held if _.spent])
-        reset_mode = handle_commands(keymap[combo], key, action, combo)
+        reset_mode = handle_commands(keymap[combo], key, action, ctx, combo)
         if reset_mode:
             _active_keymaps = None
         return
@@ -551,7 +552,7 @@ def auto_sticky(combo, input_combo):
 # ─── COMMAND PROCESSING ───────────────────────────────────────────────────────
 
 
-def handle_commands(commands, key, action, input_combo=None):
+def handle_commands(commands, key, action, ctx, input_combo=None):
     """
     returns: reset_mode (True/False) if this is True, _active_keymaps will be reset
     """
@@ -574,7 +575,11 @@ def handle_commands(commands, key, action, input_combo=None):
         for command in commands:
             if callable(command):
                 # very likely we're just passing None forwards here but that OK
-                reset_mode = handle_commands(command(), key, action)
+                cmd_param_cnt = len(inspect.signature(command).parameters)
+                if cmd_param_cnt == 0:
+                    reset_mode = handle_commands(command(), key, action, ctx)
+                else:
+                    reset_mode = handle_commands(command(ctx), key, action, ctx)
                 # if the command wants to disable reset, lets propagate that
                 if reset_mode is False:
                     return False
