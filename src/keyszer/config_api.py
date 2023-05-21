@@ -84,7 +84,8 @@ def environ_api(session_type='x11', wl_desktop_env=None):
     """
 
     # reset wl_desktop_env to None if session is X11/Xorg
-    # desktop only relevant for Wayland session
+    # desktop is only relevant for Wayland session
+    # having anything other than `None` as desktop will not match X11/Xorg provider
     if session_type == 'x11':
         wl_desktop_env = None
 
