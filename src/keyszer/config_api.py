@@ -58,12 +58,14 @@ def get_all_supported_environments():
     # Get all classes in the window context module
     all_classes = inspect.getmembers(window_context, inspect.isclass)
 
+    # shorter reference to long interface class name in 'if' condition below
+    WinCtxProvIface = window_context.WindowContextProviderInterface
+
     # Iterate through each class
     for name, obj in all_classes:
         # If the class is a subclass of WindowContextProviderInterface
         # (but not the base class itself)
-        if (issubclass(obj, window_context.WindowContextProviderInterface) and 
-            obj is not window_context.WindowContextProviderInterface):
+        if issubclass(obj, WinCtxProvIface) and obj is not WinCtxProvIface:
             # Add the environments that this provider supports to the list
             supported_environments.extend(obj.get_supported_environments())
 
