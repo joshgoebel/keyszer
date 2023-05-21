@@ -13,7 +13,12 @@ class WindowContextProviderInterface(abc.ABC):
     def get_window_context(self):
         pass
 
+    @classmethod
+    def get_supported_environments(cls):
+        raise NotImplementedError("This method should be implemented in a subclass.")
 
+
+# Generic class for the rest of the code to interact with
 class WindowContextProvider(WindowContextProviderInterface):
     """generic object to provide correct window context to KeyContext"""
     _instance = None
@@ -25,6 +30,10 @@ class WindowContextProvider(WindowContextProviderInterface):
 
     def __init__(self, session_type, wl_desktop_env) -> None:
 
+        # TODO: Add more compatible providers here in future
+        # Next up: Wayland + KDE Plasma
+
+        # TODO: Redo the logic to deal with 2-tuples instead of separate args
         if session_type == 'x11':
             self._provider = Xorg_WindowContext()
         elif session_type == 'wayland':
@@ -34,11 +43,14 @@ class WindowContextProvider(WindowContextProviderInterface):
                 raise ValueError(f"Unsupported desktop environment for Wayland: {wl_desktop_env}")
         else:
             raise ValueError(f"Unsupported session type: {session_type}")
-        # TODO: Add more compatible providers here in future
-        # Next up: Wayland + KDE Plasma
 
     def get_window_context(self):
         return self._provider.get_window_context()
+
+    @classmethod
+    def get_supported_environments(cls):
+        # This class does not directly support any environments
+        return []
 
 
 class Wl_GNOME_WindowContext(WindowContextProviderInterface):
@@ -65,7 +77,6 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
                                             "org.gnome.Shell.Extensions.WindowsExt")
 
         self.last_good_ext_uuid     = None
-        # global last_good_ext_uuid
         self.cycle_count            = 0
         self.ext_uuid_windowsext    = 'window-calls-extended@hseliger.eu'
         self.ext_uuid_xremap        = 'xremap@k0kubun.com'
@@ -74,6 +85,11 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
             self.ext_uuid_windowsext:   self.get_wl_gnome_dbus_windowsext_context,
             self.ext_uuid_xremap:       self.get_wl_gnome_dbus_xremap_context,
         }
+
+    @classmethod
+    def get_supported_environments(cls):
+        # This class supports the GNOME environment on Wayland
+        return [('wayland', 'gnome')]
 
     def get_window_context(self):
         """
@@ -117,13 +133,13 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
 
         # If we reach here, it means all extensions have failed
         print()
-        error(  f'############################################################################'
-                f'\nSHELL_EXT: No compatible GNOME Shell extension responding via D-Bus.')
-        error(  f'These extensions are compatible with keyszer:'
-                f'\n       {self.ext_uuid_windowsext}:'
+        error(  f'############################################################################')
+        error(  f'SHELL_EXT: No compatible GNOME Shell extension responding via D-Bus.'
+                f'\n\tThese extensions are compatible with keyszer:'
+                f'\n\t    {self.ext_uuid_windowsext}:'
                 f'\n\t\t(https://extensions.gnome.org/extension/4974/window-calls-extended/)'
-                f'\n       {self.ext_uuid_xremap}:'
-                f'\n\t\t(https://extensions.gnome.org/extension/5060/xremap/)'  )
+                f'\n\t    {self.ext_uuid_xremap}:'
+                f'\n\t\t(https://extensions.gnome.org/extension/5060/xremap/)')
         error(f'Install "Extension Manager" from Flathub to manage GNOME Shell extensions')
         error(f'############################################################################')
         print()
@@ -169,6 +185,11 @@ class Xorg_WindowContext(WindowContextProviderInterface):
         self.ConnectionClosedError  = ConnectionClosedError
         self.DisplayConnectionError = DisplayConnectionError
         self.DisplayNameError       = DisplayNameError
+
+    @classmethod
+    def get_supported_environments(cls):
+        # This class supports any desktop environment on X11
+        return [('x11', None)]
 
     def get_window_context(self):
         """
