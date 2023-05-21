@@ -1,56 +1,74 @@
 import abc
 import json
+
 from .logger import error, debug
 
 # Provider classes for window context info
+
+# Place new provider classes above the generic class at the end to
+# facilitate automatic inclusion in the list of supported environments
+# and automatic redirection from the generic provider class to the
+# matching specific provider class suitable for the environment.
+
 
 NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "x_error": True}
 
 
 class WindowContextProviderInterface(abc.ABC):
+    """Abstract base class for all window context provider classes"""
 
     @abc.abstractmethod
     def get_window_context(self):
-        pass
+        """
+        This method should return the current window's context as a dictionary.
+
+        The returned dictionary should contain the following keys:
+
+        - "wm_class": The class of the window.
+        - "wm_name": The name of the window.
+        - "x_error": A boolean indicating whether there was an error 
+            in obtaining the window's context.
+
+        The "wm_class" and "wm_name" values are expected to be strings.
+        The "x_error" value is expected to be a boolean, which should 
+        be False if the window's context was successfully obtained, 
+        and True otherwise.
+
+        Example of a successful context:
+
+        {
+            "wm_class": "ExampleClass",
+            "wm_name": "ExampleName",
+            "x_error": False
+        }
+
+        In case of an error, the method should return NO_CONTEXT_WAS_ERROR, 
+        which is a predefined global variable "constant":
+
+        NO_CONTEXT_WAS_ERROR = {"wm_class": "", "wm_name": "", "x_error": True}
+
+        :returns: A dictionary containing window context information.
+        """
 
     @classmethod
+    @abc.abstractmethod
     def get_supported_environments(cls):
-        raise NotImplementedError("This method should be implemented in a subclass.")
+        """
+        This method should return a list of environments that the subclass 
+        supports.
 
+        Each environment should be represented as a tuple. For example, if 
+        a subclass supports the environments 'x11' and 'wayland', this method 
+        would return [('x11',), ('wayland',)].
 
-# Generic class for the rest of the code to interact with
-class WindowContextProvider(WindowContextProviderInterface):
-    """generic object to provide correct window context to KeyContext"""
-    _instance = None
-    
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(WindowContextProvider, cls).__new__(cls)
-        return cls._instance
+        If an environment is specific to a certain desktop environment, the 
+        desktop environment should be included in the tuple. For example, if 
+        a subclass supports the 'wayland' environment specifically on the 
+        'gnome' desktop, this method would return [('wayland', 'gnome')].
 
-    def __init__(self, session_type, wl_desktop_env) -> None:
-
-        # TODO: Add more compatible providers here in future
-        # Next up: Wayland + KDE Plasma
-
-        # TODO: Redo the logic to deal with 2-tuples instead of separate args
-        if session_type == 'x11':
-            self._provider = Xorg_WindowContext()
-        elif session_type == 'wayland':
-            if wl_desktop_env == 'gnome':
-                self._provider = Wl_GNOME_WindowContext()
-            else:
-                raise ValueError(f"Unsupported desktop environment for Wayland: {wl_desktop_env}")
-        else:
-            raise ValueError(f"Unsupported session type: {session_type}")
-
-    def get_window_context(self):
-        return self._provider.get_window_context()
-
-    @classmethod
-    def get_supported_environments(cls):
-        # This class does not directly support any environments
-        return []
+        :returns: A list of tuples, each representing an environment supported 
+        by the subclass.
+        """
 
 
 class Wl_GNOME_WindowContext(WindowContextProviderInterface):
@@ -244,3 +262,47 @@ class Xorg_WindowContext(WindowContextProviderInterface):
             return None
 
         return window
+
+
+###############################################################################################
+# ALL SPECIFIC PROVIDER CLASSES MUST BE DEFINED BEFORE/ABOVE THIS GENERIC PROVIDER!!!
+# This class is responsible for making a list of the environments supported
+# by all the specific provider classes in this module, and redirecting the
+# rest of the keymapper code to the correct specific provider. 
+
+# Generic class for the rest of the code to interact with
+class WindowContextProvider(WindowContextProviderInterface):
+    """generic object to provide correct window context to KeyContext"""
+    _instance = None
+
+    # Mapping of environments to provider classes
+    environment_class_map = {
+        env: cls for cls in WindowContextProviderInterface.__subclasses__()
+        for env in cls.get_supported_environments()
+    }
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(WindowContextProvider, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, session_type, wl_desktop_env) -> None:
+
+        env = (session_type, wl_desktop_env)
+        if env not in self.environment_class_map:
+            raise ValueError(f"Unsupported environment: {env}")
+
+        self._provider = self.environment_class_map[env]()
+
+    def get_window_context(self):
+        return self._provider.get_window_context()
+
+    @classmethod
+    def get_supported_environments(cls):
+        # This generic class does not directly support any environments
+        return []
+
+# ALL SPECIFIC PROVIDER CLASSES MUST BE DEFINED BEFORE/ABOVE THIS GENERIC PROVIDER!!!
+# This class is responsible for making a list of the environments supported
+# by all the specific provider classes in this module, and redirecting the
+# rest of the keymapper code to the correct specific provider. 
