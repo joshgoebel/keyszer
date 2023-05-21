@@ -60,8 +60,10 @@ def get_all_supported_environments():
 
     # Iterate through each class
     for name, obj in all_classes:
-        # If the class is a subclass of WindowContextProviderInterface (but not the base class itself)
-        if issubclass(obj, window_context.WindowContextProviderInterface) and obj is not window_context.WindowContextProviderInterface:
+        # If the class is a subclass of WindowContextProviderInterface
+        # (but not the base class itself)
+        if (issubclass(obj, window_context.WindowContextProviderInterface) and 
+            obj is not window_context.WindowContextProviderInterface):
             # Add the environments that this provider supports to the list
             supported_environments.extend(obj.get_supported_environments())
 
