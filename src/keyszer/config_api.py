@@ -44,6 +44,7 @@ TIMEOUT_DEFAULTS = {
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
 
+
 _ENVIRON = {
         'session_type'  : 'x11',
         'wl_desktop_env': None
