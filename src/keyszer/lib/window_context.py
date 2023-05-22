@@ -1,5 +1,6 @@
 import abc
 import json
+from typing import Dict
 
 from .logger import error, debug
 
@@ -166,21 +167,25 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
 
 
     def get_wl_gnome_dbus_xremap_context(self):
-        active_window_dbus  = ""
-        active_window_dct   = ""
-        wm_class            = ""
-        wm_name             = ""
+        active_window_dbus  = ''
+        active_window_dct   = ''
+        wm_class            = ''
+        wm_name             = ''
 
         active_window_dbus  = self.iface_xremap.ActiveWindow()
         active_window_dct   = json.loads(active_window_dbus)
-        wm_class            = active_window_dct['wm_class']
-        wm_name             = active_window_dct['title']
+
+        # use get() with default value to avoid KeyError for 
+        # GNOME Shell/desktop lack of properties returned
+        active_window_dct: Dict[str:str]
+        wm_class            = active_window_dct.get('wm_class', '')
+        wm_name             = active_window_dct.get('title', '')
 
         return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
     def get_wl_gnome_dbus_windowsext_context(self):
-        wm_class            = ""
-        wm_name             = ""
+        wm_class            = ''
+        wm_name             = ''
 
         wm_class            = str(self.iface_windowsext.FocusClass())
         wm_name             = str(self.iface_windowsext.FocusTitle())
