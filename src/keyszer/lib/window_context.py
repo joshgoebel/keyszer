@@ -82,12 +82,13 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         self.DBusException      = DBusException
         self.session_bus        = dbus.SessionBus()
 
-        self.proxy_xremap       = self.session_bus.get_object(
+        self.proxy_focused_wdw  = self.session_bus.get_object(
                                                         "org.gnome.Shell",
-                                                        "/com/k0kubun/Xremap")
-        self.iface_xremap       = dbus.Interface(
-                                            self.proxy_xremap,
-                                            "com.k0kubun.Xremap")
+                                                        "/org/gnome/shell/extensions/FocusedWindow")
+        self.iface_focused_wdw  = dbus.Interface(
+                                            self.proxy_focused_wdw,
+                                            "org.gnome.shell.extensions.FocusedWindow")
+
         self.proxy_windowsext   = self.session_bus.get_object(
                                                         "org.gnome.Shell",
                                                         "/org/gnome/Shell/Extensions/WindowsExt")
@@ -95,12 +96,22 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
                                             self.proxy_windowsext,
                                             "org.gnome.Shell.Extensions.WindowsExt")
 
+        self.proxy_xremap       = self.session_bus.get_object(
+                                                        "org.gnome.Shell",
+                                                        "/com/k0kubun/Xremap")
+        self.iface_xremap       = dbus.Interface(
+                                            self.proxy_xremap,
+                                            "com.k0kubun.Xremap")
+
         self.last_good_ext_uuid     = None
         self.cycle_count            = 0
+
+        self.ext_uuid_focused_wdw   = 'focused-window-dbus@flexagoon.com'
         self.ext_uuid_windowsext    = 'window-calls-extended@hseliger.eu'
         self.ext_uuid_xremap        = 'xremap@k0kubun.com'
 
         self.GNOME_SHELL_EXTENSIONS = {
+            self.ext_uuid_focused_wdw:  self.get_wl_gnome_dbus_focused_wdw_context,
             self.ext_uuid_windowsext:   self.get_wl_gnome_dbus_windowsext_context,
             self.ext_uuid_xremap:       self.get_wl_gnome_dbus_xremap_context,
         }
@@ -112,18 +123,17 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
 
     def get_window_context(self):
         """
-        This function gets the window context from one of the two compatible 
+        This function gets the window context from one of the compatible 
         GNOME Shell extensions, via D-Bus.
         
         It attempts to get the window context from the shell extension that 
         was successfully used last time.
         
-        If it fails, it tries the other one. If both fail, it returns an error.
+        If it fails, it tries the others. If all fail, it returns an error.
         """
-        # global last_good_ext_uuid
 
         # Order of the extensions
-        extension_uuids = [self.ext_uuid_windowsext, self.ext_uuid_xremap]
+        extension_uuids = list(self.GNOME_SHELL_EXTENSIONS.keys())
 
         # If we have a last successful extension
         if self.last_good_ext_uuid in extension_uuids:
@@ -141,7 +151,7 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
                 context = self.GNOME_SHELL_EXTENSIONS[extension_uuid]()
             # pylint disable=broad-exception-caught
             except self.DBusException as e:
-                error(f'Error returned from GNOME Shell extension {extension_uuid}\n\t {e}')
+                error(f"Error returned from GNOME Shell extension '{extension_uuid}'\n\t {e}")
                 # Continue to the next extension
                 continue
             else:
@@ -155,6 +165,8 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         error(  f'############################################################################')
         error(  f'SHELL_EXT: No compatible GNOME Shell extension responding via D-Bus.'
                 f'\n\tThese extensions are compatible with keyszer:'
+                f'\n\t    {self.ext_uuid_focused_wdw}:'
+                f'\n\t\t(https://extensions.gnome.org/extension/5592/focused-window-d-bus/)'
                 f'\n\t    {self.ext_uuid_windowsext}:'
                 f'\n\t\t(https://extensions.gnome.org/extension/4974/window-calls-extended/)'
                 f'\n\t    {self.ext_uuid_xremap}:'
@@ -164,7 +176,36 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         print()
         return NO_CONTEXT_WAS_ERROR
 
+    def get_wl_gnome_dbus_focused_wdw_context(self):
+        wm_class            = ''
+        wm_name             = ''
+        
+        try:
+            focused_wdw_dbus    = self.iface_focused_wdw.Get()
+            # print(f'{focused_wdw_dbus = }')
+            focused_wdw_dct     = json.loads(focused_wdw_dbus)
+            # print(f'{focused_wdw_dct = }')
 
+            wm_class            = focused_wdw_dct.get('wm_class', '')
+            wm_name             = focused_wdw_dct.get('title', '')
+        except self.DBusException as dbus_error:
+            # This will be the error if no window info found (e.g., GNOME desktop):
+            # org.gnome.gjs.JSError.Error: No window in focus
+            if 'No window in focus' in str(dbus_error):
+                pass
+            else:
+                raise   # pass on the original exception if not 'No window in focus'
+
+        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
+
+    def get_wl_gnome_dbus_windowsext_context(self):
+        wm_class            = ''
+        wm_name             = ''
+
+        wm_class            = str(self.iface_windowsext.FocusClass())
+        wm_name             = str(self.iface_windowsext.FocusTitle())
+
+        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
     def get_wl_gnome_dbus_xremap_context(self):
         active_window_dbus  = ''
@@ -180,15 +221,6 @@ class Wl_GNOME_WindowContext(WindowContextProviderInterface):
         active_window_dct: Dict[str:str]
         wm_class            = active_window_dct.get('wm_class', '')
         wm_name             = active_window_dct.get('title', '')
-
-        return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
-
-    def get_wl_gnome_dbus_windowsext_context(self):
-        wm_class            = ''
-        wm_name             = ''
-
-        wm_class            = str(self.iface_windowsext.FocusClass())
-        wm_name             = str(self.iface_windowsext.FocusTitle())
 
         return {"wm_class": wm_class, "wm_name": wm_name, "x_error": False}
 
