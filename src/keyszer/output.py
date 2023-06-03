@@ -28,8 +28,10 @@ _MOUSE_BUTTONS = {
     264: "BTN_8",
     265: "BTN_9",
     272: ["BTN_LEFT", "BTN_MOUSE"],
-    274: "BTN_MIDDLE",
     273: "BTN_RIGHT",
+    274: "BTN_MIDDLE",
+    275: "BTN_SIDE",
+    276: "BTN_EXTRA",
 }
 _KEYBOARD_KEYS.update(_MOUSE_BUTTONS)
 
