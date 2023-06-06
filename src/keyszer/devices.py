@@ -93,7 +93,7 @@ class DeviceRegistry:
             raise DeviceGrabError()
 
     def ungrab(self, device):
-        info(f"Ungrabbing: '{device.name}' (removed)", ctx="-K")
+        info(f"Ungrabbing '{device.name}' (removed)", ctx="-K")
         self._loop.remove_reader(device)
         self._devices.remove(device)
         try:
@@ -105,7 +105,7 @@ class DeviceRegistry:
         for device in self._devices:
             try:
                 if device.fn == fn:
-                    info(f"Ungrabbing: '{device.name}' (removed)", ctx="-K")
+                    info(f"Ungrabbing '{device.name}' (removed)", ctx="-K")
                     self._loop.remove_reader(device)
                     self._devices.remove(device)
                     device.ungrab()
