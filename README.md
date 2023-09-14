@@ -474,7 +474,7 @@ The Combo specification in a keymap is written in the form of `C("(<Modifier>-)*
 
 You can specify left/right modifiers by adding the prefixes `L` or `R`.
 
-`<Key>` is any key whose name is defined in [`key.py`](https://github.com/joshgoebel/keyszer/blob/main/keyszer/models/key.py).
+`<Key>` is any key whose name is defined in [`key.py`](https://github.com/joshgoebel/keyszer/blob/main/src/keyszer/models/key.py).
 
 Some combo examples:
 
