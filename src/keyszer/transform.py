@@ -323,6 +323,11 @@ def find_keystate_or_new(inkey, action):
 
 # @benchit
 def on_event(event, device):
+    # do not pass thru any scancodes since we're very
+    # likely to be rewriting the keys anyways
+    if event.type == ecodes.EV_MSC:
+        return
+
     # we do not attempt to transform non-key events
     # or any events with no device (startup key-presses)
     if event.type != ecodes.EV_KEY or device == None:
