@@ -1,6 +1,6 @@
 # Using keyszer with Kinto release 1.2-13
 
-## Uppdating your kinto.py config file
+## Updating your kinto.py config file
 
 First, have a glace thru `UPGRADE_FROM_XKEYSNAIL.md`.
 
