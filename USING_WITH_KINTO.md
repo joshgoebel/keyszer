@@ -35,7 +35,7 @@ Note that you are replacing a single combo with an array of commands and adding 
 
 ## Running as `root`
 
-This is no longer recommended but can be enabled by passing `--very-bad-idea` to `keyszer`.  This may be required (short-term) for use with the existing release of Kinto.  See our `README` for best security practices.
+This is no longer recommended but can be enabled by passing `--very-bad-idea` to `keyszer`.  This may be required (short-term) for use with the existing release of Kinto.  See our [README](https://github.com/joshgoebel/keyszer#running-as-a-semi-privileged-user) for best security practices.
 
 
 ## Quiet vs Verbose
