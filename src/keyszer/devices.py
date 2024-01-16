@@ -22,10 +22,6 @@ class Devices:
         if qwerty and az:
             return True
         if custon:
-            # print("device", device)
-            # print("supported_keys", supported_keys)
-            # print("custom_keys", custom_keys)
-            # print("custon", custon)
             return True
         # Otherwise, its not a keyboard!
         return False
