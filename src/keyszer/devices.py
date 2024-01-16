@@ -16,11 +16,16 @@ class Devices:
         if 1 not in capabilities:
             return False
         supported_keys = capabilities[1]
-
         qwerty = all(k in supported_keys for k in QWERTY)
         az = all(k in supported_keys for k in A_Z_SPACE)
         custon = all(k in supported_keys for k in custom_keys)
-        if qwerty and az or custon:
+        if qwerty and az:
+            return True
+        if custon:
+            # print("device", device)
+            # print("supported_keys", supported_keys)
+            # print("custom_keys", custom_keys)
+            # print("custon", custon)
             return True
         # Otherwise, its not a keyboard!
         return False
