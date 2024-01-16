@@ -62,7 +62,7 @@ def main_loop(arg_devices, device_watch):
     try:
         loop = asyncio.get_event_loop()
         registry = DeviceRegistry(
-            loop, input_cb=receive_input, filterer=DeviceFilter(arg_devices)
+            loop, input_cb=receive_input, filterer=DeviceFilter(arg_devices, config_api._CUSTON_LAYOUT)
         )
         registry.autodetect()
 

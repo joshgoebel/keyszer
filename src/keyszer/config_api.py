@@ -48,6 +48,8 @@ THROTTLE_DELAY_DEFAULTS = {
 }
 _THROTTLES = THROTTLE_DELAY_DEFAULTS
 
+_CUSTON_LAYOUT = []
+
 
 def clamp(num, min_value, max_value):
     return max(min(num, max_value), min_value)
@@ -328,6 +330,12 @@ def with_or_set_mark(combo):
 
 
 # ─── STANDARD API ───────────────────────────────────────────────────────────
+
+
+
+def custon_keyboard_layout(layout_keys: list):
+    global _CUSTON_LAYOUT
+    _CUSTON_LAYOUT = layout_keys
 
 
 def include(file):
