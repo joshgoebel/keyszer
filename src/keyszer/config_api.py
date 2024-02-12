@@ -6,8 +6,11 @@ import time
 import os
 import inspect
 from inspect import signature
+from pprint import pformat as ppf
+from pprint import pprint as pp
 
 from .lib.logger import error, debug
+from .lib import window_context
 from .models.action import Action
 from .models.combo import Combo, ComboHint
 from .models.trigger import Trigger
@@ -40,6 +43,77 @@ TIMEOUT_DEFAULTS = {
 
 # multipurpose timeout
 _TIMEOUTS = TIMEOUT_DEFAULTS
+
+
+_ENVIRON = {
+        'session_type'  : 'x11',
+        'wl_desktop_env': None
+}
+
+
+# make window_context provider classes self-documenting
+def get_all_supported_environments():
+    supported_environments = []
+
+    # Get all classes in the window context module
+    all_classes = inspect.getmembers(window_context, inspect.isclass)
+
+    # shorter reference for long interface class name in 'if' condition below
+    WinCtxProvIface = window_context.WindowContextProviderInterface
+
+    # Iterate through each class
+    for name, obj in all_classes:
+        # If the class is a subclass of WindowContextProviderInterface
+        # (but not the base class itself)
+        if issubclass(obj, WinCtxProvIface) and obj is not WinCtxProvIface:
+            # Add the environments that this provider supports to the list
+            supported_environments.extend(obj.get_supported_environments())
+
+    # debug(f'get_all_supported_environments: {supported_environments = }')
+    return supported_environments
+
+
+def environ_api(session_type='x11', wl_desktop_env=None):
+    """
+    API function to specify the session type (X11/Xorg or Wayland)
+    and if Wayland, which desktop environment, to be used to try 
+    to instantiate the correct window context provider object.
+
+    Default session type is 'x11' for backwards compatibility
+    with existing configs not using the API.
+    """
+
+    # IMPORTANT: Reset wl_desktop_env to `None` if session is X11/Xorg
+    # Desktop is only relevant for Wayland session type
+    # Having anything other than `None` as desktop will not match X11/Xorg provider
+    # This matches environment ('x11', None) from X11/Xorg context provider
+    if session_type == 'x11':
+        wl_desktop_env = None
+
+    # disregard any capitalization mistakes by user
+    if isinstance(session_type, str):
+        session_type = session_type.casefold()
+    if isinstance(wl_desktop_env, str):
+        wl_desktop_env = wl_desktop_env.casefold()
+
+    # Get the currently supported environments
+    supported_environments = get_all_supported_environments()
+
+    # Construct the environment tuple based on the provided values
+    provided_environment_tup = (session_type, wl_desktop_env)
+
+    if provided_environment_tup not in supported_environments:
+        error(f'Unsupported environment: Session type: {session_type}, Desktop env: {wl_desktop_env}')
+        debug(f"Supported environments for keyszer: ('session_type', 'desktop_env')\n\t" +
+                '\n\t'.join(ppf(item) for item in supported_environments) + '\n')
+        sys.exit(1)
+
+    _ENVIRON.update({
+        'session_type': session_type,
+        'wl_desktop_env' : wl_desktop_env
+    })
+    debug(f"ENVIRON: Session type: '{session_type}', Desktop env: '{wl_desktop_env}'")
+
 
 # global dict of delay values used to mitigate Unicode entry sequence and macro or combo failures
 THROTTLE_DELAY_DEFAULTS = {

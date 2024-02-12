@@ -4,7 +4,7 @@ import inspect
 
 from evdev import ecodes
 
-from .config_api import escape_next_key, get_configuration, ignore_key
+from .config_api import escape_next_key, get_configuration, ignore_key, _ENVIRON
 from .lib import logger
 from .lib.key_context import KeyContext
 from .lib.logger import debug
@@ -321,15 +321,23 @@ def find_keystate_or_new(inkey, action):
 #   - process the actual combos, commands
 
 
+session_type    = _ENVIRON['session_type']
+wl_desktop_env  = _ENVIRON['wl_desktop_env']
+
+from .lib.window_context import WindowContextProvider
+window_context = WindowContextProvider(session_type, wl_desktop_env)
+
 # @benchit
 def on_event(event, device):
     # we do not attempt to transform non-key events
     # or any events with no device (startup key-presses)
-    if event.type != ecodes.EV_KEY or device == None:
+    if event.type != ecodes.EV_KEY or device is None:
         _output.send_event(event)
         return
 
-    context = KeyContext(device)
+
+    # Give KeyContext the device and window context objects
+    context = KeyContext(device, window_context)
     action = Action(event.value)
     key = Key(event.code)
 
